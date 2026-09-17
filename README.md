@@ -9,11 +9,19 @@ requests, so it runs offline once loaded.
 
 ## Gameplay
 
-- 10 questions per round, 15 seconds each, drawn from a bank of **100 questions**
-  across 10 categories.
+- 10 questions per round, 15 seconds each, drawn from a bank of **300 questions**
+  — 30 in each of the 10 categories.
 - Pick a single category or **Mixed Blitz**, which pulls one question from each
   category so every round covers all ten.
-- Questions and answer choices are reshuffled every round.
+- **Questions rotate.** A round always draws questions you have not been asked
+  yet, so playing the same category three times in a row gives 30 different
+  questions. Only once a category is used up does the cycle restart and mix in
+  earlier questions. Progress is stored in `localStorage`, so it survives a
+  reload, and category play and Mixed Blitz share the same history.
+- Category cards show what is left — `30 questions`, then `20 new of 30`, then
+  `all 30 seen`.
+- Answer choices are reshuffled every round, so the correct answer never sits
+  in a predictable position.
 - Scoring: **100 points** per correct answer, up to **+50** for answering
   quickly, and up to **+50** more for a streak (+10 per consecutive correct).
 - The countdown ring turns yellow at 5 seconds and red at 3, with a matching
@@ -41,6 +49,10 @@ shuffled at runtime, so authoring order never leaks into the game:
 
 New categories go in the `CATEGORIES` map (key, display name and an emoji icon);
 the home screen grid and question counts build themselves from it.
+
+Rotation needs no bookkeeping: each question is identified by a short hash of
+its text, so adding, removing or reordering questions never disturbs a player's
+saved history.
 
 ## Layout
 
