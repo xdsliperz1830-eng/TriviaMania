@@ -161,6 +161,26 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 .cat.wide{grid-column:1/-1;background:linear-gradient(120deg,rgba(139,92,246,.26),rgba(34,211,238,.16));border-color:rgba(139,92,246,.42)}
 
 .home-foot{flex:0 0 auto;padding-top:12px;}
+
+.picker-row{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:2px 14px;margin:16px 4px 9px;}
+.picker-row .section-label{margin:0}
+.len-row{display:flex;align-items:center;gap:10px;flex:1 1 auto;justify-content:flex-end;min-width:200px;}
+.len-label{flex:0 0 auto;font-size:.7rem;font-weight:800;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;}
+.len-pills{flex:0 0 auto;display:flex;gap:6px;justify-content:flex-end;}
+
+/* Wide enough for the picker to share the line with the section label: keep the
+   "Questions" caption next to its own buttons instead of drifting left. */
+@media (min-width:520px){
+  .len-row{flex:0 0 auto}
+}
+.len{min-width:46px;min-height:40px;padding:8px 10px;border-radius:12px;font-size:.92rem;font-weight:800;
+  color:var(--muted);background:rgba(148,163,184,.10);border:1px solid rgba(148,163,184,.20);
+  transition:transform .14s ease,background .2s ease,border-color .2s ease,color .2s ease;}
+.len:hover{background:rgba(139,92,246,.20);border-color:rgba(139,92,246,.5);color:var(--white)}
+.len:active{transform:scale(.94)}
+.len.on{color:var(--white);border-color:var(--cyan);box-shadow:var(--glow-cyan);
+  background:linear-gradient(135deg,rgba(139,92,246,.38),rgba(34,211,238,.26));}
 #playBtn{width:100%;}
 .hint{text-align:center;color:var(--muted);font-size:.74rem;margin:10px 0 0;font-weight:600;}
 
@@ -311,6 +331,9 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   .q-text{font-size:1.02rem}
   .ans{padding:10px 12px;font-size:.94rem}
   /* Short screens: the bottom slot belongs to the feedback panel. */
+  .picker-row{margin:8px 4px 6px}
+  .len-row{gap:8px}
+  .len{min-width:42px;min-height:36px;padding:6px 8px;font-size:.86rem}
   .q-hint{display:none}
   .answers{grid-auto-rows:minmax(46px,1fr);max-height:228px}
   .q-area{gap:8px}
@@ -332,7 +355,6 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   .brain{font-size:1.8rem}
   .tagline{margin:4px 0 0;font-size:.8rem}
   .best-chip{margin-top:8px;padding:6px 14px;font-size:.8rem}
-  .section-label{margin:8px 4px 6px}
   .cat-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
   /* Landscape has width to spare: question on the left, answers on the right,
      explanation across the bottom — so nothing has to scroll. */
@@ -384,6 +406,17 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   .screen{gap:7px}
 }
 
+/* Tiny landscape windows: drop the tagline and tighten the chrome so the
+   category list still shows a full card alongside the picker. */
+@media (orientation:landscape) and (max-height:340px){
+  .tagline{display:none}
+  .best-chip{margin-top:4px;padding:4px 12px;font-size:.76rem}
+  .picker-row{margin:5px 4px 5px}
+  .len{min-width:40px;min-height:36px;padding:6px 8px;font-size:.84rem}
+  .len-label{font-size:.64rem}
+  .hint{display:none}
+}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
@@ -412,17 +445,24 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
     </div>
 
     <div style="text-align:center">
-      <div class="best-chip">🏆 Best Score <span id="bestScore">0</span></div>
+      <div class="best-chip" id="bestChip">🏆 Best Score <span id="bestScore">0</span></div>
     </div>
 
-    <p class="section-label">Choose a category</p>
+    <div class="picker-row">
+      <p class="section-label">Choose a category</p>
+      <div class="len-row">
+        <span class="len-label">Questions</span>
+        <div class="len-pills" id="lenPills" role="group" aria-label="Questions per round"></div>
+      </div>
+    </div>
+
     <div class="cat-scroll scroll">
       <div class="cat-grid" id="catGrid"><!-- built by JS --></div>
     </div>
 
     <div class="home-foot">
       <button id="playBtn" class="btn btn-primary">▶ PLAY <span id="playCat">Mixed</span></button>
-      <p class="hint">10 questions · 15 seconds each · answer fast for bonus points</p>
+      <p class="hint" id="playHint">10 questions · 15 seconds each · answer fast for bonus points</p>
     </div>
   </section>
 
@@ -1238,7 +1278,9 @@ const Sound = (() => {
 /* ================================================================
    3. STATE
    ================================================================ */
-const ROUND_SIZE = 10;
+const ROUND_LENGTHS = [5, 10, 20, 30];   // questions per round the player can pick
+const DEFAULT_ROUND_SIZE = 10;
+const LENGTH_KEY = "brainblitz.length";
 const TIME_LIMIT = 15;          // seconds per question
 const BASE_POINTS = 100;
 const MAX_SPEED_BONUS = 50;
@@ -1248,6 +1290,7 @@ const RING_LEN = 2 * Math.PI * 23;
 
 const state = {
   category: "mixed",
+  roundSize: DEFAULT_ROUND_SIZE,
   round: [],
   index: 0,
   score: 0,
@@ -1311,6 +1354,23 @@ function questionsIn(catKey) {
   return BY_CATEGORY[catKey] || [];
 }
 
+/* A 30-question round scores roughly three times a 10-question one, so each
+   round length keeps its own best score and they are never compared. */
+const BEST_KEY = "brainblitz.best";
+
+function loadBest(size) {
+  const stored = store.get(BEST_KEY + "." + size, null);
+  if (stored !== null) return parseInt(stored, 10) || 0;
+  // Rounds were always 10 questions before lengths existed, so an older saved
+  // best belongs to that length.
+  if (size === DEFAULT_ROUND_SIZE) return parseInt(store.get(BEST_KEY, "0"), 10) || 0;
+  return 0;
+}
+
+function saveBest(size, score) {
+  store.set(BEST_KEY + "." + size, String(score));
+}
+
 function loadSeen() {
   const raw = store.get(SEEN_KEY, "");
   return new Set(raw ? raw.split(",") : []);
@@ -1342,24 +1402,32 @@ function drawQuestions(pool, n, seen) {
 }
 
 /** Build a round: one question per category for "mixed", otherwise from the chosen category. */
-function buildRound(catKey) {
+function buildRound(catKey, requested) {
   const seen = loadSeen();
+  const pool = catKey === "mixed" ? QUESTIONS : questionsIn(catKey);
+  const size = Math.min(requested || DEFAULT_ROUND_SIZE, pool.length);
   let picked = [];
 
   if (catKey === "mixed") {
-    // One question per category, so a mixed round always spans all ten.
-    shuffle(Object.keys(CATEGORIES)).forEach(key => {
-      if (picked.length < ROUND_SIZE) picked.push(...drawQuestions(questionsIn(key), 1, seen));
+    // Spread the round evenly over the categories: 10 questions means one from
+    // each, 20 means two, and a length that does not divide evenly gives the
+    // remainder to whichever categories come up first in the shuffle.
+    const keys = shuffle(Object.keys(CATEGORIES));
+    const per = Math.floor(size / keys.length);
+    const extra = size % keys.length;
+    keys.forEach((key, i) => {
+      const want = per + (i < extra ? 1 : 0);
+      if (want > 0) picked.push(...drawQuestions(questionsIn(key), want, seen));
     });
     // Safety net in case a category is ever short: top up from the whole bank.
-    if (picked.length < ROUND_SIZE) {
+    if (picked.length < size) {
       const drawn = new Set(picked.map(q => q.id));
       picked.push(...drawQuestions(QUESTIONS.filter(q => !drawn.has(q.id)),
-                                   ROUND_SIZE - picked.length, seen));
+                                   size - picked.length, seen));
     }
     picked = shuffle(picked);
   } else {
-    picked = drawQuestions(questionsIn(catKey), ROUND_SIZE, seen);
+    picked = drawQuestions(questionsIn(catKey), size, seen);
   }
 
   saveSeen(seen);
@@ -1421,6 +1489,43 @@ const UI = {
     });
   },
 
+  buildLengthPills() {
+    const wrap = $("lenPills");
+    wrap.innerHTML = "";
+    ROUND_LENGTHS.forEach(n => {
+      const b = document.createElement("button");
+      b.className = "len" + (n === state.roundSize ? " on" : "");
+      b.dataset.len = n;
+      b.textContent = n;
+      b.setAttribute("aria-pressed", n === state.roundSize ? "true" : "false");
+      b.setAttribute("aria-label", n + " questions per round");
+      b.addEventListener("click", () => UI.selectLength(n));
+      wrap.appendChild(b);
+    });
+  },
+
+  selectLength(n) {
+    Sound.init();
+    Sound.click();
+    state.roundSize = n;
+    store.set(LENGTH_KEY, String(n));
+    document.querySelectorAll(".len").forEach(el => {
+      const on = Number(el.dataset.len) === n;
+      el.classList.toggle("on", on);
+      el.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    UI.refreshBest();          // each length keeps its own best score
+    UI.updatePlayHint();
+  },
+
+  /** Keep the line under the Play button in step with the chosen length. */
+  updatePlayHint() {
+    const pool = state.category === "mixed" ? QUESTIONS.length : questionsIn(state.category).length;
+    const n = Math.min(state.roundSize, pool);
+    $("playHint").textContent =
+      n + " questions · " + TIME_LIMIT + " seconds each · answer fast for bonus points";
+  },
+
   selectCategory(key) {
     Sound.init();
     Sound.click();
@@ -1431,16 +1536,19 @@ const UI = {
       el.setAttribute("aria-pressed", on ? "true" : "false");
     });
     $("playCat").textContent = key === "mixed" ? "Mixed" : CATEGORIES[key].name;
+    UI.updatePlayHint();
   },
 
   refreshBest() {
-    $("bestScore").textContent = store.get("brainblitz.best", "0");
+    $("bestScore").textContent = loadBest(state.roundSize);
+    $("bestChip").title = "Best score for a " + state.roundSize + "-question round";
   },
 
   /** Repaint everything on the home screen that a finished round can change. */
   refreshHome() {
     UI.refreshBest();
     UI.buildCategoryGrid();
+    UI.updatePlayHint();
   },
 
   updateMuteButtons() {
@@ -1643,7 +1751,8 @@ const Game = {
     Sound.start();
     Game.stopTimer();
 
-    state.round = buildRound(state.category);
+    state.round = buildRound(state.category, state.roundSize);
+    state.roundSize = state.round.length;   // a short pool can cap the round
     state.index = 0;
     state.score = 0;
     state.displayedScore = 0;
@@ -1775,9 +1884,9 @@ const Game = {
     state.locked = true;
     $("progFill").style.width = "100%";
 
-    const best = parseInt(store.get("brainblitz.best", "0"), 10) || 0;
+    const best = loadBest(state.roundSize);
     const newBest = state.score > best;
-    if (newBest) store.set("brainblitz.best", String(state.score));
+    if (newBest) saveBest(state.roundSize, state.score);
 
     UI.refreshHome();
     UI.renderResults(newBest);
@@ -1825,9 +1934,14 @@ function spawnSparks() {
 function init() {
   Sound.setMuted(store.get("brainblitz.muted", "0") === "1");
   UI.updateMuteButtons();
+  const savedLength = parseInt(store.get(LENGTH_KEY, ""), 10);
+  if (ROUND_LENGTHS.indexOf(savedLength) !== -1) state.roundSize = savedLength;
+
   UI.buildCategoryGrid();
+  UI.buildLengthPills();
   $("playCat").textContent = "Mixed";
   UI.refreshBest();
+  UI.updatePlayHint();
   spawnSparks();
 
   $("playBtn").addEventListener("click", () => Game.start());

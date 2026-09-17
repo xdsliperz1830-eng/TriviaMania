@@ -9,28 +9,36 @@ requests, so it runs offline once loaded.
 
 ## Gameplay
 
-- 10 questions per round, 15 seconds each, drawn from a bank of **300 questions**
-  — 30 in each of the 10 categories.
-- Pick a single category or **Mixed Blitz**, which pulls one question from each
-  category so every round covers all ten.
+- **Pick your round length** — 5, 10, 20 or 30 questions — from the picker on
+  the home screen. The choice is remembered between sessions.
+- 15 seconds per question, drawn from a bank of **300 questions** — 30 in each
+  of the 10 categories.
+- Pick a single category or **Mixed Blitz**, which spreads the round evenly over
+  the categories: 10 questions means one from each, 20 means two, and a length
+  that does not divide evenly gives the remainder to whichever categories come
+  up first in the shuffle.
 - **Questions rotate.** A round always draws questions you have not been asked
-  yet, so playing the same category three times in a row gives 30 different
-  questions. Only once a category is used up does the cycle restart and mix in
+  yet, so playing the same category three times in a row at 10 questions gives
+  30 different questions. Only once a category is used up does the cycle restart and mix in
   earlier questions. Progress is stored in `localStorage`, so it survives a
   reload, and category play and Mixed Blitz share the same history.
 - Category cards show what is left — `30 questions`, then `20 new of 30`, then
   `all 30 seen`.
 - Answer choices are reshuffled every round, so the correct answer never sits
   in a predictable position.
+- **Best scores are kept per round length**, since a 30-question round scores
+  roughly three times a 10-question one. Switching length shows that length's
+  own record.
 - Scoring: **100 points** per correct answer, up to **+50** for answering
   quickly, and up to **+50** more for a streak (+10 per consecutive correct).
 - The countdown ring turns yellow at 5 seconds and red at 3, with a matching
   audio tick. Running out of time reveals the answer and breaks the streak.
 - Results show the final score, correct count, accuracy, best streak, a
-  performance message and a per-question recap. Best score is kept in
+  performance message and a per-question recap. Best scores are kept in
   `localStorage`.
 
-**Controls:** tap or click an answer; `1`–`4` / `A`–`D` also work, `Enter` or
+**Controls:** tap or click a length and a category, then Play; tap or click an
+answer; `1`–`4` / `A`–`D` also work, `Enter` or
 `Space` advances, `Esc` quits to the home screen. Sound can be muted from either
 the home or quiz screen, and the preference is remembered.
 
