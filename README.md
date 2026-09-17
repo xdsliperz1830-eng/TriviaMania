@@ -60,7 +60,12 @@ the home screen grid and question counts build themselves from it.
 
 Rotation needs no bookkeeping: each question is identified by a short hash of
 its text, so adding, removing or reordering questions never disturbs a player's
-saved history.
+saved history. Ids belonging to questions that have been edited out are dropped
+the next time progress is loaded.
+
+When adding questions, watch the spread of *topics* within a category, not just
+the count — a category where a third of the questions ask the same kind of thing
+(capital cities, say) feels repetitive long before the pool runs out.
 
 ## Layout
 
