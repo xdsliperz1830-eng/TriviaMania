@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="Brain Blitz — a fast-paced HTML5 trivia game across 10 categories.">
+<meta name="theme-color" content="#0F172A">
+<title>Brain Blitz</title>
+<style>
+/* ============================================================
+   BRAIN BLITZ — Design tokens
+   ============================================================ */
+:root{
+  --navy:#0F172A;
+  --slate:#1E293B;
+  --slate-2:#273449;
+  --purple:#8B5CF6;
+  --purple-dim:#6D42E0;
+  --cyan:#22D3EE;
+  --yellow:#FACC15;
+  --white:#F8FAFC;
+  --muted:#94A3B8;
+  --green:#22C55E;
+  --red:#F43F5E;
+
+  --r-lg:26px;
+  --r-md:18px;
+  --r-sm:12px;
+
+  --shadow-card:0 18px 40px rgba(0,0,0,.45);
+  --glow-purple:0 0 24px rgba(139,92,246,.45);
+  --glow-cyan:0 0 24px rgba(34,211,238,.40);
+
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+html,body{height:100%;margin:0;}
+
+body{
+  background:var(--navy);
+  color:var(--white);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,Arial,sans-serif;
+  overflow:hidden;
+  overscroll-behavior:none;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+
+button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;}
+
+/* ============================================================
+   Animated background
+   ============================================================ */
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:
+   radial-gradient(1200px 700px at 15% -10%, #1B1250 0%, transparent 60%),
+   radial-gradient(1000px 650px at 110% 15%, #063A52 0%, transparent 62%),
+   linear-gradient(180deg,#0F172A 0%,#0B1120 100%);}
+
+#bg .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.42;will-change:transform;}
+#bg .o1{width:46vmax;height:46vmax;left:-14vmax;top:-12vmax;background:var(--purple);animation:drift1 22s ease-in-out infinite;}
+#bg .o2{width:38vmax;height:38vmax;right:-12vmax;top:8vmax;background:var(--cyan);opacity:.30;animation:drift2 26s ease-in-out infinite;}
+#bg .o3{width:34vmax;height:34vmax;left:22vmax;bottom:-16vmax;background:#4338CA;opacity:.34;animation:drift3 30s ease-in-out infinite;}
+
+@keyframes drift1{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(8vmax,6vmax,0) scale(1.12)}}
+@keyframes drift2{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-7vmax,9vmax,0) scale(1.08)}}
+@keyframes drift3{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(6vmax,-8vmax,0) scale(1.15)}}
+
+#bg .grid{position:absolute;inset:0;opacity:.16;
+  background-image:linear-gradient(rgba(148,163,184,.14) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(148,163,184,.14) 1px,transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:radial-gradient(70% 60% at 50% 40%,#000 0%,transparent 100%);
+  mask-image:radial-gradient(70% 60% at 50% 40%,#000 0%,transparent 100%);}
+
+#bg .spark{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--cyan);opacity:.5;
+  box-shadow:0 0 10px var(--cyan);animation:rise linear infinite;}
+@keyframes rise{from{transform:translateY(12vh) scale(.6);opacity:0}
+  15%{opacity:.6}85%{opacity:.5}
+  to{transform:translateY(-105vh) scale(1);opacity:0}}
+
+/* ============================================================
+   App shell / screens
+   ============================================================ */
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;
+  padding:calc(12px + var(--safe-t)) 14px calc(12px + var(--safe-b));}
+
+.screen{width:100%;max-width:620px;height:100%;display:none;flex-direction:column;animation:screenIn .42s cubic-bezier(.2,.8,.25,1);}
+.screen.active{display:flex;}
+@keyframes screenIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+
+.scroll{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+.scroll::-webkit-scrollbar{width:6px}
+.scroll::-webkit-scrollbar-thumb{background:rgba(148,163,184,.3);border-radius:8px}
+
+/* ============================================================
+   Shared components
+   ============================================================ */
+.card{background:linear-gradient(160deg,rgba(30,41,59,.96),rgba(23,33,50,.96));
+  border:1px solid rgba(148,163,184,.14);border-radius:var(--r-lg);box-shadow:var(--shadow-card);}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;letter-spacing:.3px;
+  border-radius:var(--r-md);padding:16px 22px;transition:transform .14s ease,box-shadow .2s ease,filter .2s ease;}
+.btn:active{transform:scale(.965)}
+
+.btn-primary{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#0B1120;font-size:1.12rem;
+  box-shadow:0 10px 26px rgba(139,92,246,.42);}
+.btn-primary:hover{filter:brightness(1.08);box-shadow:0 12px 32px rgba(34,211,238,.5)}
+
+.btn-ghost{background:rgba(148,163,184,.10);border:1px solid rgba(148,163,184,.22);color:var(--white);font-size:1rem;}
+.btn-ghost:hover{background:rgba(148,163,184,.18);border-color:rgba(34,211,238,.45)}
+
+.icon-btn{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.15rem;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.2);
+  transition:transform .15s ease,background .2s ease;flex:0 0 auto;}
+.icon-btn:hover{background:rgba(139,92,246,.28)}
+.icon-btn:active{transform:scale(.9)}
+
+/* ============================================================
+   Home screen
+   ============================================================ */
+#home{justify-content:flex-start;gap:0;}
+.home-top{display:flex;justify-content:flex-end;padding:2px 2px 6px;}
+
+.logo-wrap{text-align:center;padding:6px 0 2px;flex:0 0 auto;}
+.logo{font-size:clamp(2.6rem,12vw,4rem);font-weight:900;line-height:.96;letter-spacing:-1.5px;margin:0;
+  background:linear-gradient(100deg,var(--cyan) 0%,var(--white) 38%,var(--purple) 72%,var(--yellow) 100%);
+  background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 4px 20px rgba(139,92,246,.55));animation:shine 7s linear infinite;}
+@keyframes shine{to{background-position:220% center}}
+.logo .blitz{display:block;}
+.tagline{margin:10px 0 0;color:var(--muted);font-size:clamp(.9rem,3.6vw,1.05rem);font-weight:600;}
+.brain{font-size:2.6rem;display:inline-block;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(34,211,238,.6));}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+
+.best-chip{margin:14px auto 0;display:inline-flex;align-items:center;gap:9px;padding:9px 18px;border-radius:999px;
+  background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.38);color:var(--yellow);
+  font-weight:800;font-size:.92rem;box-shadow:0 0 22px rgba(250,204,21,.12);}
+
+.section-label{margin:16px 4px 9px;font-size:.76rem;font-weight:800;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;}
+
+.cat-scroll{flex:1 1 auto;min-height:0;margin:0 -4px;padding:0 4px 4px;
+  -webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 26px),transparent 100%);
+  mask-image:linear-gradient(180deg,#000 calc(100% - 26px),transparent 100%);}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;padding-bottom:6px;}
+
+.cat{position:relative;display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:var(--r-md);
+  background:rgba(30,41,59,.82);border:1px solid rgba(148,163,184,.14);text-align:left;overflow:hidden;
+  transition:transform .15s ease,border-color .2s ease,background .2s ease;}
+.cat:hover{transform:translateY(-2px);border-color:rgba(34,211,238,.5);background:rgba(39,52,73,.9)}
+.cat:active{transform:scale(.97)}
+.cat .emoji{font-size:1.45rem;flex:0 0 auto;filter:drop-shadow(0 0 8px rgba(255,255,255,.18))}
+.cat .meta{min-width:0}
+.cat .nm{display:block;font-weight:800;font-size:.9rem;line-height:1.2;}
+.cat .ct{display:block;font-size:.72rem;color:var(--muted);margin-top:3px;font-weight:600;}
+.cat.selected{border-color:var(--cyan);background:linear-gradient(135deg,rgba(139,92,246,.30),rgba(34,211,238,.20));
+  box-shadow:var(--glow-cyan);}
+.cat.selected .ct{color:#CBD5E1}
+.cat.wide{grid-column:1/-1;background:linear-gradient(120deg,rgba(139,92,246,.26),rgba(34,211,238,.16));border-color:rgba(139,92,246,.42)}
+
+.home-foot{flex:0 0 auto;padding-top:12px;}
+#playBtn{width:100%;}
+.hint{text-align:center;color:var(--muted);font-size:.74rem;margin:10px 0 0;font-weight:600;}
+
+/* ============================================================
+   Quiz screen
+   ============================================================ */
+#quiz{gap:10px;}
+.hud{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+.hud-stat{flex:1 1 0;min-width:0;background:rgba(30,41,59,.78);border:1px solid rgba(148,163,184,.14);
+  border-radius:var(--r-sm);padding:8px 10px;text-align:center;}
+.hud-stat .lab{display:block;font-size:.6rem;letter-spacing:1.2px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.hud-stat .val{display:block;font-size:1.02rem;font-weight:900;margin-top:2px;}
+#scoreVal{color:var(--yellow)}
+#streakBox.hot{border-color:rgba(250,204,21,.55);background:rgba(250,204,21,.12);animation:hotPulse 1.1s ease-in-out infinite}
+@keyframes hotPulse{0%,100%{box-shadow:0 0 0 rgba(250,204,21,0)}50%{box-shadow:0 0 20px rgba(250,204,21,.45)}}
+
+.progress-row{display:flex;align-items:center;gap:12px;flex:0 0 auto;}
+.progress{flex:1 1 auto;height:9px;border-radius:99px;background:rgba(148,163,184,.16);overflow:hidden;}
+.progress .fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--purple),var(--cyan));
+  box-shadow:0 0 14px rgba(34,211,238,.6);transition:width .45s cubic-bezier(.2,.8,.25,1);}
+
+.timer{position:relative;width:54px;height:54px;flex:0 0 auto;}
+.timer svg{transform:rotate(-90deg);display:block;width:100%;height:100%}
+.timer .track{stroke:rgba(148,163,184,.18)}
+.timer .bar{stroke:var(--cyan);stroke-linecap:round;transition:stroke .3s ease;}
+.timer .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.05rem;color:var(--cyan);transition:color .3s ease}
+.timer.warn .bar{stroke:var(--yellow)}
+.timer.warn .num{color:var(--yellow)}
+.timer.warn{animation:tick .5s ease-in-out infinite}
+.timer.danger .bar{stroke:var(--red)}
+.timer.danger .num{color:var(--red)}
+@keyframes tick{0%,100%{transform:scale(1)}50%{transform:scale(1.11)}}
+
+.q-area{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;overscroll-behavior:contain;}
+
+.q-card{position:sticky;top:0;z-index:2;flex:0 0 auto;padding:18px 18px 20px;overflow:hidden;}  /* sticky keeps the question readable when a short screen has to scroll */
+.q-card .cat-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;
+  background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.4);font-size:.72rem;font-weight:800;
+  letter-spacing:.4px;margin-bottom:12px;}
+.q-text{margin:0;font-size:clamp(1.06rem,4.4vw,1.34rem);font-weight:800;line-height:1.38;}
+
+.answers{display:grid;grid-template-columns:1fr;grid-auto-rows:minmax(54px,1fr);gap:9px;flex:1 1 auto;max-height:307px;}
+.ans{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 15px;border-radius:var(--r-md);
+  background:rgba(30,41,59,.9);border:1.5px solid rgba(148,163,184,.18);font-size:.99rem;font-weight:700;
+  line-height:1.3;transition:transform .14s ease,border-color .2s ease,background .25s ease,box-shadow .25s ease;
+  animation:ansIn .34s backwards cubic-bezier(.2,.8,.25,1);}
+@keyframes ansIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.ans:not(.locked):hover{border-color:var(--purple);background:rgba(139,92,246,.16);transform:translateX(3px)}
+.ans:not(.locked):active{transform:scale(.98)}
+.ans .key{flex:0 0 auto;width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  background:rgba(148,163,184,.16);font-size:.82rem;font-weight:900;color:var(--muted);transition:all .2s ease}
+.ans .txt{flex:1 1 auto;min-width:0}
+.ans .mark{flex:0 0 auto;font-size:1.05rem;opacity:0;transform:scale(.4);transition:all .3s cubic-bezier(.2,1.4,.4,1)}
+
+.ans.correct{background:linear-gradient(120deg,rgba(34,197,94,.28),rgba(34,197,94,.14));border-color:var(--green);
+  box-shadow:0 0 26px rgba(34,197,94,.34);animation:pop .45s cubic-bezier(.2,1.5,.4,1)}
+.ans.correct .key{background:var(--green);color:#052E16}
+.ans.correct .mark{opacity:1;transform:scale(1)}
+.ans.wrong{background:linear-gradient(120deg,rgba(244,63,94,.24),rgba(244,63,94,.12));border-color:var(--red);
+  animation:shake .42s ease}
+.ans.wrong .key{background:var(--red);color:#4C0519}
+.ans.wrong .mark{opacity:1;transform:scale(1)}
+.ans.faded{opacity:.42}
+.ans.locked{cursor:default}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.035)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+
+.q-hint{margin:auto 0 0;padding:11px 14px;border-radius:var(--r-md);text-align:center;font-size:.82rem;
+  font-weight:700;color:var(--muted);background:rgba(30,41,59,.55);border:1px dashed rgba(148,163,184,.22);}
+.q-hint.hide{display:none}
+
+/* Feedback panel */
+.feedback{flex:0 0 auto;margin-top:auto;border-radius:var(--r-md);padding:13px 15px;border:1px solid transparent;
+  display:none;animation:fbIn .34s cubic-bezier(.2,.8,.25,1);}
+.feedback.show{display:block}
+@keyframes fbIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.feedback.good{background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.45)}
+.feedback.bad{background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.42)}
+.fb-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:900;font-size:1rem;}
+.feedback.good .fb-head{color:#4ADE80}
+.feedback.bad .fb-head{color:#FB7185}
+.fb-pts{font-size:.9rem;font-weight:900;color:var(--yellow);white-space:nowrap}
+.fb-exp{margin:7px 0 0;font-size:.86rem;line-height:1.45;color:#CBD5E1;}
+
+.quiz-foot{flex:0 0 auto;min-height:56px;display:flex;align-items:center;}
+#nextBtn{width:100%;visibility:hidden}
+#nextBtn.show{visibility:visible;animation:fbIn .3s}
+
+/* Floating score popup + particles */
+.float-pts{position:fixed;z-index:40;font-weight:900;font-size:1.5rem;color:var(--yellow);pointer-events:none;
+  text-shadow:0 0 18px rgba(250,204,21,.8);animation:floatUp 1s ease-out forwards}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,0) scale(.7)}
+  20%{opacity:1;transform:translate(-50%,-14px) scale(1.12)}
+  100%{opacity:0;transform:translate(-50%,-76px) scale(.95)}}
+
+.particle{position:fixed;z-index:39;width:9px;height:9px;border-radius:2px;pointer-events:none;
+  animation:burst .9s ease-out forwards}
+@keyframes burst{0%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.25)}}
+
+/* ============================================================
+   Results screen
+   ============================================================ */
+#results{gap:10px;}
+.res-scroll{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:12px;padding:2px;}
+.res-hero{text-align:center;padding:22px 18px;}
+.res-emoji{font-size:3.1rem;line-height:1;animation:bob 3s ease-in-out infinite;display:inline-block}
+.res-title{margin:10px 0 4px;font-size:1.32rem;font-weight:900;
+  background:linear-gradient(95deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+.res-msg{margin:0 0 14px;color:var(--muted);font-size:.9rem;font-weight:600;line-height:1.45}
+.res-score{font-size:clamp(3rem,16vw,4.2rem);font-weight:900;line-height:1;color:var(--yellow);
+  text-shadow:0 0 34px rgba(250,204,21,.45)}
+.res-score-lab{display:block;font-size:.72rem;letter-spacing:2px;color:var(--muted);font-weight:800;margin-top:6px;text-transform:uppercase}
+.res-new-best{margin-top:12px;display:none;padding:8px 16px;border-radius:999px;font-size:.82rem;font-weight:900;
+  background:rgba(250,204,21,.14);border:1px solid rgba(250,204,21,.5);color:var(--yellow)}
+.res-new-best.show{display:inline-block;animation:pop .6s cubic-bezier(.2,1.5,.4,1)}
+
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.stat{padding:14px 8px;text-align:center;border-radius:var(--r-md);background:rgba(30,41,59,.85);
+  border:1px solid rgba(148,163,184,.14)}
+.stat .v{display:block;font-size:1.28rem;font-weight:900}
+.stat .l{display:block;font-size:.64rem;letter-spacing:1px;color:var(--muted);font-weight:800;margin-top:4px;text-transform:uppercase}
+#statCorrect .v{color:var(--green)}
+#statAcc .v{color:var(--cyan)}
+#statStreak .v{color:var(--yellow)}
+
+.review{padding:14px 16px}
+.review h3{margin:0 0 10px;font-size:.76rem;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.rev-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid rgba(148,163,184,.10);font-size:.83rem}
+.rev-row:first-of-type{border-top:0}
+.rev-row .dot{flex:0 0 auto;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:900}
+.rev-row.ok .dot{background:rgba(34,197,94,.22);color:#4ADE80}
+.rev-row.no .dot{background:rgba(244,63,94,.22);color:#FB7185}
+.rev-row .q{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#CBD5E1}
+
+.res-foot{flex:0 0 auto;display:flex;gap:9px;padding-top:2px}
+.res-foot .btn{flex:1 1 0}
+#homeBtn{flex:0 0 40%}
+
+/* ============================================================
+   Responsive: small phones & landscape
+   ============================================================ */
+@media (max-height:700px){
+  .logo{font-size:clamp(2.2rem,10vw,3rem)}
+  .brain{font-size:2.1rem}
+  .q-card{padding:13px 14px 14px}
+  .q-text{font-size:1.02rem}
+  .ans{padding:10px 12px;font-size:.94rem}
+  /* Short screens: the bottom slot belongs to the feedback panel. */
+  .q-hint{display:none}
+  .answers{grid-auto-rows:minmax(46px,1fr);max-height:228px}
+  .q-area{gap:8px}
+  .feedback{padding:11px 13px}
+  .fb-exp{font-size:.82rem}
+  .quiz-foot{min-height:50px}
+  .btn{padding:13px 20px}
+  .fb-exp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .ans.faded{padding:7px 13px;font-size:.84rem;opacity:.34}
+  .ans.faded .key{width:22px;height:22px;font-size:.72rem}
+}
+
+@media (orientation:landscape) and (max-height:560px){
+  #app{padding:calc(8px + var(--safe-t)) 12px calc(8px + var(--safe-b))}
+  .screen{max-width:860px}
+  .logo-wrap{display:flex;align-items:center;justify-content:center;gap:18px;padding:0}
+  .logo{font-size:2.1rem;text-align:left}
+  .logo .blitz{display:inline;margin-left:.3em}
+  .brain{font-size:1.8rem}
+  .tagline{margin:4px 0 0;font-size:.8rem}
+  .best-chip{margin-top:8px;padding:6px 14px;font-size:.8rem}
+  .section-label{margin:8px 4px 6px}
+  .cat-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  /* Landscape has width to spare: question on the left, answers on the right,
+     explanation across the bottom — so nothing has to scroll. */
+  .q-area{display:grid;grid-template-columns:38% 1fr;grid-template-areas:"card answers" "fb fb";
+          gap:8px;align-content:start}
+  .q-card{grid-area:card;position:relative;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+  .answers{grid-area:answers;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;max-height:none;gap:8px;align-self:start}
+  .feedback{grid-area:fb;margin-top:0}
+  .hud{gap:6px}
+  .hud-stat{padding:5px 8px}
+  .hud-stat .val{font-size:.92rem}
+  .progress-row{gap:10px}
+  .q-area{gap:8px}
+  .feedback{padding:8px 12px}
+  .fb-head{font-size:.9rem}
+  .fb-exp{margin-top:4px;line-height:1.35}
+  .quiz-foot{min-height:46px}
+  .btn{padding:11px 18px;font-size:1rem;min-height:44px}
+  .timer{width:44px;height:44px}
+  .timer .num{font-size:.95rem}
+  .q-card{padding:10px 14px 12px}
+  .q-card .cat-badge{margin-bottom:6px;padding:3px 10px;font-size:.68rem}
+  .q-text{font-size:.99rem;line-height:1.3}
+  .ans{padding:11px 12px;font-size:.92rem}
+  .fb-exp{font-size:.8rem}
+  .res-hero{padding:14px}
+  .res-emoji{font-size:2.2rem}
+  .res-score{font-size:2.8rem}
+  .timer{width:46px;height:46px}
+}
+
+@media (orientation:landscape) and (max-height:400px){
+  .q-text{font-size:.9rem}
+  .ans{padding:7px 10px;font-size:.85rem}
+  .fb-exp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.78rem}
+  .hud-stat{padding:3px 7px}
+  .hud-stat .lab{font-size:.55rem}
+  .hud-stat .val{font-size:.84rem}
+  .icon-btn{width:34px;height:34px;font-size:1rem}
+  .timer{width:38px;height:38px}
+  .timer .num{font-size:.85rem}
+  .q-card{padding:8px 12px 9px}
+  .q-area{gap:6px}
+  .feedback{padding:6px 11px}
+  .fb-head{font-size:.86rem}
+  .quiz-foot{min-height:44px}
+  .btn{padding:10px 16px;font-size:.94rem;min-height:44px}
+  #app{padding:calc(6px + var(--safe-t)) 10px calc(6px + var(--safe-b))}
+  .screen{gap:7px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="grid"></div>
+</div>
+
+<div id="app">
+
+  <!-- ============================ HOME ============================ -->
+  <section id="home" class="screen active" aria-label="Home">
+    <div class="home-top">
+      <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off">🔊</button>
+    </div>
+
+    <div class="logo-wrap">
+      <span class="brain" aria-hidden="true">🧠</span>
+      <div>
+        <h1 class="logo">BRAIN<span class="blitz">BLITZ</span></h1>
+        <p class="tagline">How much do you really know?</p>
+      </div>
+    </div>
+
+    <div style="text-align:center">
+      <div class="best-chip">🏆 Best Score <span id="bestScore">0</span></div>
+    </div>
+
+    <p class="section-label">Choose a category</p>
+    <div class="cat-scroll scroll">
+      <div class="cat-grid" id="catGrid"><!-- built by JS --></div>
+    </div>
+
+    <div class="home-foot">
+      <button id="playBtn" class="btn btn-primary">▶ PLAY <span id="playCat">Mixed</span></button>
+      <p class="hint">10 questions · 15 seconds each · answer fast for bonus points</p>
+    </div>
+  </section>
+
+  <!-- ============================ QUIZ ============================ -->
+  <section id="quiz" class="screen" aria-label="Quiz">
+    <div class="hud">
+      <div class="hud-stat"><span class="lab">Score</span><span class="val" id="scoreVal">0</span></div>
+      <div class="hud-stat"><span class="lab">Question</span><span class="val" id="qNum">1/10</span></div>
+      <div class="hud-stat" id="streakBox"><span class="lab">Streak</span><span class="val" id="streakVal">🔥 0</span></div>
+      <button id="muteBtn2" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off">🔊</button>
+      <button id="quitBtn" class="icon-btn" aria-label="Quit to home" title="Quit">✕</button>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress"><div class="fill" id="progFill"></div></div>
+      <div class="timer" id="timerEl">
+        <svg width="54" height="54" viewBox="0 0 54 54" aria-hidden="true">
+          <circle class="track" cx="27" cy="27" r="23" fill="none" stroke-width="5"></circle>
+          <circle class="bar" id="timerBar" cx="27" cy="27" r="23" fill="none" stroke-width="5"
+                  stroke-dasharray="144.51" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="num" id="timerNum" role="timer" aria-live="off">15</div>
+      </div>
+    </div>
+
+    <div class="q-area" id="qArea">
+      <div class="q-card card">
+        <span class="cat-badge" id="catBadge">🌎 General Knowledge</span>
+        <p class="q-text" id="qText">Question</p>
+      </div>
+
+      <div class="answers" id="answers" role="group" aria-label="Answer choices"></div>
+
+      <p class="q-hint" id="qHint">⚡ Faster answers earn more bonus points</p>
+
+      <div class="feedback" id="feedback" role="status" aria-live="polite">
+        <div class="fb-head"><span id="fbTitle">Correct!</span><span class="fb-pts" id="fbPts"></span></div>
+        <p class="fb-exp" id="fbExp"></p>
+      </div>
+    </div>
+
+    <div class="quiz-foot">
+      <button id="nextBtn" class="btn btn-primary">NEXT QUESTION →</button>
+    </div>
+  </section>
+
+  <!-- ============================ RESULTS ============================ -->
+  <section id="results" class="screen" aria-label="Results">
+    <div class="res-scroll scroll">
+      <div class="res-hero card">
+        <span class="res-emoji" id="resEmoji">🎉</span>
+        <h2 class="res-title" id="resTitle">Quiz Complete!</h2>
+        <p class="res-msg" id="resMsg">Nice work.</p>
+        <div><span class="res-score" id="resScore">0</span><span class="res-score-lab">Total Points</span></div>
+        <div class="res-new-best" id="resNewBest">🏆 NEW BEST SCORE!</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat" id="statCorrect"><span class="v" id="statCorrectV">0/10</span><span class="l">Correct</span></div>
+        <div class="stat" id="statAcc"><span class="v" id="statAccV">0%</span><span class="l">Accuracy</span></div>
+        <div class="stat" id="statStreak"><span class="v" id="statStreakV">0</span><span class="l">Best Streak</span></div>
+      </div>
+
+      <div class="review card">
+        <h3>Round Recap</h3>
+        <div id="reviewList"></div>
+      </div>
+    </div>
+
+    <div class="res-foot">
+      <button id="homeBtn" class="btn btn-ghost">🏠 Home</button>
+      <button id="againBtn" class="btn btn-primary">🔁 Play Again</button>
+    </div>
+  </section>
+
+</div>
+<script>
+"use strict";
+/* ================================================================
+   BRAIN BLITZ
+   1. DATA      — categories + question bank
+   2. AUDIO     — Web Audio API sound engine
+   3. STATE     — game state + helpers
+   4. UI        — rendering
+   5. GAME      — flow control
+   6. BOOT      — wiring
+   ================================================================ */
+
+/* ================================================================
+   1. DATA
+   ----------------------------------------------------------------
+   To add a question, append an object to QUESTIONS:
+     { c: <category key>, q: <question>, a: [correct, wrong, wrong, wrong], e: <explanation> }
+   The first answer is always the correct one — options are shuffled
+   at runtime, so authoring order never leaks into the game.
+   ================================================================ */
+const CATEGORIES = {
+  general:  { name: "General Knowledge", icon: "🌎" },
+  science:  { name: "Science",           icon: "🔬" },
+  history:  { name: "History",           icon: "🏛️" },
+  geo:      { name: "Geography",         icon: "🌍" },
+  movies:   { name: "Movies & TV",       icon: "🎬" },
+  sports:   { name: "Sports",            icon: "⚽" },
+  animals:  { name: "Animals",           icon: "🐾" },
+  tech:     { name: "Technology",        icon: "💻" },
+  food:     { name: "Food & Culture",    icon: "🍔" },
+  space:    { name: "Space",             icon: "🚀" }
+};
+
+const QUESTIONS = [
+  /* ---------------------------- General Knowledge ---------------------------- */
+  { c:"general", q:"How many continents are there on Earth?", a:["7","5","6","8"],
+    e:"The seven continents are Africa, Antarctica, Asia, Australia, Europe, North America and South America." },
+  { c:"general", q:"How many sides does a hexagon have?", a:["6","5","7","8"],
+    e:"“Hexa” means six — a hexagon has six sides and six angles." },
+  { c:"general", q:"Mixing blue and yellow paint gives you which color?", a:["Green","Purple","Orange","Brown"],
+    e:"Blue and yellow are the classic pair for making green in paint mixing." },
+  { c:"general", q:"How many minutes are in a full day?", a:["1,440","1,200","960","2,400"],
+    e:"24 hours × 60 minutes = 1,440 minutes in a day." },
+  { c:"general", q:"What is the currency of Japan?", a:["Yen","Won","Yuan","Baht"],
+    e:"Japan uses the yen. The won is Korean, the yuan Chinese and the baht Thai." },
+  { c:"general", q:"How many letters are in the English alphabet?", a:["26","24","25","28"],
+    e:"The modern English alphabet has 26 letters, from A to Z." },
+  { c:"general", q:"At what temperature does water freeze in Celsius?", a:["0°C","32°C","-10°C","100°C"],
+    e:"Water freezes at 0°C, which is 32°F on the Fahrenheit scale." },
+  { c:"general", q:"How many cards are in a standard deck, not counting jokers?", a:["52","48","54","60"],
+    e:"Four suits of 13 cards each makes 52." },
+  { c:"general", q:"What is the Roman numeral for 50?", a:["L","V","X","C"],
+    e:"L is 50. V is 5, X is 10 and C is 100." },
+  { c:"general", q:"How many colors are traditionally listed in a rainbow?", a:["7","5","6","9"],
+    e:"Red, orange, yellow, green, blue, indigo and violet — seven in all." },
+
+  /* ---------------------------- Science ---------------------------- */
+  { c:"science", q:"Which gas do plants absorb from the air to make food?", a:["Carbon dioxide","Oxygen","Nitrogen","Hydrogen"],
+    e:"Plants take in carbon dioxide during photosynthesis and release oxygen." },
+  { c:"science", q:"What is the chemical formula for water?", a:["H₂O","CO₂","O₂","NaCl"],
+    e:"Each water molecule has two hydrogen atoms bonded to one oxygen atom." },
+  { c:"science", q:"How many bones are in the adult human body?", a:["206","150","300","124"],
+    e:"Babies are born with about 270 bones; many fuse, leaving 206 in adults." },
+  { c:"science", q:"Which force pulls objects toward the center of the Earth?", a:["Gravity","Friction","Magnetism","Inertia"],
+    e:"Gravity is the attraction between masses — it keeps us on the ground." },
+  { c:"science", q:"At sea level, water boils at what temperature?", a:["100°C","90°C","120°C","80°C"],
+    e:"Water boils at 100°C (212°F) at standard sea-level pressure." },
+  { c:"science", q:"Which organ pumps blood around the body?", a:["The heart","The liver","The lungs","The kidneys"],
+    e:"The heart beats around 100,000 times a day to circulate blood." },
+  { c:"science", q:"What is the chemical symbol for gold?", a:["Au","Go","Ag","Gd"],
+    e:"Au comes from “aurum”, the Latin word for gold. Ag is silver." },
+  { c:"science", q:"What is the center of an atom called?", a:["The nucleus","The electron","The shell","The isotope"],
+    e:"Protons and neutrons sit in the nucleus while electrons orbit around it." },
+  { c:"science", q:"Which gas makes up about 78% of Earth's atmosphere?", a:["Nitrogen","Oxygen","Carbon dioxide","Helium"],
+    e:"Nitrogen dominates our air; oxygen is a distant second at roughly 21%." },
+  { c:"science", q:"A ramp is an example of which simple machine?", a:["An inclined plane","A pulley","A lever","A wheel and axle"],
+    e:"An inclined plane trades a longer distance for less force needed." },
+
+  /* ---------------------------- History ---------------------------- */
+  { c:"history", q:"In which year did World War II end?", a:["1945","1918","1939","1950"],
+    e:"Fighting ended in Europe in May 1945 and in the Pacific that September." },
+  { c:"history", q:"Who was the first President of the United States?", a:["George Washington","Thomas Jefferson","Abraham Lincoln","John Adams"],
+    e:"Washington took office in 1789 and served two terms." },
+  { c:"history", q:"Which ancient civilization built the Great Pyramids of Giza?", a:["The Egyptians","The Romans","The Greeks","The Maya"],
+    e:"They were built as royal tombs during Egypt's Old Kingdom, over 4,500 years ago." },
+  { c:"history", q:"In which year did the Titanic sink?", a:["1912","1905","1920","1898"],
+    e:"The Titanic struck an iceberg on her maiden voyage in April 1912." },
+  { c:"history", q:"In which year did the Berlin Wall fall?", a:["1989","1979","1991","1968"],
+    e:"The wall opened on 9 November 1989; Germany reunified the following year." },
+  { c:"history", q:"Who was the first person to walk on the Moon?", a:["Neil Armstrong","Buzz Aldrin","Yuri Gagarin","Michael Collins"],
+    e:"Armstrong stepped onto the surface on 20 July 1969, with Aldrin right behind him." },
+  { c:"history", q:"Which ship carried the Pilgrims to America in 1620?", a:["The Mayflower","The Santa Maria","The Beagle","The Endeavour"],
+    e:"The Mayflower crossed the Atlantic and landed at what became Plymouth." },
+  { c:"history", q:"The American Civil War was fought between which two sides?", a:["The North and the South","England and France","East and West","Spain and Mexico"],
+    e:"The Union (North) fought the Confederacy (South) from 1861 to 1865." },
+  { c:"history", q:"Who was Britain's Prime Minister for most of World War II?", a:["Winston Churchill","Neville Chamberlain","Clement Attlee","Margaret Thatcher"],
+    e:"Churchill led Britain from 1940 until the war in Europe ended." },
+  { c:"history", q:"The Great Wall was built to help defend which country?", a:["China","Japan","India","Mongolia"],
+    e:"Chinese dynasties built and rebuilt the wall over many centuries." },
+
+  /* ---------------------------- Geography ---------------------------- */
+  { c:"geo", q:"What is the capital of Australia?", a:["Canberra","Sydney","Melbourne","Perth"],
+    e:"Canberra was purpose-built as the capital to settle the Sydney–Melbourne rivalry." },
+  { c:"geo", q:"What is the capital of Canada?", a:["Ottawa","Toronto","Vancouver","Montreal"],
+    e:"Ottawa, in Ontario, has been the capital since 1857." },
+  { c:"geo", q:"Which is the largest country in the world by land area?", a:["Russia","Canada","China","The USA"],
+    e:"Russia spans 11 time zones and about 17 million square kilometers." },
+  { c:"geo", q:"Mount Everest sits on the border of Nepal and which country?", a:["China","India","Bhutan","Pakistan"],
+    e:"Everest straddles Nepal and the Tibet Autonomous Region of China." },
+  { c:"geo", q:"Which is the largest hot desert in the world?", a:["The Sahara","The Gobi","The Mojave","The Kalahari"],
+    e:"The Sahara covers much of North Africa — roughly the size of the USA." },
+  { c:"geo", q:"How many states make up the United States?", a:["50","48","52","51"],
+    e:"Alaska and Hawaii joined in 1959 to bring the total to 50." },
+  { c:"geo", q:"The Amazon rainforest is mostly on which continent?", a:["South America","Africa","Asia","Australia"],
+    e:"Most of the Amazon lies in Brazil, in northern South America." },
+  { c:"geo", q:"Which ocean lies between Europe and North America?", a:["The Atlantic","The Pacific","The Indian","The Arctic"],
+    e:"The Atlantic is the second-largest ocean after the Pacific." },
+  { c:"geo", q:"What is the capital of Japan?", a:["Tokyo","Kyoto","Osaka","Seoul"],
+    e:"Tokyo became the capital in 1868, replacing Kyoto." },
+  { c:"geo", q:"In which country would you find the Eiffel Tower?", a:["France","Italy","Belgium","Spain"],
+    e:"The tower was built in Paris for the 1889 World's Fair." },
+
+  /* ---------------------------- Movies & TV ---------------------------- */
+  { c:"movies", q:"Which animated film follows a lion cub named Simba?", a:["The Lion King","Madagascar","Zootopia","Tarzan"],
+    e:"Disney's The Lion King first roared into cinemas in 1994." },
+  { c:"movies", q:"Who plays Iron Man in the Marvel films?", a:["Robert Downey Jr.","Chris Evans","Mark Ruffalo","Chris Hemsworth"],
+    e:"Downey Jr. first suited up as Tony Stark in 2008's Iron Man." },
+  { c:"movies", q:"In Harry Potter, what is the name of Harry's owl?", a:["Hedwig","Errol","Crookshanks","Fawkes"],
+    e:"Hedwig is Harry's snowy owl and his link to the wizarding world." },
+  { c:"movies", q:"Which Disney film features the song “Let It Go”?", a:["Frozen","Moana","Tangled","Encanto"],
+    e:"Elsa sings it in Frozen (2013) — the song won an Academy Award." },
+  { c:"movies", q:"What color is Darth Vader's lightsaber?", a:["Red","Blue","Green","Purple"],
+    e:"Sith lightsabers glow red; Jedi blades are usually blue or green." },
+  { c:"movies", q:"Who directed Jurassic Park?", a:["Steven Spielberg","James Cameron","George Lucas","Ridley Scott"],
+    e:"Spielberg's 1993 film set a new bar for computer-generated creatures." },
+  { c:"movies", q:"Which superhero is known as the “Caped Crusader”?", a:["Batman","Superman","Spider-Man","Iron Man"],
+    e:"Batman protects Gotham City without any superpowers." },
+  { c:"movies", q:"In Toy Story, what kind of toy is Woody?", a:["A cowboy doll","A robot","A teddy bear","A race car"],
+    e:"Woody is a pull-string cowboy doll and Andy's favorite toy." },
+  { c:"movies", q:"What is the name of the wizarding school in Harry Potter?", a:["Hogwarts","Durmstrang","Beauxbatons","Ilvermorny"],
+    e:"Hogwarts School of Witchcraft and Wizardry has four houses." },
+  { c:"movies", q:"Which studio's logo features a hopping desk lamp?", a:["Pixar","DreamWorks","Illumination","Studio Ghibli"],
+    e:"The lamp is Luxo Jr., star of Pixar's 1986 short film." },
+
+  /* ---------------------------- Sports ---------------------------- */
+  { c:"sports", q:"How many players from one team are on the field in soccer?", a:["11","9","10","12"],
+    e:"Eleven per side, including the goalkeeper." },
+  { c:"sports", q:"How often are the Summer Olympic Games held?", a:["Every 4 years","Every 2 years","Every 3 years","Every 5 years"],
+    e:"The Summer Games run on a four-year cycle called an Olympiad." },
+  { c:"sports", q:"In basketball, how many points is a free throw worth?", a:["1","2","3","4"],
+    e:"Free throws are worth one point each; field goals are two or three." },
+  { c:"sports", q:"Which sport is played with a shuttlecock?", a:["Badminton","Tennis","Squash","Table tennis"],
+    e:"The feathered shuttlecock is unique to badminton." },
+  { c:"sports", q:"How many holes are played in a full round of golf?", a:["18","9","12","21"],
+    e:"A standard round is 18 holes, usually a par of about 72." },
+  { c:"sports", q:"Which country has won the most FIFA World Cup titles?", a:["Brazil","Germany","Italy","Argentina"],
+    e:"Brazil has lifted the trophy five times — more than any other nation." },
+  { c:"sports", q:"In tennis, what is a score of zero called?", a:["Love","Nil","Duck","Blank"],
+    e:"“Love” means zero, as in “forty–love”." },
+  { c:"sports", q:"How many rings are on the Olympic flag?", a:["5","4","6","7"],
+    e:"Five interlocking rings represent the five inhabited continents." },
+  { c:"sports", q:"In baseball, how many strikes make an out?", a:["3","2","4","5"],
+    e:"Three strikes and the batter is out; four balls earn a walk." },
+  { c:"sports", q:"Which sport made Serena Williams a household name?", a:["Tennis","Golf","Athletics","Swimming"],
+    e:"Williams won 23 Grand Slam singles titles in tennis." },
+
+  /* ---------------------------- Animals ---------------------------- */
+  { c:"animals", q:"What is the largest land animal?", a:["The African elephant","The giraffe","The hippopotamus","The rhinoceros"],
+    e:"African elephants can weigh more than six tonnes." },
+  { c:"animals", q:"How many legs does a spider have?", a:["8","6","10","4"],
+    e:"Spiders are arachnids, with eight legs — insects have six." },
+  { c:"animals", q:"What is a group of lions called?", a:["A pride","A pack","A herd","A flock"],
+    e:"A pride usually holds related females, their cubs and a few males." },
+  { c:"animals", q:"What is the fastest land animal?", a:["The cheetah","The lion","The horse","The greyhound"],
+    e:"Cheetahs can sprint at over 100 km/h in short bursts." },
+  { c:"animals", q:"What makes up almost all of a giant panda's diet?", a:["Bamboo","Fish","Berries","Grass"],
+    e:"Bamboo is about 99% of what a wild giant panda eats." },
+  { c:"animals", q:"Which mammal is capable of true flight?", a:["The bat","The flying squirrel","The sugar glider","The colugo"],
+    e:"Bats flap powered wings; the others only glide." },
+  { c:"animals", q:"How many hearts does an octopus have?", a:["3","1","2","5"],
+    e:"Two hearts pump blood to the gills and one serves the rest of the body." },
+  { c:"animals", q:"What is the largest animal on Earth?", a:["The blue whale","The African elephant","The great white shark","The giant squid"],
+    e:"Blue whales reach 30 meters — larger than any known dinosaur." },
+  { c:"animals", q:"Which flightless bird lives in Antarctica?", a:["The penguin","The ostrich","The emu","The kiwi"],
+    e:"Penguins swim instead of flying; the others live far from Antarctica." },
+  { c:"animals", q:"What is a baby kangaroo called?", a:["A joey","A cub","A kit","A calf"],
+    e:"A joey spends months developing inside its mother's pouch." },
+
+  /* ---------------------------- Technology ---------------------------- */
+  { c:"tech", q:"What does “WWW” stand for?", a:["World Wide Web","Wide World Web","World Web Wire","Web Wide World"],
+    e:"Tim Berners-Lee invented the World Wide Web in 1989." },
+  { c:"tech", q:"Which company created the iPhone?", a:["Apple","Samsung","Microsoft","Nokia"],
+    e:"Apple launched the first iPhone in 2007." },
+  { c:"tech", q:"What does “CPU” stand for?", a:["Central Processing Unit","Computer Power Unit","Control Program Utility","Core Processing Underlay"],
+    e:"The CPU is the chip that carries out a computer's instructions." },
+  { c:"tech", q:"How many bits are in a byte?", a:["8","4","16","10"],
+    e:"One byte is eight bits, enough for 256 different values." },
+  { c:"tech", q:"Which company developed the Windows operating system?", a:["Microsoft","Apple","IBM","Google"],
+    e:"Microsoft released the first version of Windows in 1985." },
+  { c:"tech", q:"Which language is used to style web pages?", a:["CSS","HTML","SQL","JSON"],
+    e:"CSS handles layout and looks; HTML provides the structure." },
+  { c:"tech", q:"What does “GPS” stand for?", a:["Global Positioning System","General Position Service","Geographic Point Sensor","Global Path Signal"],
+    e:"GPS uses a network of satellites to pinpoint your location." },
+  { c:"tech", q:"In “HTTPS”, what does the S stand for?", a:["Secure","Standard","Server","Simple"],
+    e:"The S means the connection is encrypted between you and the site." },
+  { c:"tech", q:"Which company develops the Android operating system?", a:["Google","Apple","Samsung","Meta"],
+    e:"Google acquired Android in 2005 and still leads its development." },
+  { c:"tech", q:"What do we call the physical parts of a computer?", a:["Hardware","Software","Firmware","Freeware"],
+    e:"Hardware is what you can touch; software is the code that runs on it." },
+
+  /* ---------------------------- Food & Culture ---------------------------- */
+  { c:"food", q:"Sushi is a traditional dish from which country?", a:["Japan","China","Thailand","Korea"],
+    e:"Japanese sushi pairs vinegared rice with fish and vegetables." },
+  { c:"food", q:"What is the main ingredient in guacamole?", a:["Avocado","Cucumber","Pea","Zucchini"],
+    e:"Guacamole is mashed avocado with lime, salt and other seasonings." },
+  { c:"food", q:"Which spice is the most expensive in the world by weight?", a:["Saffron","Vanilla","Cardamom","Cinnamon"],
+    e:"Saffron threads are hand-picked from crocus flowers — thousands per ounce." },
+  { c:"food", q:"Pizza as we know it originated in which country?", a:["Italy","Greece","France","Spain"],
+    e:"The modern pizza took shape in Naples, Italy." },
+  { c:"food", q:"Chocolate is made from the seeds of which plant?", a:["Cacao","Coffee","Coconut","Cashew"],
+    e:"Cacao pods hold the beans that are roasted and ground into chocolate." },
+  { c:"food", q:"Which drink is made from fermented grapes?", a:["Wine","Beer","Cider","Sake"],
+    e:"Wine comes from grapes, beer from grain, cider from apples and sake from rice." },
+  { c:"food", q:"What is the main ingredient in hummus?", a:["Chickpeas","Lentils","White beans","Peanuts"],
+    e:"Hummus blends chickpeas with tahini, lemon and garlic." },
+  { c:"food", q:"Paella is a famous dish from which country?", a:["Spain","Portugal","Mexico","Morocco"],
+    e:"Paella is a rice dish that comes from the Valencia region of Spain." },
+  { c:"food", q:"Tacos and burritos come from which country's cuisine?", a:["Mexico","Brazil","Peru","Cuba"],
+    e:"Both are staples of Mexican cooking." },
+  { c:"food", q:"Marzipan is mostly made from sugar and which nut?", a:["Almond","Walnut","Hazelnut","Pistachio"],
+    e:"Ground almonds and sugar give marzipan its smooth texture." },
+
+  /* ---------------------------- Space ---------------------------- */
+  { c:"space", q:"Which planet is closest to the Sun?", a:["Mercury","Venus","Mars","Earth"],
+    e:"Mercury orbits the Sun in just 88 Earth days." },
+  { c:"space", q:"What is the largest planet in our solar system?", a:["Jupiter","Saturn","Neptune","Earth"],
+    e:"Jupiter is so big that all the other planets would fit inside it." },
+  { c:"space", q:"Which planet is known as the Red Planet?", a:["Mars","Venus","Mercury","Jupiter"],
+    e:"Iron-rich dust gives the Martian surface its rusty color." },
+  { c:"space", q:"Which galaxy is our solar system in?", a:["The Milky Way","Andromeda","The Whirlpool","Triangulum"],
+    e:"The Milky Way is a barred spiral galaxy with hundreds of billions of stars." },
+  { c:"space", q:"Roughly how long does sunlight take to reach Earth?", a:["About 8 minutes","About 8 seconds","About 8 hours","Instantly"],
+    e:"Light crosses the 150 million km from the Sun in about 8 minutes 20 seconds." },
+  { c:"space", q:"Which planet has the most striking ring system?", a:["Saturn","Jupiter","Uranus","Neptune"],
+    e:"Saturn's rings are mostly chunks of ice and rock, and are easy to spot in a telescope." },
+  { c:"space", q:"What is the name of Earth's only natural satellite?", a:["The Moon","Titan","Europa","Phobos"],
+    e:"Our Moon is the fifth-largest moon in the solar system." },
+  { c:"space", q:"Which space agency landed the first humans on the Moon?", a:["NASA","ESA","Roscosmos","ISRO"],
+    e:"NASA's Apollo 11 mission touched down in July 1969." },
+  { c:"space", q:"A “shooting star” is really what?", a:["A meteor burning up","A distant star","A comet's tail","A satellite"],
+    e:"It is a small piece of space rock glowing as it burns in our atmosphere." },
+  { c:"space", q:"What was the first artificial satellite launched into space?", a:["Sputnik 1","Apollo 1","Explorer 1","Vostok 1"],
+    e:"The Soviet Union launched Sputnik 1 in October 1957." }
+];
+
+/* ================================================================
+   2. AUDIO — Web Audio API, created lazily on first user gesture
+   ================================================================ */
+const Sound = (() => {
+  let ctx = null, master = null, muted = false;
+
+  function init() {
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = muted ? 0 : 0.5;
+      master.connect(ctx.destination);
+    } catch (e) { ctx = null; }
+  }
+
+  function tone(freq, start, dur, type, vol) {
+    if (!ctx || muted) return;
+    const t = ctx.currentTime + start;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain); gain.connect(master);
+    osc.start(t); osc.stop(t + dur + 0.03);
+  }
+
+  function sweep(from, to, dur, type, vol) {
+    if (!ctx || muted) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || "sawtooth";
+    osc.frequency.setValueAtTime(from, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(40, to), t + dur);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain); gain.connect(master);
+    osc.start(t); osc.stop(t + dur + 0.03);
+  }
+
+  return {
+    init,
+    isMuted: () => muted,
+    setMuted(v) {
+      muted = v;
+      if (master && ctx) master.gain.setTargetAtTime(v ? 0 : 0.5, ctx.currentTime, 0.01);
+    },
+    click()   { tone(520, 0, 0.07, "triangle", 0.18); },
+    correct(streak) {
+      const base = [523.25, 659.25, 783.99, 1046.5];
+      const lift = Math.min(4, Math.max(0, (streak || 1) - 1)) * 0.03;
+      base.forEach((f, i) => tone(f * (1 + lift), i * 0.075, 0.28, "triangle", 0.26));
+    },
+    wrong()   { sweep(320, 90, 0.42, "sawtooth", 0.2); tone(148, 0, 0.3, "square", 0.12); },
+    timeout() { tone(392, 0, 0.18, "square", 0.16); tone(294, 0.16, 0.34, "square", 0.16); },
+    tick()    { tone(880, 0, 0.07, "square", 0.12); },
+    start()   { [392, 523.25, 659.25].forEach((f, i) => tone(f, i * 0.08, 0.24, "triangle", 0.22)); },
+    finish(good) {
+      const notes = good ? [523.25, 659.25, 783.99, 1046.5, 1318.5] : [440, 392, 349.23, 293.66];
+      notes.forEach((f, i) => tone(f, i * 0.13, 0.45, "triangle", 0.24));
+    }
+  };
+})();
+
+/* ================================================================
+   3. STATE
+   ================================================================ */
+const ROUND_SIZE = 10;
+const TIME_LIMIT = 15;          // seconds per question
+const BASE_POINTS = 100;
+const MAX_SPEED_BONUS = 50;
+const STREAK_STEP = 10;
+const MAX_STREAK_BONUS = 50;
+const RING_LEN = 2 * Math.PI * 23;
+
+const state = {
+  category: "mixed",
+  round: [],
+  index: 0,
+  score: 0,
+  displayedScore: 0,
+  correctCount: 0,
+  streak: 0,
+  bestStreak: 0,
+  locked: false,          // true once the current question is answered
+  timeLeft: TIME_LIMIT,
+  rafId: null,
+  scoreRafId: null,
+  endsAt: 0,
+  lastTickSecond: null,
+  results: []
+};
+
+const store = {
+  get(key, fallback) {
+    try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
+    catch (e) { return fallback; }
+  },
+  set(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+};
+
+/* -------- helpers -------- */
+const $ = (id) => document.getElementById(id);
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function questionsIn(catKey) {
+  return QUESTIONS.filter(q => q.c === catKey);
+}
+
+/** Build a round: one question per category for "mixed", otherwise from the chosen category. */
+function buildRound(catKey) {
+  let picked;
+  if (catKey === "mixed") {
+    const byCat = shuffle(Object.keys(CATEGORIES)).map(k => shuffle(questionsIn(k)));
+    picked = [];
+    let depth = 0;
+    while (picked.length < ROUND_SIZE && depth < 20) {
+      for (const bucket of byCat) {
+        if (picked.length >= ROUND_SIZE) break;
+        if (bucket[depth]) picked.push(bucket[depth]);
+      }
+      depth++;
+    }
+    picked = shuffle(picked).slice(0, ROUND_SIZE);
+  } else {
+    picked = shuffle(questionsIn(catKey)).slice(0, ROUND_SIZE);
+  }
+
+  return picked.map(q => {
+    const options = shuffle(q.a.map((text, i) => ({ text, correct: i === 0 })));
+    return {
+      category: q.c,
+      text: q.q,
+      explanation: q.e,
+      options,
+      correctIndex: options.findIndex(o => o.correct)
+    };
+  });
+}
+
+/* ================================================================
+   4. UI RENDERING
+   ================================================================ */
+const LETTERS = ["A", "B", "C", "D"];
+
+const UI = {
+  showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+  },
+
+  buildCategoryGrid() {
+    const grid = $("catGrid");
+    grid.innerHTML = "";
+
+    const makeBtn = (key, icon, name, count, wide) => {
+      const b = document.createElement("button");
+      b.className = "cat" + (wide ? " wide" : "") + (state.category === key ? " selected" : "");
+      b.dataset.cat = key;
+      b.setAttribute("aria-pressed", state.category === key ? "true" : "false");
+      b.innerHTML =
+        '<span class="emoji" aria-hidden="true">' + icon + '</span>' +
+        '<span class="meta"><span class="nm"></span><span class="ct"></span></span>';
+      b.querySelector(".nm").textContent = name;
+      b.querySelector(".ct").textContent = count + " questions";
+      b.addEventListener("click", () => UI.selectCategory(key));
+      return b;
+    };
+
+    grid.appendChild(makeBtn("mixed", "🎲", "Mixed Blitz", QUESTIONS.length, true));
+    Object.keys(CATEGORIES).forEach(key => {
+      const c = CATEGORIES[key];
+      grid.appendChild(makeBtn(key, c.icon, c.name, questionsIn(key).length));
+    });
+  },
+
+  selectCategory(key) {
+    Sound.init();
+    Sound.click();
+    state.category = key;
+    document.querySelectorAll(".cat").forEach(el => {
+      const on = el.dataset.cat === key;
+      el.classList.toggle("selected", on);
+      el.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    $("playCat").textContent = key === "mixed" ? "Mixed" : CATEGORIES[key].name;
+  },
+
+  refreshBest() {
+    $("bestScore").textContent = store.get("brainblitz.best", "0");
+  },
+
+  updateMuteButtons() {
+    const label = Sound.isMuted() ? "🔇" : "🔊";
+    $("muteBtn").textContent = label;
+    $("muteBtn2").textContent = label;
+  },
+
+  renderHud() {
+    $("qNum").textContent = (state.index + 1) + "/" + state.round.length;
+    $("streakVal").textContent = "🔥 " + state.streak;
+    $("streakBox").classList.toggle("hot", state.streak >= 3);
+    const answered = state.index + (state.locked ? 1 : 0);
+    $("progFill").style.width = (answered / state.round.length * 100) + "%";
+  },
+
+  /** Animate the score counter from its displayed value to the real one. */
+  animateScore() {
+    cancelAnimationFrame(state.scoreRafId);
+    const from = state.displayedScore, to = state.score, span = 520;
+    if (from === to) { $("scoreVal").textContent = to; return; }
+    const t0 = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / span);
+      const eased = 1 - Math.pow(1 - p, 3);
+      state.displayedScore = Math.round(from + (to - from) * eased);
+      $("scoreVal").textContent = state.displayedScore;
+      if (p < 1) state.scoreRafId = requestAnimationFrame(step);
+      else state.displayedScore = to;
+    };
+    state.scoreRafId = requestAnimationFrame(step);
+  },
+
+  renderQuestion() {
+    const q = state.round[state.index];
+    const cat = CATEGORIES[q.category];
+
+    $("catBadge").textContent = cat.icon + "  " + cat.name;
+    $("qText").textContent = q.text;
+
+    const wrap = $("answers");
+    wrap.innerHTML = "";
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.className = "ans";
+      btn.dataset.idx = i;
+      btn.style.animationDelay = (60 + i * 55) + "ms";
+      btn.innerHTML = '<span class="key">' + LETTERS[i] + '</span><span class="txt"></span><span class="mark"></span>';
+      btn.querySelector(".txt").textContent = opt.text;
+      btn.addEventListener("click", () => Game.answer(i));
+      wrap.appendChild(btn);
+    });
+
+    $("qArea").scrollTop = 0;
+    $("feedback").className = "feedback";
+    $("qHint").classList.remove("hide");
+    $("nextBtn").classList.remove("show");
+    UI.renderHud();
+    UI.setTimerDisplay(TIME_LIMIT);
+  },
+
+  setTimerDisplay(secs) {
+    const clamped = Math.max(0, Math.min(TIME_LIMIT, secs));
+    const ratio = clamped / TIME_LIMIT;
+    $("timerBar").style.strokeDashoffset = (RING_LEN * (1 - ratio)).toFixed(2);
+    $("timerNum").textContent = Math.ceil(clamped);
+    const el = $("timerEl");
+    el.classList.toggle("warn", clamped <= 5 && clamped > 3);
+    el.classList.toggle("danger", clamped <= 3);
+  },
+
+  revealAnswers(chosenIdx, correctIdx) {
+    document.querySelectorAll(".ans").forEach(btn => {
+      const i = Number(btn.dataset.idx);
+      btn.classList.add("locked");
+      if (i === correctIdx) {
+        btn.classList.add("correct");
+        btn.querySelector(".mark").textContent = "✓";
+      } else if (i === chosenIdx) {
+        btn.classList.add("wrong");
+        btn.querySelector(".mark").textContent = "✗";
+      } else {
+        btn.classList.add("faded");
+      }
+    });
+  },
+
+  showFeedback(kind, points, explanation) {
+    const fb = $("feedback");
+    $("qHint").classList.add("hide");
+    fb.className = "feedback show " + (kind === "correct" ? "good" : "bad");
+    $("fbTitle").textContent =
+      kind === "correct" ? (state.streak >= 3 ? "🔥 " + state.streak + " in a row!" : "✅ Correct!")
+      : kind === "timeout" ? "⏰ Time's up!"
+      : "❌ Not quite";
+    $("fbPts").textContent = points > 0 ? "+" + points + " pts" : "";
+    $("fbExp").textContent = explanation;
+    $("nextBtn").textContent = state.index === state.round.length - 1 ? "SEE RESULTS →" : "NEXT QUESTION →";
+    $("nextBtn").classList.add("show");
+
+    // On short screens the explanation can sit below the fold. Scroll it into view,
+    // but never far enough to push the revealed correct answer off the top.
+    const area = $("qArea");
+    if (area.scrollHeight > area.clientHeight) {
+      requestAnimationFrame(() => {
+        const areaRect = area.getBoundingClientRect();
+        let target = area.scrollTop + Math.max(0, fb.getBoundingClientRect().bottom - areaRect.bottom);
+        const correctEl = area.querySelector(".ans.correct");
+        if (correctEl) {
+          const card = area.querySelector(".q-card");
+          const sticky = getComputedStyle(card).position === "sticky"
+            ? card.getBoundingClientRect().height + 10 : 0;
+          const correctRect = correctEl.getBoundingClientRect();
+          const headroom = correctRect.top - areaRect.top - sticky
+                         + Math.max(0, correctRect.height - 36);
+          target = Math.min(target, area.scrollTop + headroom);
+        }
+        area.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+      });
+    }
+  },
+
+  floatPoints(points, el) {
+    const rect = el.getBoundingClientRect();
+    const node = document.createElement("div");
+    node.className = "float-pts";
+    node.textContent = "+" + points;
+    node.style.left = (rect.left + rect.width / 2) + "px";
+    node.style.top = (rect.top + rect.height / 2) + "px";
+    document.body.appendChild(node);
+    setTimeout(() => node.remove(), 1000);
+  },
+
+  burst(el) {
+    const rect = el.getBoundingClientRect();
+    const colors = ["#8B5CF6", "#22D3EE", "#FACC15", "#22C55E", "#F8FAFC"];
+    for (let i = 0; i < 16; i++) {
+      const p = document.createElement("div");
+      p.className = "particle";
+      const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.4;
+      const dist = 60 + Math.random() * 90;
+      p.style.left = (rect.left + rect.width / 2) + "px";
+      p.style.top = (rect.top + rect.height / 2) + "px";
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+      p.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+      p.style.setProperty("--rot", Math.round(Math.random() * 540 - 270) + "deg");
+      p.style.animationDelay = (i * 8) + "ms";
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1100);
+    }
+  },
+
+  renderResults(newBest) {
+    const total = state.round.length;
+    const acc = Math.round((state.correctCount / total) * 100);
+
+    const tiers = [
+      { min: 100, emoji: "🏆", title: "Flawless Blitz!", msg: "A perfect round. You did not miss a single question." },
+      { min: 80,  emoji: "🌟", title: "Brilliant!",      msg: "Outstanding knowledge — you are in the top tier." },
+      { min: 60,  emoji: "🎉", title: "Well Played!",    msg: "Solid round. A little more speed and you'll be unstoppable." },
+      { min: 40,  emoji: "💪", title: "Getting There!",  msg: "Halfway there. One more round should push you higher." },
+      { min: 20,  emoji: "📚", title: "Keep Training!",  msg: "Every round teaches you something new. Try again!" },
+      { min: 0,   emoji: "🌱", title: "Fresh Start",     msg: "Everyone starts somewhere. Give it another blitz!" }
+    ];
+    const tier = tiers.find(t => acc >= t.min);
+
+    $("resEmoji").textContent = tier.emoji;
+    $("resTitle").textContent = tier.title;
+    $("resMsg").textContent = tier.msg;
+    $("resScore").textContent = state.score;
+    $("statCorrectV").textContent = state.correctCount + "/" + total;
+    $("statAccV").textContent = acc + "%";
+    $("statStreakV").textContent = state.bestStreak;
+    $("resNewBest").classList.toggle("show", newBest);
+
+    const list = $("reviewList");
+    list.innerHTML = "";
+    state.results.forEach((r, i) => {
+      const row = document.createElement("div");
+      row.className = "rev-row " + (r.correct ? "ok" : "no");
+      row.innerHTML = '<span class="dot">' + (r.correct ? "✓" : "✗") + '</span>' +
+                      '<span class="q"></span>';
+      row.querySelector(".q").textContent = (i + 1) + ". " + r.question;
+      list.appendChild(row);
+    });
+
+    if (newBest || acc >= 80) {
+      setTimeout(() => UI.burst($("resScore")), 340);
+    }
+  }
+};
+
+/* ================================================================
+   5. GAME FLOW
+   ================================================================ */
+const Game = {
+  start() {
+    Sound.init();
+    Sound.start();
+    Game.stopTimer();
+
+    state.round = buildRound(state.category);
+    state.index = 0;
+    state.score = 0;
+    state.displayedScore = 0;
+    state.correctCount = 0;
+    state.streak = 0;
+    state.bestStreak = 0;
+    state.results = [];
+    state.locked = false;
+
+    $("scoreVal").textContent = "0";
+    $("progFill").style.width = "0%";
+    UI.showScreen("quiz");
+    Game.showCurrent();
+  },
+
+  showCurrent() {
+    state.locked = false;
+    UI.renderQuestion();
+    Game.startTimer();
+  },
+
+  /* ---------------- timer ---------------- */
+  startTimer() {
+    state.timeLeft = TIME_LIMIT;
+    Game.runTimer();
+  },
+
+  /** Runs (or resumes) the countdown from whatever is left in state.timeLeft. */
+  runTimer() {
+    Game.stopTimer();
+    state.endsAt = performance.now() + state.timeLeft * 1000;
+    state.lastTickSecond = null;
+
+    const frame = (now) => {
+      if (state.locked) return;
+      const left = Math.max(0, (state.endsAt - now) / 1000);
+      state.timeLeft = left;
+      UI.setTimerDisplay(left);
+
+      const whole = Math.ceil(left);
+      if (whole !== state.lastTickSecond) {
+        if (state.lastTickSecond !== null && whole <= 5 && whole > 0) Sound.tick();
+        state.lastTickSecond = whole;
+      }
+
+      if (left <= 0) { Game.timeUp(); return; }
+      state.rafId = requestAnimationFrame(frame);
+    };
+    state.rafId = requestAnimationFrame(frame);
+  },
+
+  stopTimer() {
+    if (state.rafId) cancelAnimationFrame(state.rafId);
+    state.rafId = null;
+  },
+
+  /* ---------------- answering ---------------- */
+  answer(idx) {
+    if (state.locked) return;               // one answer per question, ever
+    state.locked = true;
+    Game.stopTimer();
+    Sound.init();
+
+    const q = state.round[state.index];
+    const timeLeft = Math.max(0, state.timeLeft);
+    const isCorrect = idx === q.correctIndex;
+    let points = 0;
+
+    if (isCorrect) {
+      state.correctCount++;
+      state.streak++;
+      state.bestStreak = Math.max(state.bestStreak, state.streak);
+
+      const speedBonus = Math.round(MAX_SPEED_BONUS * (timeLeft / TIME_LIMIT));
+      const streakBonus = Math.min(MAX_STREAK_BONUS, (state.streak - 1) * STREAK_STEP);
+      points = BASE_POINTS + speedBonus + streakBonus;
+      state.score += points;
+
+      Sound.correct(state.streak);
+      UI.revealAnswers(idx, q.correctIndex);
+      const btn = document.querySelector('.ans[data-idx="' + idx + '"]');
+      if (btn) { UI.floatPoints(points, btn); UI.burst(btn); }
+      UI.animateScore();
+
+      const parts = ["100 base"];
+      if (speedBonus > 0) parts.push(speedBonus + " speed");
+      if (streakBonus > 0) parts.push(streakBonus + " streak");
+      UI.showFeedback("correct", points, parts.join(" · ") + " — " + q.explanation);
+    } else {
+      state.streak = 0;
+      Sound.wrong();
+      UI.revealAnswers(idx, q.correctIndex);
+      const correctText = q.options[q.correctIndex].text;
+      UI.showFeedback("wrong", 0, "The answer is " + correctText + ". " + q.explanation);
+    }
+
+    state.results.push({ question: q.text, correct: isCorrect });
+    UI.setTimerDisplay(timeLeft);
+    UI.renderHud();
+  },
+
+  timeUp() {
+    if (state.locked) return;
+    state.locked = true;
+    Game.stopTimer();
+
+    const q = state.round[state.index];
+    state.streak = 0;
+    state.timeLeft = 0;
+    UI.setTimerDisplay(0);
+    Sound.timeout();
+    UI.revealAnswers(-1, q.correctIndex);
+    UI.showFeedback("timeout", 0, "The answer is " + q.options[q.correctIndex].text + ". " + q.explanation);
+    state.results.push({ question: q.text, correct: false });
+    UI.renderHud();
+  },
+
+  next() {
+    if (!state.locked) return;              // only advance from a resolved question
+    Sound.init();
+    Sound.click();
+    if (state.index >= state.round.length - 1) { Game.end(); return; }
+    state.index++;
+    Game.showCurrent();
+  },
+
+  end() {
+    Game.stopTimer();
+    state.locked = true;
+    $("progFill").style.width = "100%";
+
+    const best = parseInt(store.get("brainblitz.best", "0"), 10) || 0;
+    const newBest = state.score > best;
+    if (newBest) store.set("brainblitz.best", String(state.score));
+
+    UI.refreshBest();
+    UI.renderResults(newBest);
+    UI.showScreen("results");
+    Sound.finish(state.correctCount >= state.round.length / 2);
+  },
+
+  quitToHome() {
+    Game.stopTimer();
+    cancelAnimationFrame(state.scoreRafId);
+    state.locked = true;
+    Sound.click();
+    UI.refreshBest();
+    UI.showScreen("home");
+  }
+};
+
+/* ================================================================
+   6. BOOT — wiring, input, background flourishes
+   ================================================================ */
+function toggleMute() {
+  Sound.init();
+  const next = !Sound.isMuted();
+  Sound.setMuted(next);
+  store.set("brainblitz.muted", next ? "1" : "0");
+  UI.updateMuteButtons();
+  if (!next) Sound.click();
+}
+
+function spawnSparks() {
+  const bg = $("bg");
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement("div");
+    s.className = "spark";
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.bottom = "-10px";
+    s.style.animationDuration = (11 + Math.random() * 12) + "s";
+    s.style.animationDelay = (-Math.random() * 20) + "s";
+    if (i % 3 === 0) { s.style.background = "#8B5CF6"; s.style.boxShadow = "0 0 10px #8B5CF6"; }
+    else if (i % 3 === 1) { s.style.background = "#FACC15"; s.style.boxShadow = "0 0 10px #FACC15"; }
+    bg.appendChild(s);
+  }
+}
+
+function init() {
+  Sound.setMuted(store.get("brainblitz.muted", "0") === "1");
+  UI.updateMuteButtons();
+  UI.buildCategoryGrid();
+  $("playCat").textContent = "Mixed";
+  UI.refreshBest();
+  spawnSparks();
+
+  $("playBtn").addEventListener("click", () => Game.start());
+  $("nextBtn").addEventListener("click", () => Game.next());
+  $("againBtn").addEventListener("click", () => Game.start());
+  $("homeBtn").addEventListener("click", () => Game.quitToHome());
+  $("quitBtn").addEventListener("click", () => Game.quitToHome());
+  $("muteBtn").addEventListener("click", toggleMute);
+  $("muteBtn2").addEventListener("click", toggleMute);
+
+  // Unlock audio on the very first interaction, whatever it is.
+  ["pointerdown", "keydown", "touchstart"].forEach(ev =>
+    window.addEventListener(ev, () => Sound.init(), { once: true, passive: true }));
+
+  // Keyboard shortcuts: 1-4 / A-D to answer, Enter or Space to continue.
+  document.addEventListener("keydown", (e) => {
+    if (!$("quiz").classList.contains("active")) {
+      if ((e.key === "Enter" || e.key === " ") && $("home").classList.contains("active")) {
+        e.preventDefault(); Game.start();
+      }
+      return;
+    }
+    const key = e.key.toLowerCase();
+    const map = { "1": 0, "2": 1, "3": 2, "4": 3, "a": 0, "b": 1, "c": 2, "d": 3 };
+    if (key in map && !state.locked) {
+      const btn = document.querySelector('.ans[data-idx="' + map[key] + '"]');
+      if (btn) { e.preventDefault(); Game.answer(map[key]); }
+    } else if ((e.key === "Enter" || e.key === " ") && state.locked) {
+      e.preventDefault(); Game.next();
+    } else if (e.key === "Escape") {
+      Game.quitToHome();
+    }
+  });
+
+  // Pause the clock if the player leaves the tab mid-question, and resume on return.
+  document.addEventListener("visibilitychange", () => {
+    if (!$("quiz").classList.contains("active") || state.locked) return;
+    if (document.hidden) {
+      Game.stopTimer();
+    } else {
+      Game.runTimer();
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
