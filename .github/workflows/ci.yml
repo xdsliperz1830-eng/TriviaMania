@@ -11,6 +11,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # The suites take about three minutes; this is a backstop so a hung browser
+    # can never sit on a runner for the default six hours.
+    timeout-minutes: 15
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
