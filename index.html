@@ -59,10 +59,18 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
    radial-gradient(1000px 650px at 110% 15%, #063A52 0%, transparent 62%),
    linear-gradient(180deg,#0F172A 0%,#0B1120 100%);}
 
-#bg .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.42;will-change:transform;}
-#bg .o1{width:46vmax;height:46vmax;left:-14vmax;top:-12vmax;background:var(--purple);animation:drift1 22s ease-in-out infinite;}
-#bg .o2{width:38vmax;height:38vmax;right:-12vmax;top:8vmax;background:var(--cyan);opacity:.30;animation:drift2 26s ease-in-out infinite;}
-#bg .o3{width:34vmax;height:34vmax;left:22vmax;bottom:-16vmax;background:#4338CA;opacity:.34;animation:drift3 30s ease-in-out infinite;}
+/* Soft colour washes. These are radial gradients that fade to transparent
+   rather than filter:blur() over a solid circle: the look is the same, but the
+   blur cost about a third of the frame budget on the home screen because it was
+   re-filtering a very large, continuously animating element every frame. A
+   gradient is painted once and composited for free. */
+#bg .orb{position:absolute;will-change:transform;}
+#bg .o1{width:52vmax;height:52vmax;left:-17vmax;top:-15vmax;animation:drift1 22s ease-in-out infinite;
+  background:radial-gradient(circle closest-side,rgba(139,92,246,.46),rgba(139,92,246,.27) 55%,rgba(139,92,246,0) 100%);}
+#bg .o2{width:44vmax;height:44vmax;right:-15vmax;top:5vmax;animation:drift2 26s ease-in-out infinite;
+  background:radial-gradient(circle closest-side,rgba(34,211,238,.34),rgba(34,211,238,.19) 55%,rgba(34,211,238,0) 100%);}
+#bg .o3{width:40vmax;height:40vmax;left:19vmax;bottom:-19vmax;animation:drift3 30s ease-in-out infinite;
+  background:radial-gradient(circle closest-side,rgba(67,56,202,.38),rgba(67,56,202,.22) 55%,rgba(67,56,202,0) 100%);}
 
 @keyframes drift1{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(8vmax,6vmax,0) scale(1.12)}}
 @keyframes drift2{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-7vmax,9vmax,0) scale(1.08)}}
@@ -1299,6 +1307,7 @@ const state = {
   streak: 0,
   bestStreak: 0,
   locked: false,          // true once the current question is answered
+  roundActive: false,     // true from the moment a round is built until it ends
   timeLeft: TIME_LIMIT,
   rafId: null,
   scoreRafId: null,
@@ -1751,6 +1760,13 @@ const UI = {
    ================================================================ */
 const Game = {
   start() {
+    // Building a round marks its questions as seen, so a second tap arriving
+    // before the first round finishes would silently burn a second set of
+    // questions the player never gets shown. Play, Play Again and the Enter
+    // key all land here, so one guard covers every entry point.
+    if (state.roundActive) return;
+    state.roundActive = true;
+
     Sound.init();
     Sound.start();
     Game.stopTimer();
@@ -1885,6 +1901,7 @@ const Game = {
 
   end() {
     Game.stopTimer();
+    state.roundActive = false;
     state.locked = true;
     $("progFill").style.width = "100%";
 
@@ -1901,6 +1918,7 @@ const Game = {
   quitToHome() {
     Game.stopTimer();
     cancelAnimationFrame(state.scoreRafId);
+    state.roundActive = false;
     state.locked = true;
     Sound.click();
     UI.refreshHome();
@@ -1965,6 +1983,8 @@ function init() {
     if (!$("quiz").classList.contains("active")) {
       if ((e.key === "Enter" || e.key === " ") && $("home").classList.contains("active")) {
         e.preventDefault(); Game.start();
+      } else if (e.key === "Escape" && $("results").classList.contains("active")) {
+        e.preventDefault(); Game.quitToHome();
       }
       return;
     }

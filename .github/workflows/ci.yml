@@ -1,0 +1,34 @@
+name: Tests
+
+# The game is a single static file with no build step, so CI just runs the
+# browser-driven suites against index.html.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # No package-lock.json is committed yet (the registry was unreachable from
+      # the environment this was set up in), so `npm install` is used rather than
+      # `npm ci`. The Playwright version is pinned exactly in package.json to keep
+      # this reproducible; commit a lockfile and switch to `npm ci` when you can.
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install the Chromium browser Playwright drives
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the test suites
+        run: npm test

@@ -120,35 +120,41 @@ the rotation, best-score and picker code is untouched.
 
 ---
 
-## 3. Defects found in this review
+## 3. Defects found in this review — all fixed
 
-### 3.1 Double-tapping Play burns the rotation pool — **high**
+### 3.1 Double-tapping Play burns the rotation pool — **high** — *fixed*
 
 Two `Game.start()` calls in quick succession each build a round, and **each build
-marks its questions as seen**. Only the second round is played; the first ten
-questions are consumed without ever being shown.
+marks its questions as seen**. Only the last round is played; the earlier ones are
+consumed without ever being shown.
 
-Measured:
+Measured on a 10-question round: a double-tap **consumed 20 questions and played
+10**, silently burning ten from the rotation pool.
 
-- Double-tap Play on a 10-question round → **20 questions consumed, 10 playable**.
-- Double-tap Play on a 30-question category round → **all 30 of 30 marked seen**,
-  so the entire category is exhausted and the very next round is all repeats.
+> **Correction to the original review.** That first write-up also claimed a
+> double-tapped 30-question category round exhausted "all 30 of 30". That number
+> is real but it does not isolate the bug: a 30-question round draws the entire
+> 30-question pool anyway, so a single correct round produces the same figure. The
+> honest evidence is the 10-question case above. Writing the regression test is
+> what surfaced this — the assertion passed against the broken build, which meant
+> it was measuring the wrong thing.
 
-This silently defeats the question-rotation feature. A double-tap is an ordinary
-thing to do on a phone, and it is reachable from the Play button, the Play Again
-button and the Enter key.
+A double-tap is an ordinary thing to do on a phone, and it was reachable from the
+Play button, the Play Again button and the Enter key.
 
-**Fix:** guard `Game.start()` against re-entry (ignore a start while a round is
-already being built / already active), so a second tap is a no-op.
+**Fixed** by a `state.roundActive` re-entry guard in `Game.start()`, released in
+`end()` and `quitToHome()`. All three entry points funnel through `start()`, so
+one guard covers them. The regression test asserts the invariant directly — three
+rapid taps must call `buildRound` exactly once — rather than counting consumed
+questions, which only exposes the bug when the round is smaller than the pool.
 
-### 3.2 Esc does nothing on the results screen — **low**
+### 3.2 Esc does nothing on the results screen — **low** — *fixed*
 
 The `keydown` handler returns early unless the quiz screen is active, so Esc only
 quits mid-round. Playables requires modals to be closable with Esc **[verify how
-strictly this applies to a full-screen results view]**. Cheap to make Esc return
-home from results.
+strictly this applies to a full-screen results view]**. **Fixed:** Esc now returns home from the results screen, and still quits mid-round.
 
-### 3.3 Background blur costs ~30% of the frame budget — **medium**
+### 3.3 Background blur costs ~30% of the frame budget — **medium** — *fixed*
 
 The three drifting orbs use `filter: blur(60px)` on elements up to 46 vmax across.
 Measured on the home screen (headless, same machine, three runs):
@@ -166,8 +172,12 @@ large-radius blur on a continuously animating element is a known cost on mobile
 GPUs, and Playables must run on low-end hardware. 20 elements animate infinitely
 on the home screen.
 
-**Fix:** replace the blurred orbs with pre-blurred radial gradients, keep the
-`prefers-reduced-motion` path, then re-measure under CPU throttling.
+**Fixed** by replacing the blurred circles with radial gradients that fade to
+transparent — the same look, painted once and composited for free. Re-measured on
+the same machine: **43 fps → 61 fps**, and the background now costs nothing at all
+(61 fps with the orbs shown, 61 with them hidden). The regression test guards it
+structurally: no large, continuously animating element may carry a blur filter,
+the three orbs must still animate, and the frame rate must stay above 50.
 
 ---
 
@@ -184,8 +194,17 @@ touches persistence, audio and lifecycle *underneath* the game logic. That is
 exactly the kind of refactor the existing tests would catch regressions in, and
 right now CI runs nothing but a deploy.
 
-**Fix:** move the suites into `tests/`, add a `package.json` with a Playwright
-dev-dependency and an `npm test` script, and run it in CI on push and pull request.
+**Fixed.** The suites now live in `tests/` behind `npm test`, with a shared
+harness, a runner that isolates each suite in its own process, and a `Tests`
+workflow running them on every push and pull request. **148 assertions** across
+seven suites, including a new `regressions.test.js` covering the three defects
+above.
+
+One loose end: no `package-lock.json` is committed, because the npm registry was
+unreachable from the environment this was set up in. The Playwright version is
+pinned exactly instead, and CI uses `npm install` rather than `npm ci`. Run
+`npm install` locally, commit the lockfile, and switch the workflow to `npm ci`
+when convenient.
 
 Other notes:
 
@@ -202,20 +221,21 @@ Other notes:
 Ordered so that each phase is shippable on its own and nothing depends on YouTube
 approval until the game is actually ready.
 
-### Phase 0 — fix the live defects (small)
-1. Re-entry guard on `Game.start()`. *(3.1)*
-2. Esc returns home from results. *(3.2)*
-3. Regression tests for both.
+### ~~Phase 0 — fix the live defects~~ — **done**
+1. ~~Re-entry guard on `Game.start()`.~~ *(3.1)*
+2. ~~Esc returns home from results.~~ *(3.2)*
+3. ~~Regression tests for both.~~ Each was verified to fail against the unfixed
+   build before being accepted.
 
-### Phase 1 — make the repo sustainable (small)
-4. Move the 132 assertions into `tests/`, add `package.json` + `npm test`.
-5. CI workflow running the suites on push and PR, alongside the existing deploy.
+### ~~Phase 1 — make the repo sustainable~~ — **done**
+4. ~~Move the assertions into `tests/`, add `package.json` + `npm test`.~~
+5. ~~CI workflow running the suites on push and PR.~~
 
-*Rationale: do this before the SDK refactor, not after — it is the safety net for it.*
-
-### Phase 2 — performance for low-end devices (small)
-6. Replace blurred orbs with gradients; re-measure. *(3.3)*
-7. Add a throttled-CPU performance check to the suite so this cannot regress.
+### ~~Phase 2 — performance for low-end devices~~ — **done**
+6. ~~Replace blurred orbs with gradients; re-measure.~~ *(3.3)* 43 → 61 fps.
+7. A frame-rate floor and a structural no-blur check now guard it. Verifying
+   under real CPU throttling on a physical low-end device remains worthwhile
+   before submission.
 
 ### Phase 3 — SDK integration (the real work)
 8. **Verify the SDK surface against the official docs** — resolve the
@@ -242,6 +262,8 @@ approval until the game is actually ready.
     **[verify]**.
 17. Test in the developer portal's own harness, then submit. Expect roughly
     **2–7 business days** from testing to release. **[verify]**
+
+**Status:** Phases 0–2 are complete and deployed. Phase 3 is the remaining work.
 
 **Not in scope until YouTube says so:** access to the developer portal is via an
 interest form and approval, which is a business step, not a code one. Phases 0–2

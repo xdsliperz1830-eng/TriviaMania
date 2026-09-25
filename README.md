@@ -42,6 +42,20 @@ answer; `1`–`4` / `A`–`D` also work, `Enter` or
 `Space` advances, `Esc` quits to the home screen. Sound can be muted from either
 the home or quiz screen, and the preference is remembered.
 
+## Tests
+
+```bash
+npm install
+npx playwright install chromium
+npm test                 # all suites
+npm test -- rotation     # one suite by name prefix
+```
+
+Seven suites in `tests/` drive the real page in a headless browser: gameplay,
+question rotation, round length, geography balance, picker layout, an
+18-viewport layout sweep, and regressions for previously fixed defects. They run
+in CI on every push and pull request.
+
 ## Adding questions
 
 The question bank is a plain array near the top of the `<script>` block. Append
