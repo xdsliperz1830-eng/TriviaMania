@@ -66,9 +66,19 @@ function mockSdk(options) {
   };
 }
 
+/**
+ * Keep the real SDK off the page. Where the network allows it, the script tag
+ * loads and overwrites `window.ytgame`, which would replace the mock these
+ * tests depend on. Blocking it makes the suite behave the same everywhere.
+ */
+async function blockRealSdk(page) {
+  await page.route("**/game_api/**", (route) => route.abort());
+}
+
 async function openWith(browser, opts) {
   const page = await browser.newPage();
   await page.setViewportSize({ width: 390, height: 844 });
+  await blockRealSdk(page);
   page.on("console", (m) => {
     if (m.type() === "error" && !isSdkFetch(m)) suite.check(false, "console: " + m.text());
   });
@@ -138,15 +148,18 @@ const calls = (page) => page.evaluate(() => window.__sdk.calls.slice());
     saved: window.__sdk.saved.slice(),
     score: state.score
   }));
-  ck(after.calls.indexOf("saveData") !== -1, "progress is saved to the cloud after a round");
-  ck(after.scores.length === 1 && after.scores[0].value === after.score,
+  const savedOk = ck(after.saved.length > 0, "progress is saved to the cloud after a round");
+  ck(after.scores.length === 1 && after.scores[0] && after.scores[0].value === after.score,
      `the score is reported as { value } (${JSON.stringify(after.scores[0])})`);
-  const payload = JSON.parse(after.saved[after.saved.length - 1]);
-  ck(Array.isArray(payload.seen) && payload.seen.length === 5,
-     `the saved payload carries the five served question ids (${payload.seen.length})`);
-  ck(payload.best && payload.best["5"] === after.score, "the saved payload carries the new best score");
-  ck(after.saved[after.saved.length - 1].length < 3 * 1024 * 1024,
-     `the payload is far inside the 3 MB save limit (${after.saved[after.saved.length - 1].length} bytes)`);
+  if (savedOk) {
+    const raw = after.saved[after.saved.length - 1];
+    const payload = JSON.parse(raw);
+    ck(Array.isArray(payload.seen) && payload.seen.length === 5,
+       `the saved payload carries the five served question ids (${payload.seen.length})`);
+    ck(payload.best && payload.best["5"] === after.score, "the saved payload carries the new best score");
+    ck(raw.length < 3 * 1024 * 1024,
+       `the payload is far inside the 3 MB save limit (${raw.length} bytes)`);
+  }
 
   /* ---------------- writes are debounced, not per answer ---------------- */
   const writeCount = after.calls.filter((x) => x === "saveData").length;
@@ -211,17 +224,24 @@ const calls = (page) => page.evaluate(() => window.__sdk.calls.slice());
   ck(await page.evaluate(() => Sound.isAudible() === true), "audio is allowed outside YouTube");
   await page.close();
 
-  /* ---------------- no SDK at all: the deployed web build ---------------- */
+  /* ----------------------------------------------------------------------
+     The SDK script fails to load at all — offline, blocked, or YouTube down.
+     Nothing may depend on it having resolved.
+     ---------------------------------------------------------------------- */
   page = await browser.newPage();
   await page.setViewportSize({ width: 390, height: 844 });
   page.on("pageerror", (e) => suite.check(false, "pageerror: " + e.message));
-  await page.goto(GAME_URL);           // the SDK script cannot load here
+  await blockRealSdk(page);            // no mock installed either
+  await page.goto(GAME_URL);
   await page.waitForTimeout(600);
   ck(await page.evaluate(() => typeof window.ytgame === "undefined"),
-     "the SDK really is absent in this environment");
+     "no SDK object exists when the script cannot load");
   ck(await page.locator("#home").isVisible(), "the game runs with no SDK object at all");
   ck(await page.evaluate(() => Platform.inPlayables === false), "the adapter reports standalone");
   ck(await page.evaluate(() => Platform.version === "standalone"), "the adapter reports no SDK version");
+  await page.locator("#playBtn").click();
+  await page.waitForTimeout(300);
+  ck(await page.locator("#quiz").isVisible(), "a round still starts with no SDK");
   await page.close();
 
   await browser.close();
