@@ -20,7 +20,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- three consecutive category rounds are fully distinct ----
   const rounds = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     return [buildRound('animals'), buildRound('animals'), buildRound('animals')]
       .map(r => r.map(q => q.text));
   });
@@ -50,7 +50,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- progress survives a page reload ----
   const beforeReload = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     return buildRound('tech').map(q => q.text);
   });
   await p.reload(); await p.waitForTimeout(300);
@@ -60,7 +60,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- mixed mode still spans all ten categories and prefers fresh ----
   const mixed = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     const a = buildRound('mixed'), b = buildRound('mixed');
     return { catsA: a.map(q=>q.category), catsB: b.map(q=>q.category),
              textA: a.map(q=>q.text), textB: b.map(q=>q.text) };
@@ -72,7 +72,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- category play and mixed play share one history ----
   const shared = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     const cat = buildRound('food').map(q => q.text);
     const mix = buildRound('mixed').filter(q => q.category === 'food').map(q => q.text);
     return { cat, mix };
@@ -82,7 +82,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- 30 rounds straight: never a repeat inside a round, full coverage per cycle ----
   const longRun = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     const seenPerRound = [], cycle1 = new Set(), cycle2 = new Set();
     for (let i = 0; i < 6; i++) {
       const r = buildRound('history').map(q => q.text);
@@ -96,7 +96,7 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(longRun.cycle2 === 30, 'second cycle also covers all 30 (' + longRun.cycle2 + ')');
 
   // ---- the home screen reports fresh counts ----
-  await p.evaluate(() => { localStorage.removeItem('brainblitz.seen'); });
+  await p.evaluate(() => { progress.seen = []; });
   await p.reload(); await p.waitForTimeout(300);
   const fresh0 = await p.locator('.cat[data-cat="animals"] .ct').innerText();
   ck(fresh0 === '30 questions', 'category card starts at "30 questions" (' + fresh0 + ')');

@@ -15,6 +15,17 @@ const PHONE = { width: 390, height: 844 };
  * Collects pass/fail results and reports them, exiting non-zero on any failure
  * or uncaught page error.
  */
+/**
+ * The Playables SDK is only reachable from inside YouTube. Everywhere else the
+ * request fails by design and the game runs standalone, so that console entry
+ * is expected rather than a defect.
+ */
+function isSdkFetch(consoleMessage) {
+  const from = (consoleMessage.location() && consoleMessage.location().url) || "";
+  return from.indexOf("youtube.com/game_api") !== -1 ||
+         consoleMessage.text().indexOf("game_api") !== -1;
+}
+
 function createSuite(name) {
   const passed = [];
   const failed = [];
@@ -31,7 +42,12 @@ function createSuite(name) {
     watch(page) {
       page.on("pageerror", (e) => pageErrors.push("pageerror: " + e.message));
       page.on("console", (m) => {
-        if (m.type() === "error") pageErrors.push("console: " + m.text());
+        if (m.type() !== "error") return;
+        // The Playables SDK is only reachable from inside YouTube. Everywhere
+        // else the request fails by design and the game runs standalone, so
+        // that one console entry is expected rather than a defect.
+        if (isSdkFetch(m)) return;
+        pageErrors.push("console: " + m.text());
       });
       return page;
     },
@@ -78,4 +94,26 @@ async function playRound(page, maxSteps = 40) {
   return page.locator("#results").isVisible();
 }
 
-module.exports = { chromium, GAME_URL, PHONE, createSuite, openGame, playRound };
+/**
+ * Clear saved progress. Progress is held in memory and mirrored to storage, so
+ * clearing the key alone is not enough — the live object has to go back to its
+ * defaults too.
+ */
+async function resetProgress(page) {
+  await page.evaluate(() => {
+    try { localStorage.clear(); } catch (e) {}
+    progress.seen = [];
+    progress.best = {};
+    progress.muted = false;
+    progress.length = 10;
+  });
+}
+
+/** The ids the game currently considers served. */
+function seenIds(page) {
+  return page.evaluate(() => progress.seen.slice());
+}
+
+module.exports = {
+  chromium, GAME_URL, PHONE, createSuite, openGame, playRound, resetProgress, seenIds, isSdkFetch
+};

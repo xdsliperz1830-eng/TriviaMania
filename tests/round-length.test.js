@@ -89,7 +89,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- rotation still applies at other lengths ----
   const rot = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     const a = buildRound('sports', 20).map(q=>q.text);
     const b = buildRound('sports', 20).map(q=>q.text);
     return { a, b, overlap: b.filter(q => a.includes(q)).length };
@@ -100,7 +100,9 @@ const ck = (condition, message) => suite.check(condition, message);
   // ---- a legacy best score is inherited by the 10-question length ----
   const legacy = await p.evaluate(() => {
     localStorage.clear();
-    localStorage.setItem('brainblitz.best', '1234');
+    localStorage.setItem('brainblitz.best', '1234');   // written before lengths existed
+    progress.best = {};
+    applyProgress(readLocalProgress());                // what boot does
     return { ten: loadBest(10), five: loadBest(5) };
   });
   ck(legacy.ten === 1234, 'old saved best carries over to the 10-question length');

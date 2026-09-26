@@ -1,4 +1,4 @@
-const { chromium, GAME_URL, createSuite } = require("./harness");
+const { chromium, GAME_URL, createSuite , isSdkFetch } = require("./harness");
 const suite = createSuite("gameplay");
 const ck = (condition, message) => suite.check(condition, message);
 (async () => {
@@ -7,7 +7,7 @@ const ck = (condition, message) => suite.check(condition, message);
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-  page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
+  page.on('console', m => { if (m.type() === 'error' && !isSdkFetch(m)) errors.push('console: ' + m.text()); });
 
   await page.goto(GAME_URL);
   await page.waitForTimeout(400);

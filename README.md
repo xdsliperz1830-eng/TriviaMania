@@ -7,6 +7,11 @@ requests, so it runs offline once loaded.
 
 **Play:** open `index.html` in any modern browser.
 
+It runs in two places from the same file: as an ordinary web page, and inside
+YouTube as a Playable. The YouTube Playables SDK is loaded first and wrapped in a
+`Platform` adapter; outside YouTube that request simply fails and the game runs
+standalone, saving progress to `localStorage` instead of the cloud.
+
 ## Gameplay
 
 - **Pick your round length** — 5, 10, 20 or 30 questions — from the picker on
@@ -51,10 +56,11 @@ npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
 ```
 
-Seven suites in `tests/` drive the real page in a headless browser: gameplay,
+Eight suites in `tests/` drive the real page in a headless browser: gameplay,
 question rotation, round length, geography balance, picker layout, an
-18-viewport layout sweep, and regressions for previously fixed defects. They run
-in CI on every push and pull request.
+18-viewport layout sweep, regressions for previously fixed defects, and the
+YouTube Playables integration (against a mock `ytgame`, since YouTube is not
+reachable from a test runner). They run in CI on every push and pull request.
 
 ## Adding questions
 

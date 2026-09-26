@@ -6,6 +6,12 @@
 <meta name="description" content="Brain Blitz — a fast-paced HTML5 trivia game across 10 categories.">
 <meta name="theme-color" content="#0F172A">
 <title>Brain Blitz</title>
+
+<!-- The YouTube Playables SDK must load before any game code. Outside YouTube
+     this request simply fails and the game runs standalone; nothing below
+     depends on it resolving. -->
+<script src="https://www.youtube.com/game_api/v1"></script>
+
 <style>
 /* ============================================================
    BRAIN BLITZ — Design tokens
@@ -553,10 +559,10 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
    BRAIN BLITZ
    1. DATA      — categories + question bank
    2. AUDIO     — Web Audio API sound engine
-   3. STATE     — game state + helpers
+   4. STATE     — game state + helpers
    4. UI        — rendering
    5. GAME      — flow control
-   6. BOOT      — wiring
+   7. BOOT      — wiring
    ================================================================ */
 
 /* ================================================================
@@ -1213,10 +1219,106 @@ const QUESTIONS = [
 ];
 
 /* ================================================================
-   2. AUDIO — Web Audio API, created lazily on first user gesture
+   2. PLATFORM — YouTube Playables SDK adapter
+   ----------------------------------------------------------------
+   The game ships in two places: inside YouTube as a Playable, and as an
+   ordinary web page (which is how it is deployed and tested). Nothing outside
+   this module touches `ytgame`, so the rest of the code is identical in both,
+   and every SDK call is wrapped so a missing or misbehaving SDK can never take
+   the game down with it.
+
+   API surface confirmed against Phaser's official Playables template:
+     ytgame.IN_PLAYABLES_ENV / ytgame.SDK_VERSION
+     ytgame.game.firstFrameReady() / gameReady() / loadData() / saveData(str)
+     ytgame.system.onPause(fn) / onResume(fn)
+     ytgame.system.isAudioEnabled() / onAudioEnabledChange(fn)
+     ytgame.engagement.sendScore({ value }) — note the object argument
+     ytgame.health.logError() / logWarning()
+   ================================================================ */
+const Platform = (() => {
+  const sdk = (typeof window !== "undefined" && window.ytgame) || null;
+  const inPlayables = !!(sdk && sdk.IN_PLAYABLES_ENV);
+
+  let firstFrameSent = false;
+  let gameReadySent = false;
+
+  /** Never let an SDK call throw into game code. */
+  function guard(fn, fallback) {
+    try { return fn(); } catch (e) { return fallback; }
+  }
+
+  /** loadData can hang; a Playable must still become interactive. */
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))
+    ]);
+  }
+
+  return {
+    inPlayables,
+    version: sdk && sdk.SDK_VERSION ? sdk.SDK_VERSION : "standalone",
+
+    /** The first painted frame — call as soon as something is on screen. */
+    firstFrameReady() {
+      if (!inPlayables || firstFrameSent) return;
+      guard(() => sdk.game.firstFrameReady());
+      firstFrameSent = true;
+    },
+
+    /** Interactive and waiting for the player. Must follow firstFrameReady. */
+    gameReady() {
+      if (!inPlayables || gameReadySent || !firstFrameSent) return;
+      guard(() => sdk.game.gameReady());
+      gameReadySent = true;
+    },
+
+    isReady() { return gameReadySent; },
+
+    onPause(fn)  { if (inPlayables) guard(() => sdk.system.onPause(fn)); },
+    onResume(fn) { if (inPlayables) guard(() => sdk.system.onResume(fn)); },
+
+    /** YouTube's own audio state. Outside YouTube, audio is always allowed. */
+    audioEnabled() {
+      return inPlayables ? guard(() => sdk.system.isAudioEnabled(), true) : true;
+    },
+    onAudioEnabledChange(fn) {
+      if (inPlayables) guard(() => sdk.system.onAudioEnabledChange(fn));
+    },
+
+    sendScore(value) {
+      if (!inPlayables || !gameReadySent) return;
+      guard(() => sdk.engagement.sendScore({ value: value }));
+    },
+
+    logError() { if (inPlayables) guard(() => sdk.health.logError()); },
+
+    /** Resolves with the saved object, or null. Never rejects. */
+    load() {
+      if (!inPlayables) return Promise.resolve(null);
+      return withTimeout(guard(() => sdk.game.loadData(), Promise.resolve(null)), 2000)
+        .then(raw => (raw ? JSON.parse(raw) : null))
+        .catch(() => { Platform.logError(); return null; });
+    },
+
+    /** Fire-and-forget; a failed cloud save must never interrupt play. */
+    save(payload) {
+      if (!inPlayables) return Promise.resolve(false);
+      return Promise.resolve(guard(() => sdk.game.saveData(JSON.stringify(payload))))
+        .then(() => true)
+        .catch(() => { Platform.logError(); return false; });
+    }
+  };
+})();
+
+/* ================================================================
+   3. AUDIO — Web Audio API, created lazily on first user gesture
    ================================================================ */
 const Sound = (() => {
-  let ctx = null, master = null, muted = false;
+  let ctx = null, master = null, muted = false, platformAudio = true;
+
+  /** Silent if the player muted us, or if YouTube has muted the Playable. */
+  function silent() { return muted || !platformAudio; }
 
   function init() {
     if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
@@ -1225,13 +1327,17 @@ const Sound = (() => {
     try {
       ctx = new AC();
       master = ctx.createGain();
-      master.gain.value = muted ? 0 : 0.5;
+      master.gain.value = silent() ? 0 : 0.5;
       master.connect(ctx.destination);
     } catch (e) { ctx = null; }
   }
 
+  function applyGain() {
+    if (master && ctx) master.gain.setTargetAtTime(silent() ? 0 : 0.5, ctx.currentTime, 0.01);
+  }
+
   function tone(freq, start, dur, type, vol) {
-    if (!ctx || muted) return;
+    if (!ctx || silent()) return;
     const t = ctx.currentTime + start;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -1245,7 +1351,7 @@ const Sound = (() => {
   }
 
   function sweep(from, to, dur, type, vol) {
-    if (!ctx || muted) return;
+    if (!ctx || silent()) return;
     const t = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -1262,9 +1368,16 @@ const Sound = (() => {
   return {
     init,
     isMuted: () => muted,
+    /** True when sound would actually be heard — both gates open. */
+    isAudible: () => !silent(),
     setMuted(v) {
       muted = v;
-      if (master && ctx) master.gain.setTargetAtTime(v ? 0 : 0.5, ctx.currentTime, 0.01);
+      applyGain();
+    },
+    /** Driven by YouTube; the player's own mute button is left untouched. */
+    setPlatformAudio(enabled) {
+      platformAudio = enabled !== false;
+      applyGain();
     },
     click()   { tone(520, 0, 0.07, "triangle", 0.18); },
     correct(streak) {
@@ -1284,7 +1397,7 @@ const Sound = (() => {
 })();
 
 /* ================================================================
-   3. STATE
+   4. STATE
    ================================================================ */
 const ROUND_LENGTHS = [5, 10, 20, 30];   // questions per round the player can pick
 const DEFAULT_ROUND_SIZE = 10;
@@ -1316,6 +1429,28 @@ const state = {
   results: []
 };
 
+/* ---- progress -----------------------------------------------------------
+   Cloud saves are asynchronous and `saveData` is rejected until `loadData` has
+   resolved, so the game cannot read storage synchronously mid-play any more.
+   Instead progress is hydrated once at boot into this object, every read during
+   play hits memory, and writes mark it dirty for a debounced flush. That keeps
+   the rotation and best-score code unchanged and stops a cloud write firing
+   after every answer.
+   ------------------------------------------------------------------------ */
+const SAVE_KEY = "brainblitz.save";     // single blob, mirrors the cloud payload
+const SAVE_DEBOUNCE_MS = 800;
+
+const progress = {
+  seen: [],        // ids of questions already served
+  best: {},        // best score keyed by round length
+  muted: false,
+  length: 10       // DEFAULT_ROUND_SIZE, restated so this stays declaration-order safe
+};
+
+let progressHydrated = false;
+let progressDirty = false;
+let flushTimer = null;
+
 const store = {
   get(key, fallback) {
     try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
@@ -1323,6 +1458,74 @@ const store = {
   },
   set(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
 };
+
+/** Read whatever this device already has, including pre-cloud saves. */
+function readLocalProgress() {
+  const blob = store.get(SAVE_KEY, null);
+  if (blob) {
+    try { return JSON.parse(blob); } catch (e) { /* fall through to migration */ }
+  }
+  // Migrate the separate keys written before cloud saves existed, so players
+  // who have been at this a while keep their history and records.
+  const legacy = { seen: [], best: {}, muted: false, length: 10 };
+  const seen = store.get("brainblitz.seen", "");
+  if (seen) legacy.seen = seen.split(",").filter(Boolean);
+  [5, 10, 20, 30].forEach(n => {
+    const v = store.get("brainblitz.best." + n, null);
+    if (v !== null) legacy.best[n] = parseInt(v, 10) || 0;
+  });
+  const oldestBest = store.get("brainblitz.best", null);
+  if (oldestBest !== null && legacy.best[10] === undefined) {
+    legacy.best[10] = parseInt(oldestBest, 10) || 0;   // rounds were always 10
+  }
+  legacy.muted = store.get("brainblitz.muted", "0") === "1";
+  const len = parseInt(store.get("brainblitz.length", ""), 10);
+  if (len) legacy.length = len;
+  return legacy;
+}
+
+/** Merge a saved payload into `progress`, ignoring anything malformed. */
+function applyProgress(data) {
+  if (!data || typeof data !== "object") return;
+  if (Array.isArray(data.seen)) progress.seen = data.seen.filter(id => typeof id === "string");
+  if (data.best && typeof data.best === "object") {
+    Object.keys(data.best).forEach(k => {
+      const v = parseInt(data.best[k], 10);
+      if (!isNaN(v)) progress.best[k] = v;
+    });
+  }
+  if (typeof data.muted === "boolean") progress.muted = data.muted;
+  const len = parseInt(data.length, 10);
+  if (!isNaN(len)) progress.length = len;
+}
+
+/** Load once at boot: cloud when inside YouTube, this device otherwise. */
+function hydrateProgress() {
+  applyProgress(readLocalProgress());          // always available, instant
+  return Platform.load()
+    .then(cloud => { applyProgress(cloud); })  // cloud wins when present
+    .catch(() => {})
+    .then(() => { progressHydrated = true; });
+}
+
+function snapshotProgress() {
+  return { seen: progress.seen, best: progress.best, muted: progress.muted, length: progress.length };
+}
+
+/** Write through to this device now, and to the cloud on a debounce. */
+function flushProgress() {
+  if (!progressDirty) return;
+  progressDirty = false;
+  const payload = snapshotProgress();
+  store.set(SAVE_KEY, JSON.stringify(payload));
+  if (progressHydrated) Platform.save(payload);
+}
+
+function markProgressDirty() {
+  progressDirty = true;
+  clearTimeout(flushTimer);
+  flushTimer = setTimeout(flushProgress, SAVE_DEBOUNCE_MS);
+}
 
 /* -------- helpers -------- */
 const $ = (id) => document.getElementById(id);
@@ -1344,8 +1547,6 @@ function shuffle(arr) {
    mix. Ids come from the text rather than the array position, so adding or
    reordering questions never invalidates a player's history.
    ------------------------------------------------------------------------ */
-const SEEN_KEY = "brainblitz.seen";
-
 function questionId(text) {
   let h = 5381;
   for (let i = 0; i < text.length; i++) h = (((h << 5) + h) ^ text.charCodeAt(i)) | 0;
@@ -1365,32 +1566,26 @@ function questionsIn(catKey) {
 
 /* A 30-question round scores roughly three times a 10-question one, so each
    round length keeps its own best score and they are never compared. */
-const BEST_KEY = "brainblitz.best";
-
 function loadBest(size) {
-  const stored = store.get(BEST_KEY + "." + size, null);
-  if (stored !== null) return parseInt(stored, 10) || 0;
-  // Rounds were always 10 questions before lengths existed, so an older saved
-  // best belongs to that length.
-  if (size === DEFAULT_ROUND_SIZE) return parseInt(store.get(BEST_KEY, "0"), 10) || 0;
-  return 0;
+  return progress.best[size] || 0;
 }
 
 function saveBest(size, score) {
-  store.set(BEST_KEY + "." + size, String(score));
+  progress.best[size] = score;
+  markProgressDirty();
 }
 
 const ALL_IDS = new Set(QUESTIONS.map(q => q.id));
 
 function loadSeen() {
-  const raw = store.get(SEEN_KEY, "");
   // Drop ids for questions that have since been edited out of the bank, so a
   // player's saved progress cannot accumulate entries that match nothing.
-  return new Set((raw ? raw.split(",") : []).filter(id => ALL_IDS.has(id)));
+  return new Set(progress.seen.filter(id => ALL_IDS.has(id)));
 }
 
 function saveSeen(seen) {
-  store.set(SEEN_KEY, Array.from(seen).join(","));
+  progress.seen = Array.from(seen);
+  markProgressDirty();
 }
 
 /** How many questions in a pool the player has not been asked yet. */
@@ -1458,7 +1653,7 @@ function buildRound(catKey, requested) {
 }
 
 /* ================================================================
-   4. UI RENDERING
+   5. UI RENDERING
    ================================================================ */
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -1521,7 +1716,8 @@ const UI = {
     Sound.init();
     Sound.click();
     state.roundSize = n;
-    store.set(LENGTH_KEY, String(n));
+    progress.length = n;
+    markProgressDirty();
     document.querySelectorAll(".len").forEach(el => {
       const on = Number(el.dataset.len) === n;
       el.classList.toggle("on", on);
@@ -1565,7 +1761,7 @@ const UI = {
   },
 
   updateMuteButtons() {
-    const label = Sound.isMuted() ? "🔇" : "🔊";
+    const label = Sound.isAudible() ? "🔊" : "🔇";
     $("muteBtn").textContent = label;
     $("muteBtn2").textContent = label;
   },
@@ -1756,7 +1952,7 @@ const UI = {
 };
 
 /* ================================================================
-   5. GAME FLOW
+   6. GAME FLOW
    ================================================================ */
 const Game = {
   start() {
@@ -1913,6 +2109,21 @@ const Game = {
     UI.renderResults(newBest);
     UI.showScreen("results");
     Sound.finish(state.correctCount >= state.round.length / 2);
+
+    Platform.sendScore(state.score);
+    flushProgress();          // a finished round is a natural checkpoint
+  },
+
+  /** Freeze the countdown: the tab was hidden, or YouTube paused the Playable. */
+  suspend() {
+    if (!$("quiz").classList.contains("active") || state.locked) return;
+    Game.stopTimer();
+  },
+
+  /** Resume from wherever the countdown was frozen. */
+  wake() {
+    if (!$("quiz").classList.contains("active") || state.locked) return;
+    Game.runTimer();
   },
 
   quitToHome() {
@@ -1927,13 +2138,14 @@ const Game = {
 };
 
 /* ================================================================
-   6. BOOT — wiring, input, background flourishes
+   7. BOOT — wiring, input, background flourishes
    ================================================================ */
 function toggleMute() {
   Sound.init();
   const next = !Sound.isMuted();
   Sound.setMuted(next);
-  store.set("brainblitz.muted", next ? "1" : "0");
+  progress.muted = next;
+  markProgressDirty();
   UI.updateMuteButtons();
   if (!next) Sound.click();
 }
@@ -1953,18 +2165,45 @@ function spawnSparks() {
   }
 }
 
-function init() {
-  Sound.setMuted(store.get("brainblitz.muted", "0") === "1");
+async function init() {
+  // The shell is already painted by the time this runs, so tell YouTube the
+  // first frame is up before doing anything that can wait on the network.
+  Platform.firstFrameReady();
+
+  wireInput();
+  spawnSparks();
+
+  // Hydrate saved progress before the home screen is built, so best scores and
+  // the "new of 30" counts are right the first time rather than flashing.
+  // Platform.load() resolves (never rejects) and is bounded by its own timeout.
+  await hydrateProgress();
+
+  Sound.setMuted(progress.muted);
+  Sound.setPlatformAudio(Platform.audioEnabled());
+  Platform.onAudioEnabledChange((enabled) => {
+    Sound.setPlatformAudio(enabled);
+    UI.updateMuteButtons();
+  });
+
   UI.updateMuteButtons();
-  const savedLength = parseInt(store.get(LENGTH_KEY, ""), 10);
-  if (ROUND_LENGTHS.indexOf(savedLength) !== -1) state.roundSize = savedLength;
+  if (ROUND_LENGTHS.indexOf(progress.length) !== -1) state.roundSize = progress.length;
 
   UI.buildCategoryGrid();
   UI.buildLengthPills();
   $("playCat").textContent = "Mixed";
   UI.refreshBest();
   UI.updatePlayHint();
-  spawnSparks();
+
+  // Pause and resume on YouTube's terms, reusing the countdown handling the
+  // hidden-tab path already uses.
+  Platform.onPause(() => { flushProgress(); Game.suspend(); });
+  Platform.onResume(() => Game.wake());
+
+  // Interactive and waiting for the player.
+  Platform.gameReady();
+}
+
+function wireInput() {
 
   $("playBtn").addEventListener("click", () => Game.start());
   $("nextBtn").addEventListener("click", () => Game.next());
@@ -2002,12 +2241,7 @@ function init() {
 
   // Pause the clock if the player leaves the tab mid-question, and resume on return.
   document.addEventListener("visibilitychange", () => {
-    if (!$("quiz").classList.contains("active") || state.locked) return;
-    if (document.hidden) {
-      Game.stopTimer();
-    } else {
-      Game.runTimer();
-    }
+    if (document.hidden) { flushProgress(); Game.suspend(); } else { Game.wake(); }
   });
 }
 

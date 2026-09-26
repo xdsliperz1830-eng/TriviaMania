@@ -15,7 +15,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- a full 30-question geography round: at most 2 capitals, wide topic spread ----
   const round = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     return buildRound('geo', 30).map(q => q.text);
   });
   ck(round.length === 30, 'a 30-question geography round builds');
@@ -36,10 +36,10 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- 10-question rounds should rarely be capital-heavy ----
   const sample = await p.evaluate(() => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     const counts = [];
     for (let i = 0; i < 30; i++) {
-      localStorage.removeItem('brainblitz.seen');
+      progress.seen = [];
       counts.push(buildRound('geo', 10).filter(q => /capital/i.test(q.text)).length);
     }
     return counts;
@@ -50,7 +50,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- the new questions are actually playable end to end ----
   const played = await p.evaluate(async () => {
-    localStorage.removeItem('brainblitz.seen');
+    progress.seen = [];
     state.category = 'geo'; state.roundSize = 30;
     Game.start();
     const texts = state.round.map(q => q.text);
@@ -64,7 +64,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- removed questions leave no orphan ids in saved progress ----
   const prune = await p.evaluate(() => {
-    localStorage.setItem('brainblitz.seen', 'deadbeef,notreal,' + QUESTIONS[0].id);
+    progress.seen = ['deadbeef', 'notreal', QUESTIONS[0].id];
     const seen = loadSeen();
     return { size: seen.size, keptReal: seen.has(QUESTIONS[0].id),
              droppedFake: !seen.has('deadbeef') && !seen.has('notreal') };
@@ -75,7 +75,7 @@ const ck = (condition, message) => suite.check(condition, message);
   // ---- a saved history from before the swap still works ----
   const legacy = await p.evaluate(() => {
     // pretend the player had seen all ten old capital questions (now gone)
-    localStorage.setItem('brainblitz.seen', 'aaa,bbb,ccc,ddd,eee,fff,ggg,hhh,iii,jjj');
+    progress.seen = ['aaa','bbb','ccc','ddd','eee','fff','ggg','hhh','iii','jjj'];
     const r = buildRound('geo', 10);
     return { n: r.length, distinct: new Set(r.map(q=>q.text)).size };
   });

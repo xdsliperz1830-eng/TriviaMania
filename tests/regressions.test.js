@@ -2,12 +2,11 @@
  * Regression tests for defects found in the pre-Playables review.
  * Each test names the defect it guards so a future failure explains itself.
  */
-const { chromium, GAME_URL, createSuite, openGame, playRound } = require("./harness");
+const { chromium, GAME_URL, createSuite, openGame, playRound, resetProgress } = require("./harness");
 const suite = createSuite("regressions");
 const ck = (condition, message) => suite.check(condition, message);
 
-const seenCount = (page) =>
-  page.evaluate(() => (localStorage.getItem("brainblitz.seen") || "").split(",").filter(Boolean).length);
+const seenCount = (page) => page.evaluate(() => progress.seen.length);
 
 (async () => {
   const { browser, page } = await openGame();
@@ -18,9 +17,10 @@ const seenCount = (page) =>
      Play tap used to burn a whole extra set the player never saw. One
      double-tap on a 30-question category exhausted all 30.
      --------------------------------------------------------------------- */
-  await page.evaluate(() => localStorage.removeItem("brainblitz.seen"));
+  await resetProgress(page);
   await page.reload();
-  await page.waitForTimeout(350);
+  await page.waitForTimeout(400);
+  await resetProgress(page);
   await page.evaluate(() => {
     document.querySelector("#playBtn").click();
     document.querySelector("#playBtn").click();
@@ -38,13 +38,13 @@ const seenCount = (page) =>
     const realBuild = window.buildRound;
     let calls = 0;
     window.buildRound = function (...args) { calls++; return realBuild.apply(this, args); };
-    localStorage.removeItem("brainblitz.seen");
+    progress.seen = [];
     state.category = "animals";
     state.roundSize = 30;
     Game.start();
     Game.start();
     Game.start();
-    const result = { calls, seen: (localStorage.getItem("brainblitz.seen") || "").split(",").filter(Boolean).length };
+    const result = { calls, seen: progress.seen.length };
     window.buildRound = realBuild;
     return result;
   });
@@ -69,7 +69,7 @@ const seenCount = (page) =>
 
   // and the Enter key, which is the third way into Game.start()
   await page.evaluate(() => Game.quitToHome());
-  await page.evaluate(() => { localStorage.removeItem("brainblitz.seen"); state.roundSize = 10; });
+  await page.evaluate(() => { progress.seen = []; state.roundSize = 10; });
   await page.waitForTimeout(150);
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");

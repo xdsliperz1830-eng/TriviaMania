@@ -46,30 +46,32 @@ work ahead is **integration and compliance**, not optimisation for size.
 
 ---
 
-## 2. The blocker: no SDK integration
+## 2. SDK integration — **done**
 
-The game currently has **zero** Playables SDK integration (`window.ytgame` is
-undefined; the only script tag is our own inline one). Certification requires it,
-so this is the whole of the real work.
+The game is now integrated. The API was confirmed by reading Phaser's official
+Playables template (`phaserjs/template-youtube-playables`, `src/YouTubePlayables.js`),
+which is a working reference rather than a summary — that resolved the open
+question below.
 
-Required integrations **[verify all names]**:
+**The open question is resolved: pause and resume live on `ytgame.system`,
+not `ytgame.game`.** Two other details the summaries had not made clear:
+`sendScore` takes an **object** (`{ value: score }`), and `loadData()` resolves
+with a **raw string** that the caller must `JSON.parse` itself.
 
-| Requirement | Today | Needed |
-|---|---|---|
-| Load SDK before game code | — | `<script src="https://www.youtube.com/game_api/v1"></script>` first in `<head>` |
-| Loading lifecycle | — | `ytgame.game.firstFrameReady()` then `ytgame.game.gameReady()` |
-| Environment detection | — | `ytgame.IN_PLAYABLES_ENV` to keep the standalone build working |
-| Pause / resume | `visibilitychange` only | `onPause` / `onResume` callbacks |
-| Audio state | own mute button | `ytgame.system.isAudioEnabled()` + `onAudioEnabledChange()` |
-| Persistence | `localStorage` only | `ytgame.game.saveData()` / `loadData()` |
-| Score reporting | — | `ytgame.engagement.sendScore()` (optional, worth having) |
-| Error reporting | — | `ytgame.health.logError()` (optional) |
+Required integrations:
 
-**Sources disagree on two namespaces** — one places pause/resume on `ytgame.game`,
-another on `ytgame.system`. Resolve against the official SDK reference before
-writing the adapter. **[verify]**
+| Requirement | Status |
+|---|---|
+| SDK loaded before game code | done — first script in `<head>` |
+| Loading lifecycle | done — `game.firstFrameReady()` at boot, `game.gameReady()` once the home screen is built |
+| Environment detection | done — `IN_PLAYABLES_ENV` keeps the standalone build working |
+| Pause / resume | done — `system.onPause` / `system.onResume`, sharing the hidden-tab path |
+| Audio state | done — `system.isAudioEnabled()` + `system.onAudioEnabledChange()` |
+| Persistence | done — `game.saveData()` / `game.loadData()`, hydrate-once + debounced flush |
+| Score reporting | done — `engagement.sendScore({ value })` at round end |
+| Error reporting | done — `health.logError()` on save/load failure |
 
-### Architectural decision: a platform adapter
+### The adapter, as built
 
 The game must keep working as a plain web page (it is deployed on GitHub Pages and
 that is how it gets tested), while also running inside YouTube. So the SDK should
@@ -92,10 +94,13 @@ const Platform = (() => {
 })();
 ```
 
-Everything in `STATE` and `GAME` then calls `Platform.*` and neither build knows
-about the other. This keeps the GitHub Pages deploy as the test harness.
+Everything else calls `Platform.*`, so neither build knows about the other and
+the GitHub Pages deploy stays the test harness. Every SDK call is wrapped so a
+missing, hostile or hanging SDK cannot take the game down — `loadData` is bounded
+at two seconds, and a round still starts if every SDK method throws. Both are
+covered by tests.
 
-### Persistence becomes asynchronous — the one real refactor
+### Persistence became asynchronous — the one real refactor
 
 This is the part that actually changes existing code. Today `store.get/set` are
 **synchronous** and called freely from `loadSeen`, `saveSeen`, `loadBest` and the
@@ -115,8 +120,11 @@ So the storage layer becomes:
 4. A save that fails must never break play — same defensive posture as the current
    `try/catch` around `localStorage`.
 
-Doing it this way means `loadSeen`/`saveSeen`/`loadBest` keep their signatures and
-the rotation, best-score and picker code is untouched.
+Done this way, `loadSeen`/`saveSeen`/`loadBest` kept their signatures and the
+rotation, best-score and picker code was untouched. Saved progress from before
+the change is migrated on first load, so existing players keep their history and
+records. A finished round and a pause are both flush points; a five-question
+round writes twice, not once per answer.
 
 ---
 
@@ -231,6 +239,19 @@ approval until the game is actually ready.
 4. ~~Move the assertions into `tests/`, add `package.json` + `npm test`.~~
 5. ~~CI workflow running the suites on push and PR.~~
 
+### ~~Phase 3 — SDK integration~~ — **done**
+8. ~~Verify the SDK surface against a working reference.~~ Resolved from Phaser's
+   official template; pause/resume are on `system`.
+9. ~~SDK script tag and `Platform` adapter.~~
+10. ~~Loading lifecycle.~~
+11. ~~Pause/resume through the adapter.~~
+12. ~~Audio: YouTube's state gates the game's own mute.~~
+13. ~~Async persistence with hydrate-once and debounced flush.~~
+14. ~~`sendScore` and `logError`.~~
+
+Covered by a new `playables.test.js` — 38 assertions driven against a mock
+`ytgame`, since YouTube is not reachable from a test runner.
+
 ### ~~Phase 2 — performance for low-end devices~~ — **done**
 6. ~~Replace blurred orbs with gradients; re-measure.~~ *(3.3)* 43 → 61 fps.
 7. A frame-rate floor and a structural no-blur check now guard it. Verifying
@@ -263,7 +284,14 @@ approval until the game is actually ready.
 17. Test in the developer portal's own harness, then submit. Expect roughly
     **2–7 business days** from testing to release. **[verify]**
 
-**Status:** Phases 0–2 are complete and deployed. Phase 3 is the remaining work.
+**Status:** Phases 0–3 are complete and deployed. Phase 4 (content pass,
+metadata, portal testing and submission) is what remains, and most of it needs
+developer-portal access rather than code.
+
+**Still worth verifying against the official docs**, which were unreachable from
+the environment this was built in: the exact metadata specs, and whether any
+certification rule covers behaviour the mock cannot model (the mock mirrors the
+Phaser template's usage, not YouTube's own runtime).
 
 **Not in scope until YouTube says so:** access to the developer portal is via an
 interest form and approval, which is a business step, not a code one. Phases 0–2
