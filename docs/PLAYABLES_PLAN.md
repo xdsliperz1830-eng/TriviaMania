@@ -239,6 +239,12 @@ approval until the game is actually ready.
 4. ~~Move the assertions into `tests/`, add `package.json` + `npm test`.~~
 5. ~~CI workflow running the suites on push and PR.~~
 
+### ~~Phase 2 — performance for low-end devices~~ — **done**
+6. ~~Replace blurred orbs with gradients; re-measure.~~ *(3.3)* 43 → 61 fps.
+7. A frame-rate floor and a structural no-blur check now guard it. Verifying
+   under real CPU throttling on a physical low-end device remains worthwhile
+   before submission.
+
 ### ~~Phase 3 — SDK integration~~ — **done**
 8. ~~Verify the SDK surface against a working reference.~~ Resolved from Phaser's
    official template; pause/resume are on `system`.
@@ -252,37 +258,41 @@ approval until the game is actually ready.
 Covered by a new `playables.test.js` — 38 assertions driven against a mock
 `ytgame`, since YouTube is not reachable from a test runner.
 
-### ~~Phase 2 — performance for low-end devices~~ — **done**
-6. ~~Replace blurred orbs with gradients; re-measure.~~ *(3.3)* 43 → 61 fps.
-7. A frame-rate floor and a structural no-blur check now guard it. Verifying
-   under real CPU throttling on a physical low-end device remains worthwhile
-   before submission.
+### Phase 4 — submission readiness — **the only phase left**
 
-### Phase 3 — SDK integration (the real work)
-8. **Verify the SDK surface against the official docs** — resolve the
-   `ytgame.game` vs `ytgame.system` question and confirm every signature.
-9. Add the SDK script tag and the `Platform` adapter; keep the standalone build
-   working and green.
-10. Loading lifecycle: `firstFrameReady` at first paint, `gameReady` when the home
-    screen is interactive.
-11. Pause/resume through the adapter — the countdown must freeze and resume
-    exactly as the existing `visibilitychange` path already does (that behaviour is
-    already correct and tested; it just needs a second trigger).
-12. Audio: make YouTube's audio state the source of truth when embedded, and
-    reconcile it with our own mute button so the two cannot disagree.
-13. Persistence: the async storage layer described in §2, with the in-memory
-    hydrate + debounced flush, preserving the current rotation and best-score
-    behaviour exactly.
-14. Optional but cheap: `sendScore` on round end, `logError` wired to the existing
-    error paths.
+Split by who can do it, because the order matters: the portal gates everything
+else, and applying for it does not depend on the rest.
 
-### Phase 4 — submission readiness
-15. Content pass over the 300 questions for a 13+ general audience and for facts
-    that could age badly.
-16. Metadata: title, description, thumbnails to the published character/pixel specs
-    **[verify]**.
-17. Test in the developer portal's own harness, then submit. Expect roughly
-    **2–7 business days** from testing to release. **[verify]**
+**Needs you (start here — it is the long pole)**
+15. Apply for the Playables developer programme through YouTube's interest form.
+    Access is granted by approval, not self-serve, so this is the item with an
+    unknown lead time and nothing else can be finished without it.
+16. Once in the portal: read the certification pages directly and settle the
+    points this plan marks **[verify]** — they were written from search summaries
+    because `developers.google.com` is blocked from the build environment.
+17. Run the game in the portal's own test harness. This is the first time the
+    integration meets YouTube's real runtime rather than a mock, so treat it as
+    the actual verification of Phase 3.
+
+**Can be done now, without the portal**
+18. Content pass over all 300 questions: suitability for a 13+ general audience,
+    and facts that could age badly (nothing currently depends on a record holder
+    or a head of state, which was deliberate, but it is worth a second read).
+19. Draft the store metadata — title, short description, long description — so
+    only the exact character limits and thumbnail dimensions need filling in from
+    the portal.
+20. Verify performance under real CPU throttling on a physical low-end phone.
+    The frame-rate floor in CI is a headless proxy, not a device.
+
+**Known loose ends**
+21. No `package-lock.json`: the npm registry was unreachable from the build
+    environment. Run `npm install` locally, commit the lockfile, and switch the
+    CI workflow from `npm install` to `npm ci`.
+22. The `actions/*` versions in both workflows target Node 20, which GitHub has
+    deprecated. They still run; bump when convenient.
+
+Expect roughly **2–7 business days** from the start of portal testing to
+release. **[verify]**
 
 **Status:** Phases 0–3 are complete and deployed. Phase 4 (content pass,
 metadata, portal testing and submission) is what remains, and most of it needs
@@ -293,9 +303,11 @@ the environment this was built in: the exact metadata specs, and whether any
 certification rule covers behaviour the mock cannot model (the mock mirrors the
 Phaser template's usage, not YouTube's own runtime).
 
-**Not in scope until YouTube says so:** access to the developer portal is via an
-interest form and approval, which is a business step, not a code one. Phases 0–2
-are worth doing regardless of whether the Playables application succeeds.
+**On the application itself:** portal access comes via an interest form and an
+approval, which is a business step rather than a code one — it is the one part of
+this plan that cannot be engineered around. Everything in Phases 0–3 was worth
+doing regardless of whether the application succeeds; the game is better for it
+either way.
 
 ---
 
