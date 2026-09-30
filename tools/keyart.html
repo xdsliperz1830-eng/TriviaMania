@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Brain Blitz key art</title>
+<style>
+  :root{
+    --navy:#0F172A; --purple:#8B5CF6; --cyan:#22D3EE; --yellow:#FACC15; --white:#F8FAFC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden}
+  body{
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,Arial,sans-serif;
+    color:var(--white);
+    background:
+      radial-gradient(ellipse 70% 80% at 12% 6%, rgba(139,92,246,.85), rgba(139,92,246,0) 100%),
+      radial-gradient(ellipse 60% 75% at 94% 16%, rgba(34,211,238,.60), rgba(34,211,238,0) 100%),
+      radial-gradient(ellipse 75% 80% at 62% 114%, rgba(79,70,229,.75), rgba(79,70,229,0) 100%),
+      linear-gradient(165deg,#1B2350 0%,#131B3D 50%,#0B1120 100%);
+  }
+  .stage{text-align:center;padding:4%;}
+  .brain{display:block;line-height:1;margin:0 auto .06em;
+         filter:drop-shadow(0 0 .28em rgba(34,211,238,.55));}
+  .logo{font-weight:900;line-height:.92;letter-spacing:-.02em;
+        background:linear-gradient(100deg,var(--cyan) 0%,var(--white) 42%,var(--purple) 78%,var(--yellow) 100%);
+        -webkit-background-clip:text;background-clip:text;color:transparent;
+        filter:drop-shadow(0 .04em .12em rgba(139,92,246,.5));}
+  .tag{color:#D3DEEE;font-weight:700;margin-top:.45em;text-shadow:0 .04em .2em rgba(0,0,0,.45)}
+  .chips{display:flex;gap:.5em;justify-content:center;margin-top:1em;flex-wrap:wrap}
+  .chip{border-radius:999px;padding:.34em .85em;font-weight:800;
+        background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.4)}
+  /* Wide key art */
+  body[data-variant="wide"] .brain{font-size:13vh}
+  body[data-variant="wide"] .logo{font-size:21vh}
+  body[data-variant="wide"] .tag{font-size:5vh}
+  body[data-variant="wide"] .chips{font-size:3.2vh}
+  /* Square icon: logo only, larger, no tagline */
+  body[data-variant="square"] .brain{font-size:30vh}
+  body[data-variant="square"] .logo{font-size:20vh}
+  body[data-variant="square"] .tag,body[data-variant="square"] .chips{display:none}
+  body[data-variant="square"] .stage{padding:8%}
+</style>
+</head>
+<body data-variant="wide">
+  <div class="stage">
+    <span class="brain">🧠</span>
+    <h1 class="logo">BRAIN<br>BLITZ</h1>
+    <p class="tag">How much do you really know?</p>
+    <div class="chips">
+      <span class="chip">🌎 10 categories</span>
+      <span class="chip">⚡ 15 seconds</span>
+      <span class="chip">🎲 300 questions</span>
+    </div>
+  </div>
+<script>
+  const v = new URLSearchParams(location.search).get("variant");
+  if (v) document.body.dataset.variant = v;
+</script>
+</body>
+</html>

@@ -56,11 +56,25 @@ npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
 ```
 
-Eight suites in `tests/` drive the real page in a headless browser: gameplay,
+Nine suites in `tests/` drive the real page in a headless browser: gameplay,
 question rotation, round length, geography balance, picker layout, an
-18-viewport layout sweep, regressions for previously fixed defects, and the
-YouTube Playables integration (against a mock `ytgame`, since YouTube is not
-reachable from a test runner). They run in CI on every push and pull request.
+18-viewport layout sweep, regressions for previously fixed defects, the YouTube
+Playables integration (against a mock `ytgame`, since YouTube is not reachable
+from a test runner), and performance against the published Playables limits
+under CPU throttling. They run in CI on every push and pull request.
+
+## Building for submission
+
+```bash
+npm run build      # -> dist/brain-blitz-playable.zip (40 KB)
+npm run art        # -> art/ key art and icons
+```
+
+The build checks the bundle against every Playables size cap, then launches the
+built file and plays a round before declaring it ready. See
+[`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the metadata, art inventory and
+certification self-check, and [`docs/PLAYABLES_PLAN.md`](docs/PLAYABLES_PLAN.md)
+for how the game got here.
 
 ## Adding questions
 

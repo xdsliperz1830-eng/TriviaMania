@@ -274,27 +274,45 @@ else, and applying for it does not depend on the rest.
     integration meets YouTube's real runtime rather than a mock, so treat it as
     the actual verification of Phase 3.
 
-**Can be done now, without the portal**
-18. Content pass over all 300 questions: suitability for a 13+ general audience,
-    and facts that could age badly (nothing currently depends on a record holder
-    or a head of state, which was deliberate, but it is worth a second read).
-19. Draft the store metadata — title, short description, long description — so
-    only the exact character limits and thumbnail dimensions need filling in from
-    the portal.
-20. Verify performance under real CPU throttling on a physical low-end phone.
-    The frame-rate floor in CI is a headless proxy, not a device.
+**~~Can be done now, without the portal~~ — done**
+18. ~~Content pass over all 300 questions.~~ Six questions changed: two alcohol
+    references removed, a duplicated country answer and two near-duplicate space
+    questions replaced, and "most World Cup titles" — the one genuinely
+    decay-prone fact left — rewritten as "won the very first World Cup", which is
+    settled for good.
+19. ~~Draft the store metadata.~~ In `docs/SUBMISSION.md`, written at several
+    lengths so one fits whichever limit applies.
+20. ~~Verify performance under throttling.~~ A new `performance.test.js` encodes
+    the published limits and measures under 4× and 6× CPU throttling: interactive
+    in 567 ms at 6×, 61 fps at 4×, 10 MB heap, no leak across forty rounds. A
+    physical low-end device is still worth a look, but the headless proxy is now
+    a throttled one rather than an unthrottled one.
+
+Also added, because submission needs them:
+- `npm run build` produces `dist/brain-blitz-playable.zip` — 40 KB, `index.html`
+  at the archive root — checks it against every size cap, then launches the built
+  file and plays a round, so the artifact that gets uploaded is the one tested.
+- `npm run art` generates store art and icons from the game's own palette, and
+  refuses to write a file if the artwork fails to render.
+- `docs/SUBMISSION.md`: build steps, metadata, art inventory and a certification
+  self-check with evidence for each line.
 
 **Known loose ends**
-21. No `package-lock.json`: the npm registry was unreachable from the build
-    environment. Run `npm install` locally, commit the lockfile, and switch the
-    CI workflow from `npm install` to `npm ci`.
-22. The `actions/*` versions in both workflows target Node 20, which GitHub has
-    deprecated. They still run; bump when convenient.
+21. No `package-lock.json`: the npm registry is unreachable from this environment
+    (403). Run `npm install` locally, commit the lockfile, and switch CI from
+    `npm install` to `npm ci`.
+22. ~~The `actions/*` versions target the deprecated Node 20.~~ Bumped:
+    checkout and setup-node to v5, configure-pages to v6, deploy-pages and
+    upload-pages-artifact to v5.
 
 Expect roughly **2–7 business days** from the start of portal testing to
 release. **[verify]**
 
-**Status:** Phases 0–3 are complete and deployed. Phase 4 (content pass,
+**Status:** Phases 0–3 are complete and deployed, and everything in Phase 4 that
+does not need the portal is done too — the remaining items are the application
+itself, reading the certification pages, and testing in the portal harness.
+
+**Previously:** Phases 0–3 complete and deployed. Phase 4 (content pass,
 metadata, portal testing and submission) is what remains, and most of it needs
 developer-portal access rather than code.
 
