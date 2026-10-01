@@ -132,10 +132,49 @@ What could be checked without portal access, and the evidence for each.
 
 ---
 
-## 5. What still needs you
+## 5. Interest form answers
 
-1. **Apply to the Playables developer programme.** Access is by approval, not
-   self-serve, so this gates everything and has an unknown lead time.
+Access is early access: you apply through YouTube's interest form and wait for
+approval, which is reported to take weeks to months. The form asks for developer
+details, game information, a game URL, mobile compatibility and technical
+details — all of which exist now, so this can be submitted today. Reported
+answers below; adjust the ones about you.
+
+| Field | Answer |
+|---|---|
+| Game title | Brain Blitz |
+| Genre | Trivia / quiz, casual |
+| Playable URL | https://xdsliperz1830-eng.github.io/TriviaMania/ |
+| Source | https://github.com/xdsliperz1830-eng/TriviaMania |
+| Engine / stack | Hand-written HTML, CSS and vanilla JavaScript. No engine, no framework, no build step. |
+| Bundle size | 40 KB zipped, 124 KB unpacked — one self-contained file |
+| Mobile support | Yes. Portrait and landscape, touch-first, verified at 18 viewport sizes from 320×568 to 1920×1080 |
+| Time to interactive | Under 600 ms, including at 6× CPU throttling |
+| Playables SDK | Already integrated: `firstFrameReady`/`gameReady`, `onPause`/`onResume`, `isAudioEnabled`/`onAudioEnabledChange`, `saveData`/`loadData`, `sendScore`, `logError` |
+| Network use | None at runtime. Plays fully offline once loaded |
+| Accounts / sign-in | None |
+| Ads, payments, external links | None |
+| Audience | General audience, 13+ |
+| Languages | English |
+| Session length | 1–7 minutes, player's choice of 5, 10, 20 or 30 questions |
+
+**One-paragraph pitch, if the form wants one**
+
+> Brain Blitz is a fast-fire trivia game: ten categories, fifteen seconds a
+> question, and more points the quicker you answer. It is one self-contained
+> HTML file of 124 KB with no engine, no network calls at runtime and no
+> sign-in, and it already integrates the Playables SDK for cloud saves, pause
+> and resume, audio state and score reporting. A bank of 300 questions rotates
+> so that playing again gives you questions you have not seen rather than the
+> same set reshuffled.
+
+---
+
+## 6. What still needs you
+
+1. **Submit the interest form** using §5. Everything it asks for exists today,
+   and approval reportedly takes weeks to months, so submitting early is the
+   single highest-value thing left.
 2. **Read the certification pages** and settle every **[verify]** above.
 3. **Run the bundle in the portal's test harness.** This is the first contact
    with YouTube's real runtime rather than a mock, and is the true verification
