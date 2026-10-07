@@ -80,13 +80,18 @@ if (problems.length) {
   const ok = await page.evaluate(() => ({
     answers: document.querySelectorAll(".ans").length,
     questions: typeof QUESTIONS !== "undefined" ? QUESTIONS.length : 0,
+    categories: typeof CATEGORIES !== "undefined" ? Object.keys(CATEGORIES).length : 0,
     round: state.round.length
   }));
   await browser.close();
 
   const failures = [];
   if (ok.answers !== 4) failures.push(`expected 4 answers, saw ${ok.answers}`);
-  if (ok.questions !== 300) failures.push(`expected 300 questions, saw ${ok.questions}`);
+  // Counted from the source so growing the bank is not a build failure.
+  const expected = (fs.readFileSync(path.join(ROOT, "index.html"), "utf8")
+    .match(/\{ c:"[a-z]+", q:"/g) || []).length;
+  if (ok.questions !== expected) failures.push(`expected ${expected} questions, saw ${ok.questions}`);
+  if (ok.categories !== 10) failures.push(`expected 10 categories, saw ${ok.categories}`);
   if (ok.round !== 10) failures.push(`expected a 10-question round, saw ${ok.round}`);
   if (errors.length) failures.push("page errors: " + errors.join("; "));
 
@@ -94,6 +99,6 @@ if (problems.length) {
     failures.forEach((f) => console.error("  PROBLEM: " + f));
     process.exit(1);
   }
-  console.log(`  smoke test                   a round plays from the bundle (${ok.questions} questions)`);
+  console.log(`  smoke test                   a round plays from the bundle (${ok.questions} questions, ${ok.categories} categories)`);
   console.log("\n  Ready to upload.");
 })();

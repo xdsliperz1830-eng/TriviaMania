@@ -21,15 +21,15 @@ npm run build          # -> dist/brain-blitz-playable.zip
 ```
 
 The whole game is one self-contained file, so the bundle is `index.html` at the
-archive root: **40 KB zipped, 124 KB unpacked**. The build fails rather than
+archive root: **90 KB zipped, 235 KB unpacked**. The build fails rather than
 producing a bundle if a size cap is exceeded, and it finishes by launching the
 built file and playing a round, so what you upload is what was tested.
 
 | Limit | Budget | Bundle |
 |---|---|---|
-| Initial payload | 30 MiB (15 MiB recommended) | 0.13% of the cap |
+| Initial payload | 30 MiB (15 MiB recommended) | 0.3% of the cap |
 | Total bundle | 250 MiB | negligible |
-| Per file | 30 MiB (512 KiB recommended) | 124 KB |
+| Per file | 30 MiB (512 KiB recommended) | 235 KB |
 
 ---
 
@@ -62,7 +62,7 @@ built file and playing a round, so what you upload is what was tested.
 > Build a streak for bonus points, learn something from the explanation after
 > every answer, and chase your best score for each round length.
 >
-> 300 questions. No sign-in, no waiting, no ads.
+> 900 questions. No sign-in, no waiting, no ads.
 
 **Category / genre:** Trivia, Puzzle, Casual **[verify — use the portal's own list]**
 
@@ -116,7 +116,7 @@ What could be checked without portal access, and the evidence for each.
 
 ### Content notes
 
-300 questions, reviewed for a 13+ general audience:
+900 questions, reviewed for a 13+ general audience:
 
 - No profanity, sexual content, gambling or self-harm references.
 - Alcohol references were removed, though nothing suggests they are
@@ -147,7 +147,7 @@ answers below; adjust the ones about you.
 | Playable URL | https://xdsliperz1830-eng.github.io/TriviaMania/ |
 | Source | https://github.com/xdsliperz1830-eng/TriviaMania |
 | Engine / stack | Hand-written HTML, CSS and vanilla JavaScript. No engine, no framework, no build step. |
-| Bundle size | 40 KB zipped, 124 KB unpacked — one self-contained file |
+| Bundle size | 90 KB zipped, 235 KB unpacked — one self-contained file |
 | Mobile support | Yes. Portrait and landscape, touch-first, verified at 18 viewport sizes from 320×568 to 1920×1080 |
 | Time to interactive | Under 600 ms, including at 6× CPU throttling |
 | Playables SDK | Already integrated: `firstFrameReady`/`gameReady`, `onPause`/`onResume`, `isAudioEnabled`/`onAudioEnabledChange`, `saveData`/`loadData`, `sendScore`, `logError` |

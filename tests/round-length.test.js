@@ -90,12 +90,16 @@ const ck = (condition, message) => suite.check(condition, message);
   // ---- rotation still applies at other lengths ----
   const rot = await p.evaluate(() => {
     progress.seen = [];
+    const pool = QUESTIONS.filter(q => q.c === 'sports').length;
     const a = buildRound('sports', 20).map(q=>q.text);
     const b = buildRound('sports', 20).map(q=>q.text);
-    return { a, b, overlap: b.filter(q => a.includes(q)).length };
+    return { pool, a, b, overlap: b.filter(q => a.includes(q)).length };
   });
   ck(rot.a.length === 20 && rot.b.length === 20, 'two 20-question sports rounds built');
-  ck(rot.overlap === 10, 'after 20 of 30 are used, the next 20 reuses exactly 10 (got ' + rot.overlap + ')');
+  // Reuse only begins once the pool runs dry: 40 drawn from a pool of `pool`.
+  const expectedReuse = Math.max(0, 40 - rot.pool);
+  ck(rot.overlap === expectedReuse,
+     `with ${rot.pool} sports questions, two 20-question rounds reuse ${expectedReuse} (got ${rot.overlap})`);
 
   // ---- a legacy best score is inherited by the 10-question length ----
   const legacy = await p.evaluate(() => {

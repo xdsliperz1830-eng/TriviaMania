@@ -13,10 +13,16 @@ const ck = (condition, message) => suite.check(condition, message);
   // ---- no id collisions across the whole bank ----
   const ids = await p.evaluate(() => {
     const set = new Set(QUESTIONS.map(q => q.id));
-    return { total: QUESTIONS.length, unique: set.size };
+    const perCat = {};
+    QUESTIONS.forEach(q => perCat[q.c] = (perCat[q.c] || 0) + 1);
+    return { total: QUESTIONS.length, unique: set.size, sizes: Object.values(perCat) };
   });
-  ck(ids.total === 300, 'bank holds 300 questions');
-  ck(ids.unique === 300, 'every question id is unique (no hash collisions): ' + ids.unique);
+  // Derived from the bank rather than hardcoded, so growing it is not a failure.
+  ck(ids.total >= 300, 'bank holds at least 300 questions (' + ids.total + ')');
+  ck(ids.unique === ids.total, 'every question id is unique (no hash collisions): ' + ids.unique);
+  ck(new Set(ids.sizes).size === 1, 'every category holds the same number (' + ids.sizes[0] + ')');
+  const PER_CAT = ids.sizes[0];
+  const ROUNDS_TO_EXHAUST = PER_CAT / 10;
 
   // ---- three consecutive category rounds are fully distinct ----
   const rounds = await p.evaluate(() => {
@@ -32,21 +38,31 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(overlap12.length === 0, 'round 2 repeats nothing from round 1 (overlap ' + overlap12.length + ')');
   ck(overlap13.length === 0, 'round 3 repeats nothing from round 1 (overlap ' + overlap13.length + ')');
   ck(overlap23.length === 0, 'round 3 repeats nothing from round 2 (overlap ' + overlap23.length + ')');
-  ck(new Set([...first, ...second, ...third]).size === 30, 'three rounds cover the whole 30-question category');
+  ck(new Set([...first, ...second, ...third]).size === 30, 'three rounds give 30 distinct questions');
 
   // ---- all questions stay in-category ----
   const cats = await p.evaluate(() => buildRound('space').map(q => q.category));
   ck(cats.every(c => c === 'space'), 'category rounds only draw from that category');
 
   // ---- 4th round recycles, and does so without repeating within the round ----
-  const r4 = await p.evaluate(() => buildRound('animals').map(q => q.text));
-  ck(new Set(r4).size === 10, 'round 4 (after exhaustion) still has 10 distinct questions');
-  ck(r4.every(q => first.has(q) || second.has(q) || third.has(q)), 'round 4 recycles earlier questions');
-
-  // ---- round 5 does not simply repeat round 4 ----
-  const r5 = await p.evaluate(() => buildRound('animals').map(q => q.text));
-  const overlap45 = r5.filter(q => r4.includes(q));
-  ck(overlap45.length === 0, 'round 5 avoids everything from round 4 (overlap ' + overlap45.length + ')');
+  // Play the category dry, then check the cycle restarts correctly.
+  const exhaust = await p.evaluate((n) => {
+    progress.seen = [];
+    const seenTexts = [];
+    for (let i = 0; i < n; i++) seenTexts.push(buildRound('animals').map(q => q.text));
+    const all = new Set(seenTexts.flat());
+    const next = buildRound('animals').map(q => q.text);
+    const after = buildRound('animals').map(q => q.text);
+    return { cycle: all.size, rounds: n, next, after,
+             recycled: next.every(t => all.has(t)),
+             overlap: after.filter(t => next.includes(t)).length };
+  }, ROUNDS_TO_EXHAUST);
+  ck(exhaust.cycle === PER_CAT,
+     `${exhaust.rounds} rounds cover the whole ${PER_CAT}-question category (${exhaust.cycle})`);
+  ck(new Set(exhaust.next).size === 10, 'the round after exhaustion still has 10 distinct questions');
+  ck(exhaust.recycled, 'the round after exhaustion recycles earlier questions');
+  ck(exhaust.overlap === 0,
+     'the round after that avoids everything just recycled (overlap ' + exhaust.overlap + ')');
 
   // ---- progress survives a page reload ----
   const beforeReload = await p.evaluate(() => {
@@ -81,32 +97,33 @@ const ck = (condition, message) => suite.check(condition, message);
      'a mixed round avoids food questions just seen in a food round');
 
   // ---- 30 rounds straight: never a repeat inside a round, full coverage per cycle ----
-  const longRun = await p.evaluate(() => {
+  const longRun = await p.evaluate((n) => {
     progress.seen = [];
-    const seenPerRound = [], cycle1 = new Set(), cycle2 = new Set();
-    for (let i = 0; i < 6; i++) {
+    const sizes = [], cycle1 = new Set(), cycle2 = new Set();
+    for (let i = 0; i < n * 2; i++) {
       const r = buildRound('history').map(q => q.text);
-      seenPerRound.push(new Set(r).size);
-      (i < 3 ? cycle1 : cycle2).forEach && (i < 3 ? r.forEach(q=>cycle1.add(q)) : r.forEach(q=>cycle2.add(q)));
+      sizes.push(new Set(r).size);
+      r.forEach(q => (i < n ? cycle1 : cycle2).add(q));
     }
-    return { allTen: seenPerRound.every(n => n === 10), cycle1: cycle1.size, cycle2: cycle2.size };
-  });
-  ck(longRun.allTen, 'every one of 6 consecutive rounds has 10 distinct questions');
-  ck(longRun.cycle1 === 30, 'first cycle of 3 rounds covers all 30 history questions');
-  ck(longRun.cycle2 === 30, 'second cycle also covers all 30 (' + longRun.cycle2 + ')');
+    return { allTen: sizes.every(s => s === 10), cycle1: cycle1.size, cycle2: cycle2.size };
+  }, ROUNDS_TO_EXHAUST);
+  ck(longRun.allTen, `every one of ${ROUNDS_TO_EXHAUST * 2} consecutive rounds has 10 distinct questions`);
+  ck(longRun.cycle1 === PER_CAT, `first full cycle covers all ${PER_CAT} history questions`);
+  ck(longRun.cycle2 === PER_CAT, `second full cycle also covers all ${PER_CAT} (${longRun.cycle2})`);
 
   // ---- the home screen reports fresh counts ----
   await p.evaluate(() => { progress.seen = []; });
   await p.reload(); await p.waitForTimeout(300);
   const fresh0 = await p.locator('.cat[data-cat="animals"] .ct').innerText();
-  ck(fresh0 === '30 questions', 'category card starts at "30 questions" (' + fresh0 + ')');
+  ck(fresh0 === PER_CAT + ' questions', `category card starts at "${PER_CAT} questions" (${fresh0})`);
   await p.evaluate(() => buildRound('animals'));
   await p.evaluate(() => UI.refreshHome());
   const fresh1 = await p.locator('.cat[data-cat="animals"] .ct').innerText();
-  ck(fresh1 === '20 new of 30', 'card updates to "20 new of 30" after a round (' + fresh1 + ')');
-  await p.evaluate(() => { buildRound('animals'); buildRound('animals'); UI.refreshHome(); });
+  ck(fresh1 === (PER_CAT - 10) + ' new of ' + PER_CAT,
+     `card counts down after a round (${fresh1})`);
+  await p.evaluate((n) => { for (let i = 1; i < n; i++) buildRound('animals'); UI.refreshHome(); }, ROUNDS_TO_EXHAUST);
   const fresh2 = await p.locator('.cat[data-cat="animals"] .ct').innerText();
-  ck(fresh2 === 'all 30 seen', 'card reports all seen once exhausted (' + fresh2 + ')');
+  ck(fresh2 === 'all ' + PER_CAT + ' seen', `card reports all seen once exhausted (${fresh2})`);
 
   // ---- storage failure must not break the game ----
   const survives = await p.evaluate(() => {

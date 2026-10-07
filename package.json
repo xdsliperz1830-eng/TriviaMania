@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node tests/run.js",
     "build": "node tools/build.js",
-    "art": "node tools/make-art.js"
+    "art": "node tools/make-art.js",
+    "questions": "node tools/export-csv.js"
   },
   "devDependencies": {
     "playwright": "1.56.1"

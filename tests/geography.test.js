@@ -10,8 +10,8 @@ const ck = (condition, message) => suite.check(condition, message);
   // ---- capital-question density ----
   const geo = await p.evaluate(() => QUESTIONS.filter(q => q.c === 'geo').map(q => q.q));
   const caps = geo.filter(q => /capital/i.test(q));
-  ck(geo.length === 30, 'geography still holds 30 questions');
-  ck(caps.length === 2, 'only 2 capital questions remain (was 10): ' + caps.length);
+  ck(geo.length >= 30, `geography holds ${geo.length} questions`);
+  ck(caps.length <= 2, `at most 2 capital questions (was 10, now ${caps.length})`);
 
   // ---- a full 30-question geography round: at most 2 capitals, wide topic spread ----
   const round = await p.evaluate(() => {
@@ -19,20 +19,47 @@ const ck = (condition, message) => suite.check(condition, message);
     return buildRound('geo', 30).map(q => q.text);
   });
   ck(round.length === 30, 'a 30-question geography round builds');
-  ck(round.filter(q => /capital/i.test(q)).length === 2, 'a full round contains at most 2 capital questions');
+  ck(round.filter(q => /capital/i.test(q)).length <= 2,
+     'a 30-question round contains at most 2 capital questions');
 
-  // ---- no two questions share an answer (a proxy for near-duplicate topics) ----
-  const answers = await p.evaluate(() => {
-    const seen = {}, clash = [];
-    QUESTIONS.filter(q => q.c === 'geo').forEach(q => {
-      const correct = q.a[0];
-      if (seen[correct]) clash.push(correct + ' — "' + seen[correct] + '" / "' + q.q + '"');
-      seen[correct] = q.q;
+  // ---- answer crowding, across every category ----
+  const crowded = await p.evaluate(() => {
+    const byCat = {};
+    QUESTIONS.forEach(q => {
+      const key = q.a[0].toLowerCase().replace(/^(the|a|an) /, '').trim();
+      if (/^[\d,.]+$/.test(key)) return;        // numbers legitimately repeat
+      ((byCat[q.c] = byCat[q.c] || {})[key] = byCat[q.c][key] || []).push(q.q);
     });
-    return clash;
+    const out = [];
+    Object.keys(byCat).forEach(cat => Object.keys(byCat[cat]).forEach(ans => {
+      if (byCat[cat][ans].length >= 3) out.push(`[${cat}] '${ans}' answers ${byCat[cat][ans].length}`);
+    }));
+    return out;
   });
-  ck(answers.length === 0, 'no two geography questions share a correct answer: ' +
-     (answers.length ? answers.join(' | ') : 'none'));
+  ck(crowded.length === 0,
+     'no answer carries three or more questions in one category: ' +
+     (crowded.length ? crowded.join(' | ') : 'none'));
+
+  // ---- near-duplicate questions, across every category ----
+  const nearDupes = await p.evaluate(() => {
+    const stop = new Set(['which','what','many','does','have','from','with','that','this',
+                          'called','your','name','the','and','for','are','was','its','into']);
+    const words = t => new Set(t.toLowerCase().match(/[a-z']+/g).filter(w => w.length > 3 && !stop.has(w)));
+    const out = [];
+    for (let i = 0; i < QUESTIONS.length; i++) {
+      for (let j = i + 1; j < QUESTIONS.length; j++) {
+        const a = QUESTIONS[i], b = QUESTIONS[j];
+        if (a.c !== b.c || a.a[0] !== b.a[0]) continue;   // same category AND same answer
+        const wa = words(a.q), wb = words(b.q);
+        const shared = [...wa].filter(w => wb.has(w)).length;
+        if (shared >= 3) out.push(`[${a.c}] "${a.q}" / "${b.q}"`);
+      }
+    }
+    return out;
+  });
+  ck(nearDupes.length === 0,
+     'no two questions in a category ask the same thing: ' +
+     (nearDupes.length ? nearDupes.join(' | ') : 'none'));
 
   // ---- 10-question rounds should rarely be capital-heavy ----
   const sample = await p.evaluate(() => {
