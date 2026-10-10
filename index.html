@@ -7,6 +7,22 @@
 <meta name="theme-color" content="#0F172A">
 <title>Brain Blitz</title>
 
+<!-- Added to a home screen, the launcher needs real artwork or the OS falls
+     back to the first letter of the title. iOS reads apple-touch-icon and
+     ignores the manifest; Android reads the manifest and ignores the link. -->
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="application-name" content="Brain Blitz">
+<meta name="apple-mobile-web-app-title" content="Brain Blitz">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- The layout already pads for env(safe-area-inset-*), so the game can run
+     under the status bar instead of beside a grey strip. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <!-- The YouTube Playables SDK must load before any game code. Outside YouTube
      this request simply fails and the game runs standalone; nothing below
      depends on it resolving. -->

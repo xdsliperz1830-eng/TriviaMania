@@ -3,7 +3,8 @@
 A fast-paced HTML5 trivia game built for YouTube Playables. Everything — markup,
 styles, game logic, question bank and sound engine — lives in a single
 self-contained `index.html`. No backend, no build step, no accounts, no external
-requests, so it runs offline once loaded.
+requests, so it runs offline once loaded. The only other files the page touches
+are the launcher icons and the web app manifest, which nothing at runtime reads.
 
 **Play:** open `index.html` in any modern browser.
 
@@ -16,7 +17,7 @@ standalone, saving progress to `localStorage` instead of the cloud.
 
 - **Pick your round length** — 5, 10, 20 or 30 questions — from the picker on
   the home screen. The choice is remembered between sessions.
-- 15 seconds per question, drawn from a bank of **300 questions** — 30 in each
+- 15 seconds per question, drawn from a bank of **900 questions** — 90 in each
   of the 10 categories.
 - Pick a single category or **Mixed Blitz**, which spreads the round evenly over
   the categories: 10 questions means one from each, 20 means two, and a length
@@ -24,11 +25,11 @@ standalone, saving progress to `localStorage` instead of the cloud.
   up first in the shuffle.
 - **Questions rotate.** A round always draws questions you have not been asked
   yet, so playing the same category three times in a row at 10 questions gives
-  30 different questions. Only once a category is used up does the cycle restart and mix in
-  earlier questions. Progress is stored in `localStorage`, so it survives a
+  30 different questions. Only once a category is used up does the cycle restart
+  and mix in earlier questions. Progress is stored in `localStorage`, so it survives a
   reload, and category play and Mixed Blitz share the same history.
-- Category cards show what is left — `30 questions`, then `20 new of 30`, then
-  `all 30 seen`.
+- Category cards show what is left — `90 questions`, then `80 new of 90`, then
+  `all 90 seen`.
 - Answer choices are reshuffled every round, so the correct answer never sits
   in a predictable position.
 - **Best scores are kept per round length**, since a 30-question round scores
@@ -56,18 +57,21 @@ npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
 ```
 
-Nine suites in `tests/` drive the real page in a headless browser: gameplay,
+Ten suites in `tests/` drive the real page in a headless browser: gameplay,
 question rotation, round length, geography balance, picker layout, an
-18-viewport layout sweep, regressions for previously fixed defects, the YouTube
-Playables integration (against a mock `ytgame`, since YouTube is not reachable
-from a test runner), and performance against the published Playables limits
-under CPU throttling. They run in CI on every push and pull request.
+18-viewport layout sweep, regressions for previously fixed defects, the launcher
+icons and manifest, the YouTube Playables integration (against a mock `ytgame`,
+since YouTube is not reachable from a test runner), and performance against the
+published Playables limits under CPU throttling. They run in CI on every push
+and pull request.
 
 ## Building for submission
 
 ```bash
-npm run build      # -> dist/brain-blitz-playable.zip (40 KB)
-npm run art        # -> art/ key art and icons
+npm run build      # -> dist/brain-blitz-playable.zip (440 KB)
+npm run art        # -> art/ store key art and listing tiles
+npm run icons      # -> icons/ launcher icons and favicons
+npm run questions  # -> dist/brain-blitz-questions.csv, the whole bank for review
 ```
 
 The build checks the bundle against every Playables size cap, then launches the
@@ -75,6 +79,23 @@ built file and plays a round before declaring it ready. See
 [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the metadata, art inventory and
 certification self-check, and [`docs/PLAYABLES_PLAN.md`](docs/PLAYABLES_PLAN.md)
 for how the game got here.
+
+## The app icon
+
+Added to a phone's home screen, the game installs as a standalone app. The mark
+is a brain with a lightning bolt through it, authored as vector geometry in
+[`tools/logo.js`](tools/logo.js) and rasterised by `npm run icons` into
+`icons/` — a 180 px `apple-touch-icon` for iOS, 192 and 512 px icons plus a
+maskable 512 for the Android manifest, and 16/32 px favicons that drop the brain
+and keep only the bolt, which is all that survives at that size.
+
+It is deliberately not the store art in `art/`: that is a listing tile with a
+wordmark on it, and at roughly 48 px the words are unreadable and its emoji
+renders differently on every platform.
+
+`tests/icons.test.js` reads the pixels back out of each PNG, so an icon that
+silently fails to render — or a mark that drifts outside the circle Android may
+crop a maskable icon to — fails the build rather than shipping.
 
 ## Adding questions
 

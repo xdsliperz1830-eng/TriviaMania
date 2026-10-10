@@ -289,7 +289,7 @@ else, and applying for it does not depend on the rest.
     a throttled one rather than an unthrottled one.
 
 Also added, because submission needs them:
-- `npm run build` produces `dist/brain-blitz-playable.zip` — 40 KB, `index.html`
+- `npm run build` produces `dist/brain-blitz-playable.zip` — 440 KB, `index.html`
   at the archive root — checks it against every size cap, then launches the built
   file and plays a round, so the artifact that gets uploaded is the one tested.
 - `npm run art` generates store art and icons from the game's own palette, and
@@ -311,6 +311,26 @@ release. **[verify]**
 **Status:** Phases 0–3 are complete and deployed, and everything in Phase 4 that
 does not need the portal is done too — the remaining items are the application
 itself, reading the certification pages, and testing in the portal harness.
+
+### Since then, outside the phases
+
+- **The bank tripled to 900 questions**, 90 per category, with the geography
+  quality checks generalised to all ten; `npm run questions` exports the lot to
+  CSV for a human fact-check, which is still owed.
+- **Launcher icons.** The page declared no icon at all, so adding it to a phone
+  home screen showed a letter "B". There is now a vector mark in `tools/logo.js`
+  — a brain with a bolt through it — rasterised by `npm run icons` into an
+  `apple-touch-icon`, Android manifest icons including a maskable one, and
+  favicons; `manifest.webmanifest` makes it install standalone. The store art in
+  `art/` was the wrong source for this: it is a listing tile with a wordmark, and
+  the words are unreadable at 48 px.
+
+  Two notes for the portal pass. The bundle grew from 74 KB to 440 KB, because
+  the icons ship with it so the page's own `<head>` links resolve rather than
+  404 inside the player — still 1.4% of the initial-payload cap, but no longer
+  trivially small. And **[verify]** whether certification has anything to say
+  about a playable declaring a web app manifest; nothing found so far suggests
+  it does, but that was searched for rather than read.
 
 **Previously:** Phases 0–3 complete and deployed. Phase 4 (content pass,
 metadata, portal testing and submission) is what remains, and most of it needs

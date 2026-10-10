@@ -2,11 +2,12 @@
   "name": "brain-blitz",
   "version": "1.0.0",
   "private": true,
-  "description": "A fast-paced HTML5 trivia game, self-contained in a single file.",
+  "description": "A fast-paced HTML5 trivia game, self-contained in a single HTML file.",
   "scripts": {
     "test": "node tests/run.js",
     "build": "node tools/build.js",
     "art": "node tools/make-art.js",
+    "icons": "node tools/make-icons.js",
     "questions": "node tools/export-csv.js"
   },
   "devDependencies": {

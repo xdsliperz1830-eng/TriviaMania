@@ -1,9 +1,10 @@
 /**
  * Produces the submission bundle.
  *
- * A Playable is uploaded as a ZIP. The whole game is one self-contained file,
- * so the bundle is just index.html at the archive root — no build step, no
- * external assets, nothing to resolve at runtime.
+ * A Playable is uploaded as a ZIP. All the game code, data and styling lives in
+ * index.html at the archive root — no build step and nothing to fetch at run
+ * time. The launcher icons and the manifest ride along only so the page's own
+ * <head> links resolve instead of 404ing inside the player; no code reads them.
  *
  *   node tools/build.js      (or: npm run build)
  */
@@ -21,17 +22,24 @@ const RECOMMENDED = 15 * MiB;
 const BUNDLE_CAP = 250 * MiB;
 const FILE_CAP = 30 * MiB;        // per file inside the bundle
 
-const CONTENTS = ["index.html"];
+const CONTENTS = ["index.html", "manifest.webmanifest", "icons"];
+
+/** Every file under a bundle entry, so a directory is measured, not stat'd. */
+function filesUnder(entry) {
+  const abs = path.join(DIST, entry);
+  if (!fs.statSync(abs).isDirectory()) return [entry];
+  return fs.readdirSync(abs).flatMap((child) => filesUnder(path.join(entry, child)));
+}
 
 function kb(bytes) { return (bytes / 1024).toFixed(0) + " KB"; }
 
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 
-for (const file of CONTENTS) {
-  const from = path.join(ROOT, file);
-  if (!fs.existsSync(from)) throw new Error(`missing ${file}`);
-  fs.copyFileSync(from, path.join(DIST, file));
+for (const entry of CONTENTS) {
+  const from = path.join(ROOT, entry);
+  if (!fs.existsSync(from)) throw new Error(`missing ${entry}`);
+  fs.cpSync(from, path.join(DIST, entry), { recursive: true });
 }
 
 // index.html must sit at the archive root, so zip from inside dist/.
@@ -40,7 +48,7 @@ execFileSync("zip", ["-q", "-X", "-r", ZIP, ...CONTENTS], { cwd: DIST });
 const zipSize = fs.statSync(ZIP).size;
 const problems = [];
 
-for (const file of CONTENTS) {
+for (const file of CONTENTS.flatMap(filesUnder)) {
   const size = fs.statSync(path.join(DIST, file)).size;
   console.log(`  ${file.padEnd(28)} ${kb(size)}`);
   if (size > FILE_CAP) problems.push(`${file} exceeds the ${FILE_CAP / MiB} MiB per-file limit`);
