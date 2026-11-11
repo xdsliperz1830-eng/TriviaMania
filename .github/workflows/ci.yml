@@ -25,12 +25,10 @@ jobs:
         with:
           node-version: 20
 
-      # No package-lock.json is committed yet (the registry was unreachable from
-      # the environment this was set up in), so `npm install` is used rather than
-      # `npm ci`. The Playwright version is pinned exactly in package.json to keep
-      # this reproducible; commit a lockfile and switch to `npm ci` when you can.
+      # package-lock.json pins Playwright and its one dependency exactly, so every
+      # run installs the same versions.
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       # No --with-deps: the ubuntu-24.04 image already ships every library
       # Chromium needs, and --with-deps only added nine optional font packages

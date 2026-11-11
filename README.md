@@ -63,7 +63,7 @@ game. On iPhone, the ring/silent switch also silences web audio.
 ## Tests
 
 ```bash
-npm install
+npm ci
 npx playwright install chromium
 npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
