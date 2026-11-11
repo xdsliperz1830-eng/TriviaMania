@@ -32,15 +32,18 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      # The runner's apt mirrors sometimes fail to resolve for a few minutes,
-      # which kills the run before a single test starts. Retry the install a
-      # couple of times; this retries setup only, never the tests.
+      # No --with-deps: the ubuntu-24.04 image already ships every library
+      # Chromium needs, and --with-deps only added nine optional font packages
+      # from the runner's apt mirrors. When those mirrors stop resolving, that
+      # step hung until the job timed out without running a test. Leaving it
+      # out means the install only downloads the browser itself. That download
+      # is retried, and only setup is retried, never the tests.
       - name: Install the Chromium browser Playwright drives
         run: |
           for attempt in 1 2 3; do
-            npx playwright install --with-deps chromium && exit 0
-            echo "Browser install failed (attempt $attempt of 3); retrying in 30s"
-            sleep 30
+            timeout 300 npx playwright install chromium && exit 0
+            echo "Browser download failed (attempt $attempt of 3); retrying in 15s"
+            sleep 15
           done
           exit 1
 
