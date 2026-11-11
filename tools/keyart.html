@@ -3,54 +3,106 @@
 <head>
 <meta charset="UTF-8">
 <title>Brain Blitz key art</title>
+<!-- Rendered by tools/make-art.js, which injects the game's own @font-face
+     rules (Lilita One and Nunito, embedded in index.html) before capturing.
+     Icons are the in-game ones from assets/icons/. -->
 <style>
   :root{
-    --navy:#0F172A; --purple:#8B5CF6; --cyan:#22D3EE; --yellow:#FACC15; --white:#F8FAFC;
+    --ink:#040335; --gold:#FEC41C; --gold-2:#FEB41E; --white:#FFFFFF; --soft:#E3E9FF;
+    --edge:.045em solid var(--ink);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:100%;height:100%;overflow:hidden}
   body{
-    display:flex;align-items:center;justify-content:center;
-    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,Arial,sans-serif;
-    color:var(--white);
+    font-family:"Nunito","Segoe UI",system-ui,sans-serif;color:var(--white);
+    /* Four layers: dots, a highlight, a warm wash low on the right, the game's blue. */
     background:
-      radial-gradient(ellipse 70% 80% at 12% 6%, rgba(139,92,246,.85), rgba(139,92,246,0) 100%),
-      radial-gradient(ellipse 60% 75% at 94% 16%, rgba(34,211,238,.60), rgba(34,211,238,0) 100%),
-      radial-gradient(ellipse 75% 80% at 62% 114%, rgba(79,70,229,.75), rgba(79,70,229,0) 100%),
-      linear-gradient(165deg,#1B2350 0%,#131B3D 50%,#0B1120 100%);
+      radial-gradient(rgba(255,255,255,.13) 14%, transparent 16%) 0 0 / 3.4vmin 3.4vmin,
+      radial-gradient(ellipse 60% 55% at 30% 0%, rgba(255,255,255,.20), rgba(255,255,255,0) 100%),
+      radial-gradient(ellipse 55% 60% at 100% 100%, rgba(254,196,28,.20), rgba(254,196,28,0) 100%),
+      linear-gradient(180deg,#3A57DB 0%,#2F48C7 45%,#1C2687 100%);
   }
-  .stage{text-align:center;padding:4%;}
-  .brain{display:block;line-height:1;margin:0 auto .06em;
-         filter:drop-shadow(0 0 .28em rgba(34,211,238,.55));}
-  .logo{font-weight:900;line-height:.92;letter-spacing:-.02em;
-        background:linear-gradient(100deg,var(--cyan) 0%,var(--white) 42%,var(--purple) 78%,var(--yellow) 100%);
-        -webkit-background-clip:text;background-clip:text;color:transparent;
-        filter:drop-shadow(0 .04em .12em rgba(139,92,246,.5));}
-  .tag{color:#D3DEEE;font-weight:700;margin-top:.45em;text-shadow:0 .04em .2em rgba(0,0,0,.45)}
-  .chips{display:flex;gap:.5em;justify-content:center;margin-top:1em;flex-wrap:wrap}
-  .chip{border-radius:999px;padding:.34em .85em;font-weight:800;
-        background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.4)}
-  /* Wide key art */
-  body[data-variant="wide"] .brain{font-size:13vh}
-  body[data-variant="wide"] .logo{font-size:21vh}
-  body[data-variant="wide"] .tag{font-size:5vh}
-  body[data-variant="wide"] .chips{font-size:3.2vh}
-  /* Square icon: logo only, larger, no tagline */
-  body[data-variant="square"] .brain{font-size:30vh}
-  body[data-variant="square"] .logo{font-size:20vh}
-  body[data-variant="square"] .tag,body[data-variant="square"] .chips{display:none}
-  body[data-variant="square"] .stage{padding:8%}
+  .stage{position:absolute;inset:0;display:flex;align-items:center}
+
+  .title{font-family:"Lilita One","Nunito",sans-serif;font-weight:400;line-height:.95;letter-spacing:.02em;
+    color:var(--white);-webkit-text-stroke:.09em var(--ink);paint-order:stroke fill;
+    text-shadow:0 .09em 0 var(--ink)}
+  .title .blitz{color:var(--gold)}
+  .tag{font-weight:900;color:var(--soft);text-shadow:0 .06em 0 rgba(4,3,53,.45)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:.45em}
+  .chip{display:inline-flex;align-items:center;gap:.35em;padding:.28em .7em .28em .35em;border-radius:999px;
+    background:var(--white);color:var(--ink);font-weight:900;border:var(--edge);
+    box-shadow:inset 0 .12em 0 rgba(255,255,255,.9),inset 0 -.18em 0 rgba(4,3,53,.08),0 .14em 0 var(--ink)}
+  .chip img{width:1.55em;height:1.55em}
+  .chip.gold{background:var(--gold)}
+
+  /* A tilted stack of Block Blitz blocks, the same colours as the game. */
+  .blocks{display:grid;grid-template-columns:repeat(4,1fr);gap:.12em;transform:rotate(-8deg)}
+  .b{width:1em;height:1em;border-radius:.2em;border:.05em solid var(--ink);display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 .07em 0 rgba(255,255,255,.5),inset 0 -.09em 0 rgba(4,3,53,.22),0 .07em 0 var(--ink)}
+  .b img{width:64%;height:64%}
+  .b.lucky{background:linear-gradient(135deg,#FFF6C8,#FFE07A 45%,#FFC31C)}
+  .b.lucky img{width:78%;height:78%}
+  .b.empty{visibility:hidden}
+
+  /* ---- wide: title and chips on the left, the block stack on the right ---- */
+  body[data-variant="wide"] .stage{justify-content:space-between;padding:0 7vw 0 8vw}
+  body[data-variant="wide"] .left{display:flex;flex-direction:column;gap:3.2vh}
+  body[data-variant="wide"] .head{display:flex;align-items:center;gap:3vh}
+  body[data-variant="wide"] .bolt{height:24vh}
+  body[data-variant="wide"] .title{font-size:17vh}
+  body[data-variant="wide"] .tag{font-size:4.6vh}
+  body[data-variant="wide"] .chips{font-size:3.5vh;max-width:56vw}
+  body[data-variant="wide"] .blocks{font-size:13vh}
+
+  /* ---- square store icon: the bolt over the title, nothing else ---- */
+  body[data-variant="square"] .stage{flex-direction:column;justify-content:center;gap:2vh}
+  body[data-variant="square"] .left{display:flex;flex-direction:column;align-items:center}
+  body[data-variant="square"] .head{display:flex;flex-direction:column;align-items:center;gap:1vh}
+  body[data-variant="square"] .bolt{height:36vh}
+  body[data-variant="square"] .title{font-size:17vh;text-align:center}
+  body[data-variant="square"] .title .blitz{display:block}
+  body[data-variant="square"] .tag,
+  body[data-variant="square"] .chips,
+  body[data-variant="square"] .blocks{display:none}
 </style>
 </head>
 <body data-variant="wide">
   <div class="stage">
-    <span class="brain">🧠</span>
-    <h1 class="logo">BRAIN<br>BLITZ</h1>
-    <p class="tag">How much do you really know?</p>
-    <div class="chips">
-      <span class="chip">🌎 10 categories</span>
-      <span class="chip">⚡ 15 seconds</span>
-      <span class="chip">🎲 900 questions</span>
+    <div class="left">
+      <div class="head">
+        <img class="bolt" src="../assets/icons/logo-bolt.png" alt="">
+        <h1 class="title">BRAIN <span class="blitz">BLITZ</span></h1>
+      </div>
+      <p class="tag">How much do you really know?</p>
+      <div class="chips">
+        <span class="chip"><img src="../assets/icons/cat-mixed.png" alt="">900 questions</span>
+        <span class="chip"><img src="../assets/icons/cat-general.png" alt="">10 categories</span>
+        <span class="chip"><img src="../assets/icons/calendar.png" alt="">Daily challenge</span>
+        <span class="chip gold"><img src="../assets/icons/lucky-block.png" alt="">Block Blitz</span>
+      </div>
+    </div>
+    <div class="blocks" aria-hidden="true">
+      <span class="b empty"></span>
+      <span class="b" style="background:#32B6FE"><img src="../assets/icons/cat-science.png" alt=""></span>
+      <span class="b empty"></span>
+      <span class="b empty"></span>
+
+      <span class="b" style="background:#E25BD8"><img src="../assets/icons/cat-space.png" alt=""></span>
+      <span class="b" style="background:#32B6FE"><img src="../assets/icons/cat-science.png" alt=""></span>
+      <span class="b lucky"><img src="../assets/icons/lucky-block.png" alt=""></span>
+      <span class="b empty"></span>
+
+      <span class="b" style="background:#E25BD8"><img src="../assets/icons/cat-space.png" alt=""></span>
+      <span class="b" style="background:#47C64D"><img src="../assets/icons/cat-geo.png" alt=""></span>
+      <span class="b" style="background:#FE9100"><img src="../assets/icons/cat-sports.png" alt=""></span>
+      <span class="b" style="background:#FE9100"><img src="../assets/icons/cat-sports.png" alt=""></span>
+
+      <span class="b" style="background:#A66CFF"><img src="../assets/icons/cat-general.png" alt=""></span>
+      <span class="b" style="background:#47C64D"><img src="../assets/icons/cat-geo.png" alt=""></span>
+      <span class="b" style="background:#F6365B"><img src="../assets/icons/cat-food.png" alt=""></span>
+      <span class="b" style="background:#FE9100"><img src="../assets/icons/cat-sports.png" alt=""></span>
     </div>
   </div>
 <script>
