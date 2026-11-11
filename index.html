@@ -757,6 +757,27 @@ body{
 .bk-pip{width:14px;height:14px;border-radius:50%;background:rgba(4,3,53,.35);border:2px solid var(--ink)}
 .bk-pip.on{background:var(--gold)}
 .bk-pips.urgent .bk-pip.on{background:var(--red)}
+.bk-rise-lab{white-space:nowrap}
+.bk-rise-lab.urgent{color:#FFD0DA;animation:bkWarn .8s ease-in-out infinite}
+@keyframes bkWarn{50%{color:#fff}}
+.bk-power{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:3px 10px 3px 5px;border-radius:999px;
+  background:var(--paper);border:var(--edge);box-shadow:var(--bevel),var(--drop-sm);color:var(--ink);
+  font-family:"Lilita One","Nunito",sans-serif;font-size:.95rem;letter-spacing:.3px;
+  transition:transform .1s ease,box-shadow .1s ease}
+.bk-power .ico{width:1.6em;height:1.6em;vertical-align:0}
+.bk-power:disabled{opacity:.45;box-shadow:none;cursor:default}
+.bk-power:not(:disabled):active{transform:translateY(2px);box-shadow:var(--bevel),0 1px 0 var(--ink)}
+.bk-power.armed{background:var(--gold);animation:bkArm .6s ease-in-out infinite}
+@keyframes bkArm{50%{transform:scale(1.08)}}
+.bk-board.arming .bk-block{cursor:crosshair}
+.bk-board.arming{box-shadow:inset 0 4px 0 rgba(4,3,53,.35),0 0 0 4px var(--gold),var(--drop-sm)}
+.bk-board.rise-soon::before{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;z-index:3;pointer-events:none;
+  background:linear-gradient(0deg,rgba(246,54,91,.85),rgba(246,54,91,0));animation:bkWarn2 .8s ease-in-out infinite}
+@keyframes bkWarn2{50%{opacity:.35}}
+.bk-block.lucky{background:linear-gradient(135deg,#FFF6C8,#FFE07A 45%,#FFC31C);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.8),inset 0 -4px 0 rgba(196,106,0,.35),0 0 12px rgba(255,214,74,.8)}
+.bk-block.lucky .ico{width:74%;height:74%}
+.bk-block:focus-visible{outline:3px solid #fff;outline-offset:1px;z-index:4}
 
 .bk-wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
 .bk-board{position:relative;box-sizing:content-box;padding:5px;border-radius:18px;background:rgba(4,3,53,.40);
@@ -808,11 +829,21 @@ body{
 .bk-over-card .res-new-best{margin:0 auto}
 .bk-over-card .res-new-best.show{display:inline-flex;align-items:center;gap:6px}
 
+/* Landscape: the board on the left, the question panel on the right, so a
+   question never covers the blocks. The hint holds the panel's place when no
+   question is open. */
 @media (orientation:landscape) and (max-height:560px){
-  .bk-hint{display:none}
-  .bk-rise{font-size:.64rem}
-  .bk-sheet{left:50%;right:auto;width:min(560px,96%);transform:translate(-50%,115%)}
-  .bk-sheet.open{transform:translate(-50%,0)}
+  #blocks.active{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,48%);
+    grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"hud hud" "board rise" "board panel";
+    column-gap:12px;row-gap:6px}
+  #blocks .hud{grid-area:hud}
+  .bk-rise{grid-area:rise;font-size:.64rem;justify-content:flex-start}
+  .bk-wrap{grid-area:board}
+  .bk-hint{grid-area:panel;display:flex;align-items:center;justify-content:center;padding:0 12px;font-size:.86rem}
+  .bk-sheet{grid-area:panel;position:relative;left:auto;right:auto;bottom:auto;align-self:start;
+    transform:none;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s}
+  .bk-sheet.open{transform:none;opacity:1;visibility:visible}
+  .bk-sheet-card{padding:10px 12px}
   .bk-sheet .q-text{font-size:.95rem;margin-bottom:8px}
   .bk-timer{margin:6px 0}
   .bk-answers .ans{min-height:42px;padding:7px 10px}
@@ -948,7 +979,10 @@ body{
       <button id="bkQuit" class="icon-btn" aria-label="Quit to home" title="Quit"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
     </div>
 
-    <div class="bk-rise"><span class="bk-rise-lab">New row in</span><span class="bk-pips" id="bkPips"></span></div>
+    <div class="bk-rise">
+      <span class="bk-rise-lab" id="bkRiseLab">New row in</span><span class="bk-pips" id="bkPips"></span>
+      <button class="bk-power" id="bkBomb" aria-label="Bomb: blast a whole row" title="Bomb (B): blast a whole row" disabled><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span id="bkBombs">0</span></button>
+    </div>
 
     <div class="bk-wrap" id="bkWrap">
       <div class="bk-board" id="bkBoard" aria-label="Block board"></div>
@@ -1013,7 +1047,7 @@ const ICON_DIR = "assets/icons/";
 const ICON_NAMES = ["cat-mixed", "cat-general", "cat-science", "cat-history", "cat-geo", "cat-movies",
   "cat-sports", "cat-animals", "cat-tech", "cat-food", "cat-space", "logo-bolt", "trophy", "fire",
   "sound-on", "sound-off", "check", "cross", "clock", "tier-crown", "tier-star", "tier-up",
-  "tier-book", "tier-clover", "music-on", "music-off", "lucky-block"];
+  "tier-book", "tier-clover", "music-on", "music-off", "lucky-block", "bomb"];
 const icon = (name) => '<img class="ico" src="' + ICON_DIR + name + '.png" alt="" draggable="false">';
 /** Fill an element with an icon followed by text, keeping the text out of innerHTML. */
 const setIconText = (el, name, text) => {
@@ -4050,10 +4084,18 @@ const Game = {
    Each game uses five random categories so the board stays readable, and
    questions come through the same rotation as the quiz, so a player is
    not asked something they have just seen in either mode.
+
+   Power-ups. Every fifth answer in a streak earns a bomb (up to three):
+   arm it, tap any block, and that block's whole row goes with no question.
+   A rising row sometimes carries a Lucky Block; answer its question and
+   every block of one category on the board blasts at once.
+
+   Keyboard: arrow keys move between blocks, Enter or Space picks a group,
+   B arms a bomb, 1-4 / A-D answer, Escape quits.
    ================================================================ */
 const BLOCK_COLORS = {
   general: "#A66CFF", science: "#32B6FE", history: "#E3A45A", geo: "#47C64D", movies: "#FEC41C",
-  sports: "#FE9100", animals: "#C77B4A", tech: "#8FA3C8", food: "#F6365B", space: "#E25BD8"
+  sports: "#FE9100", animals: "#3DD6B5", tech: "#8FA3C8", food: "#F6365B", space: "#E25BD8"
 };
 
 const Blocks = (() => {
@@ -4063,13 +4105,18 @@ const Blocks = (() => {
   const TIME = 15;                 // seconds per question, as in the quiz
   const FIRST_RISE_EVERY = 4;      // answers between automatic rises at the start
   const CLEAR_BONUS = 500;
+  const LUCKY = "lucky";           // the wild block's "category"
+  const LUCKY_CHANCE = 0.3;        // chance that a rising row carries one (never two on the board)
+  const BOMB_EVERY = 5, MAX_BOMBS = 3, BOMB_POINTS = 20;
 
   let grid = [];                   // grid[col][row] = block | null; row 0 is the bottom
   let cats = [];
   let cell = 40;
   let score = 0, best = 0, streak = 0, bestStreak = 0, blasted = 0, correctCount = 0;
   let riseEvery = FIRST_RISE_EVERY, sinceRise = 0;
-  let picked = null;               // { cat, blocks: [...] } while a question is open
+  let bombs = 0, arming = false;
+  let cursor = { col: 0, row: 0 }; // where arrow keys resume after focus leaves the board
+  let picked = null;               // { cat, blocks: [...], lucky } while a question is open
   let q = null, locked = true, busy = false, over = true;
   let rafId = null, endsAt = 0, timeLeft = TIME, lastTick = null;
   let gen = 0;                     // bumped by start() and quit(), so delayed steps from an old game do nothing
@@ -4086,19 +4133,23 @@ const Blocks = (() => {
   function randomCat(col, row) {
     // Lean towards the neighbour below or to the left, so groups form.
     const r = Math.random();
-    if (row > 0 && grid[col][row - 1] && r < 0.42) return grid[col][row - 1].cat;
-    if (col > 0 && grid[col - 1][row] && r < 0.62) return grid[col - 1][row].cat;
+    const below = row > 0 && grid[col][row - 1], left = col > 0 && grid[col - 1][row];
+    if (below && below.cat !== LUCKY && r < 0.42) return below.cat;
+    if (left && left.cat !== LUCKY && r < 0.62) return left.cat;
     return cats[Math.floor(Math.random() * cats.length)];
   }
 
+  const nameOf = (cat) => (cat === LUCKY ? "Lucky" : CATEGORIES[cat].name);
+
   function makeBlock(cat, col, row) {
     const el = document.createElement("button");
-    el.className = "bk-block";
-    el.style.setProperty("--c", BLOCK_COLORS[cat]);
-    el.innerHTML = icon(CATEGORIES[cat].icon);
-    el.setAttribute("aria-label", CATEGORIES[cat].name + " block");
+    el.className = "bk-block" + (cat === LUCKY ? " lucky" : "");
+    if (cat !== LUCKY) el.style.setProperty("--c", BLOCK_COLORS[cat]);
+    el.innerHTML = icon(cat === LUCKY ? "lucky-block" : CATEGORIES[cat].icon);
     const block = { cat, col, row, el };
+    el._block = block;
     el.addEventListener("click", () => tap(block));
+    el.addEventListener("focus", () => { cursor = { col: block.col, row: block.row }; });
     board().appendChild(el);
     return block;
   }
@@ -4108,6 +4159,8 @@ const Blocks = (() => {
     block.el.style.width = block.el.style.height = (cell - 4) + "px";
     block.el.style.transform =
       "translate(" + (block.col * cell + 2) + "px," + ((ROWS - 1 - block.row) * cell + 2) + "px)";
+    block.el.setAttribute("aria-label",
+      nameOf(block.cat) + " block, column " + (block.col + 1) + ", row " + (block.row + 1));
     if (instant) { void block.el.offsetWidth; block.el.style.transition = ""; }
   }
 
@@ -4164,20 +4217,65 @@ const Blocks = (() => {
       p.className = "bk-pip" + (i < sinceRise ? " on" : "");
       pips.appendChild(p);
     }
-    pips.classList.toggle("urgent", sinceRise >= riseEvery - 1);
+    const soon = !over && sinceRise >= riseEvery - 1;
+    pips.classList.toggle("urgent", soon);
+    $("bkRiseLab").textContent = soon ? "Row coming next!" : "New row in";
+    $("bkRiseLab").classList.toggle("urgent", soon);
+    board().classList.toggle("rise-soon", soon);
     board().classList.toggle("danger", topFull());
+    $("bkBombs").textContent = bombs;
+    $("bkBomb").disabled = bombs === 0 || over;
+    $("bkBomb").classList.toggle("armed", arming);
   }
 
   /* ---------- turns ---------- */
   function tap(block) {
     if (busy || over || picked) return;
     Sound.init();
-    const blocks = groupAt(block);
-    picked = { cat: block.cat, blocks };
+    if (arming) { bombRow(block.row); return; }
+    let cat = block.cat, blocks;
+    if (cat === LUCKY) {
+      // The wild block: a random category on the board, and every block of it.
+      const present = [];
+      eachBlock((b) => { if (b.cat !== LUCKY && present.indexOf(b.cat) === -1) present.push(b.cat); });
+      if (!present.length) return;
+      cat = present[Math.floor(Math.random() * present.length)];
+      blocks = [block];
+      eachBlock((b) => { if (b.cat === cat) blocks.push(b); });
+    } else {
+      blocks = groupAt(block);
+    }
+    picked = { cat, blocks, lucky: block.cat === LUCKY };
     blocks.forEach((b) => b.el.classList.add("pick"));
     board().classList.add("choosing");
     Sound.click();
-    openQuestion(block.cat, blocks.length);
+    openQuestion(cat, blocks.length);
+  }
+
+  function toggleBomb() {
+    if (busy || over || picked || (!arming && bombs === 0)) return;
+    Sound.init();
+    arming = !arming;
+    board().classList.toggle("arming", arming);
+    $("bkHint").textContent = arming ? "Bomb ready: tap any block to blast its whole row."
+                                     : "Tap a group of blocks, then answer its question to blast them.";
+    Sound.click();
+    renderHud();
+  }
+
+  function bombRow(row) {
+    arming = false;
+    board().classList.remove("arming");
+    bombs--;
+    const blocks = [];
+    for (let c = 0; c < COLS; c++) if (grid[c][row]) blocks.push(grid[c][row]);
+    const points = blocks.length * BOMB_POINTS;
+    score += points;
+    picked = { cat: null, blocks };
+    $("bkHint").textContent = "Boom! +" + points;
+    Sound.wrong();   // the low sweep doubles as an explosion
+    renderHud();
+    blast(points);
   }
 
   function multiplier(s) { return 1 + 0.25 * Math.min(Math.max(s - 1, 0), 4); }
@@ -4191,7 +4289,7 @@ const Blocks = (() => {
     q = { cat, text: raw.q, explanation: raw.e, options, correctIndex: options.findIndex((o) => o.correct) };
 
     setIconText($("bkBadge"), CATEGORIES[cat].icon, CATEGORIES[cat].name);
-    $("bkWorth").textContent = "Blast " + n + " · +" + worth(n, streak + 1);
+    $("bkWorth").textContent = (picked && picked.lucky ? "Lucky! " : "") + "Blast " + n + " · +" + worth(n, streak + 1);
     $("bkQ").textContent = q.text;
     $("bkFb").textContent = "";
     $("bkFb").className = "bk-fb";
@@ -4253,6 +4351,10 @@ const Blocks = (() => {
       score += points;
       fb.className = "bk-fb good";
       fb.textContent = (streak >= 3 ? streak + " in a row! " : "Correct! ") + "+" + points;
+      if (streak % BOMB_EVERY === 0 && bombs < MAX_BOMBS) {
+        bombs++;
+        fb.textContent += " · Bomb earned!";
+      }
       Sound.correct(streak);
       // Every 8 correct answers the automatic rise comes one answer sooner, down to every 2.
       if (correctCount % 8 === 0) riseEvery = Math.max(2, riseEvery - 1);
@@ -4338,8 +4440,12 @@ const Blocks = (() => {
       }
       grid[c][0] = null;
     }
+    let luckyCol = -1;
+    let hasLucky = false;
+    eachBlock((b) => { if (b.cat === LUCKY) hasLucky = true; });
+    if (!hasLucky && Math.random() < LUCKY_CHANCE) luckyCol = Math.floor(Math.random() * COLS);
     for (let c = 0; c < COLS; c++) {
-      const b = makeBlock(randomCat(c, 0), c, -1);   // start one row below the board, then slide in
+      const b = makeBlock(c === luckyCol ? LUCKY : randomCat(c, 0), c, -1);   // start below the board, then slide in
       place(b, true);
       b.row = 0; grid[c][0] = b;
       requestAnimationFrame(() => place(b));
@@ -4381,6 +4487,30 @@ const Blocks = (() => {
     renderHud();
   }
 
+  /** Arrow-key navigation: step to the nearest block in that direction. */
+  function moveFocus(dc, dr) {
+    const active = document.activeElement && document.activeElement._block;
+    let { col, row } = active && active.el.isConnected ? active : cursor;
+    if (!active || !active.el.isConnected) {
+      // Resume where the player left off, or the nearest block below it.
+      col = Math.min(col, COLS - 1);
+      row = Math.min(row, ROWS - 1);
+      while (row > 0 && !grid[col][row]) row--;
+      if (grid[col][row]) { grid[col][row].el.focus(); return; }
+    }
+    if (dr !== 0) {
+      const r = row + dr;
+      if (r >= 0 && r < ROWS && grid[col][r]) grid[col][r].el.focus();
+      return;
+    }
+    for (let c = col + dc; c >= 0 && c < COLS; c += dc) {
+      // Same row if there is a block there, otherwise the top of that column.
+      let r = Math.min(row, ROWS - 1);
+      while (r > 0 && !grid[c][r]) r--;
+      if (grid[c][r]) { grid[c][r].el.focus(); return; }
+    }
+  }
+
   /* ---------- lifecycle ---------- */
   function start() {
     gen++;
@@ -4392,6 +4522,8 @@ const Blocks = (() => {
     grid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
     score = 0; streak = 0; bestStreak = 0; blasted = 0; correctCount = 0;
     riseEvery = FIRST_RISE_EVERY; sinceRise = 0;
+    bombs = 0; arming = false; cursor = { col: 0, row: 0 };
+    board().classList.remove("arming");
     picked = null; q = null; locked = true; busy = false; over = false;
     best = parseInt(progress.best.blocks, 10) || 0;
     $("bkOver").classList.remove("show");
@@ -4411,7 +4543,8 @@ const Blocks = (() => {
   function quit() {
     gen++;
     cancelAnimationFrame(rafId);
-    locked = true; over = true; busy = false;
+    locked = true; over = true; busy = false; arming = false;
+    board().classList.remove("arming");
     closeSheet(); unpick();
     $("bkOver").classList.remove("show");
     Music.setMode("home");
@@ -4423,22 +4556,41 @@ const Blocks = (() => {
   const isActive = () => $("blocks").classList.contains("active");
 
   return {
-    start, quit, layout,
+    start, quit, layout, toggleBomb,
     isActive,
-    /** Keyboard: 1-4 / A-D answer, Enter replays from game over, Escape quits. */
+    /** Keyboard: arrows move, Enter/Space pick, B bomb, 1-4 / A-D answer, Escape quits. */
     key(e) {
       const k = e.key.toLowerCase();
       const map = { "1": 0, "2": 1, "3": 2, "4": 3, "a": 0, "b": 1, "c": 2, "d": 3 };
+      const arrows = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, 1], arrowdown: [0, -1] };
       if (k in map && q && !locked) { e.preventDefault(); answer(map[k]); }
       else if ((e.key === "Enter" || e.key === " ") && over) { e.preventDefault(); start(); }
-      else if (e.key === "Escape") { e.preventDefault(); quit(); }
+      else if (k in arrows && !q && !over) { e.preventDefault(); moveFocus(arrows[k][0], arrows[k][1]); }
+      else if (k === "b" && !q) { e.preventDefault(); toggleBomb(); }
+      else if (e.key === "Escape") {
+        e.preventDefault();
+        if (arming) toggleBomb(); else quit();
+      }
+      // Enter or Space on a focused block clicks it natively, which picks its group.
     },
     suspend() { if (isActive() && q && !locked) cancelAnimationFrame(rafId); },
     wake() { if (isActive() && q && !locked) runTimer(); },
     /** For tests: a snapshot of the board, bottom row first. */
-    debug: () => ({ cats, score, streak, riseEvery, sinceRise, over, busy, open: !!q,
+    debug: () => ({ cats, score, streak, riseEvery, sinceRise, over, busy, open: !!q, bombs, arming,
+      lucky: picked ? !!picked.lucky : false, pickedCat: picked ? picked.cat : null,
       correctIndex: q ? q.correctIndex : -1, picked: picked ? picked.blocks.length : 0,
-      rows: ROWS, grid: grid.map((col) => col.map((b) => (b ? b.cat : null))) })
+      rows: ROWS, grid: grid.map((col) => col.map((b) => (b ? b.cat : null))) }),
+    /** For tests: put the board into a state that would otherwise take luck or a long streak. */
+    testSetup(opts) {
+      if (opts.bombs != null) { bombs = opts.bombs; renderHud(); }
+      if (opts.luckyAt) {
+        const [c, r] = opts.luckyAt;
+        if (grid[c][r]) grid[c][r].el.remove();
+        grid[c][r] = makeBlock(LUCKY, c, r);
+        place(grid[c][r], true);
+      }
+      if (opts.sinceRise != null) { sinceRise = opts.sinceRise; renderHud(); }
+    }
   };
 })();
 
@@ -4535,6 +4687,7 @@ function wireInput() {
   $("bkQuit").addEventListener("click", () => Blocks.quit());
   $("bkHome").addEventListener("click", () => Blocks.quit());
   $("bkAgain").addEventListener("click", () => Blocks.start());
+  $("bkBomb").addEventListener("click", () => Blocks.toggleBomb());
   window.addEventListener("resize", () => { if (Blocks.isActive()) Blocks.layout(); });
 
   // Unlock audio on the very first interaction, whatever it is, and start the

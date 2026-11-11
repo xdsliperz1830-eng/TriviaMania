@@ -116,6 +116,80 @@ const ck = (condition, message) => suite.check(condition, message);
   await page.waitForTimeout(2500);
   ck(await count() === 35, `the old game's penalty row does not land on the new board (${await count()} blocks)`);
 
+  /* ---------------- power-ups ---------------- */
+  await page.keyboard.press("Escape");   // leave the game the regression check started
+  await page.waitForTimeout(300);
+  await page.locator("#blocksBtn").click();
+  await page.waitForTimeout(400);
+  ck(await page.locator("#bkBomb").isDisabled(), "the bomb button starts disabled with no bombs");
+
+  // Bomb: arm it, tap a bottom-row block, and exactly that row goes.
+  await page.evaluate(() => Blocks.testSetup({ bombs: 1 }));
+  await page.locator("#bkBomb").click();
+  ck((await dbg()).arming, "tapping the bomb button arms it");
+  const before2 = await count();
+  const rowSize = (await dbg()).grid.filter((col) => col[0]).length;
+  await page.locator("#bkBoard .bk-block").first().click();   // a bottom-row block
+  await page.waitForTimeout(1000);
+  d = await dbg();
+  ck(await count() === before2 - rowSize, `the bomb blasts the whole row (${before2} -> ${await count()})`);
+  ck(d.score === rowSize * 20 && d.bombs === 0 && !d.arming, `the bomb scores 20 a block and is spent (${d.score})`);
+  ck(!d.open, "a bomb asks no question");
+
+  // Lucky Block: every block of one category on the board, plus the lucky one.
+  await page.evaluate(() => Blocks.testSetup({ luckyAt: [3, 0] }));
+  const lucky = page.locator("#bkBoard .bk-block.lucky");
+  ck(await lucky.count() === 1, "a Lucky Block can sit on the board");
+  await lucky.click();
+  await page.waitForTimeout(400);
+  d = await dbg();
+  const ofCat = d.grid.flat().filter((x) => x === d.pickedCat).length;
+  ck(d.lucky && d.picked === ofCat + 1, `the Lucky Block picks every ${d.pickedCat} block (${d.picked} = ${ofCat} + 1)`);
+  const luckyCat = d.pickedCat;
+  await page.keyboard.press(String(d.correctIndex + 1));
+  await page.waitForTimeout(1900);
+  d = await dbg();
+  ck(!d.grid.flat().includes(luckyCat),
+     `a right answer blasts every ${luckyCat} block on the board`);
+  ck(!d.grid.flat().includes("lucky"), "the Lucky Block goes with them");
+  await page.evaluate(() => Blocks.testSetup({ sinceRise: Blocks.debug().riseEvery - 1 }));
+  ck((await page.locator("#bkRiseLab").innerText()).toLowerCase().includes("row coming next"),
+     "the player is warned one answer before a row rises");
+  ck(await page.locator("#bkBoard").evaluate((e) => e.classList.contains("rise-soon")), "the board edge glows before a rise");
+
+  /* ---------------- keyboard ---------------- */
+  await page.evaluate(() => Blocks.testSetup({ sinceRise: 0 }));
+  await page.keyboard.press("ArrowUp");
+  ck(await page.evaluate(() => document.activeElement.classList.contains("bk-block")), "arrow keys move focus onto the blocks");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(400);
+  ck((await dbg()).open, "Enter on a focused block picks its group and opens a question");
+  d = await dbg();
+  await page.keyboard.press(String(d.correctIndex + 1));
+  await page.waitForTimeout(1900);
+  await page.keyboard.press("ArrowLeft");
+  ck(await page.evaluate(() => document.activeElement.classList.contains("bk-block")),
+     "after a turn, the arrow keys pick up again on the board");
+
+  /* ---------------- landscape ---------------- */
+  const land = suite.watch(await browser.newPage());
+  await land.setViewportSize({ width: 844, height: 390 });
+  await land.goto(GAME_URL);
+  await land.waitForTimeout(300);
+  await land.locator("#blocksBtn").click();
+  await land.waitForTimeout(400);
+  await land.locator("#bkBoard .bk-block").first().click();
+  await land.waitForTimeout(500);
+  const lay = await land.evaluate(() => {
+    const b = document.querySelector("#bkBoard").getBoundingClientRect();
+    const sh = document.querySelector("#bkSheet .bk-sheet-card").getBoundingClientRect();
+    return { overlap: !(b.right <= sh.left || sh.right <= b.left || b.bottom <= sh.top || sh.bottom <= b.top),
+             onScreen: sh.bottom <= innerHeight + 1 && sh.right <= innerWidth + 1 && b.bottom <= innerHeight + 1 };
+  });
+  ck(!lay.overlap && lay.onScreen, `in landscape the question sits beside the board (${JSON.stringify(lay)})`);
+
   await browser.close();
   suite.report();
 })();
