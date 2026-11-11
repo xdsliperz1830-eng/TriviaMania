@@ -116,8 +116,8 @@ function describe(page, href) {
     "the manifest asks for a standalone window, not a browser tab");
   t.check(manifest.theme_color === head.metas["theme-color"],
     `the manifest theme colour matches the meta tag (${manifest.theme_color})`);
-  t.check(manifest.background_color === "#0F172A",
-    "the splash background is the game's navy, so the launch does not flash white");
+  t.check(manifest.background_color === "#2F48C7",
+    "the splash background is the game's blue, so the launch does not flash white");
   t.check(!!manifest.start_url && !!manifest.scope,
     "the manifest sets start_url and scope, so it works from a project subpath");
 
