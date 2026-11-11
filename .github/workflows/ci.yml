@@ -32,8 +32,17 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      # The runner's apt mirrors sometimes fail to resolve for a few minutes,
+      # which kills the run before a single test starts. Retry the install a
+      # couple of times; this retries setup only, never the tests.
       - name: Install the Chromium browser Playwright drives
-        run: npx playwright install --with-deps chromium
+        run: |
+          for attempt in 1 2 3; do
+            npx playwright install --with-deps chromium && exit 0
+            echo "Browser install failed (attempt $attempt of 3); retrying in 30s"
+            sleep 30
+          done
+          exit 1
 
       - name: Run the test suites
         run: npm test
