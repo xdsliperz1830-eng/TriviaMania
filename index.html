@@ -771,9 +771,37 @@ body{
 .info-how li{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:800;line-height:1.35;color:var(--ink)}
 .info-how .ico{width:1.9rem;height:1.9rem;vertical-align:0}
 .pl{display:none}
-#home[data-mode="quiz"] .pl-quiz,#home[data-mode="daily"] .pl-daily,#home[data-mode="blocks"] .pl-blocks{display:inline}
-#playBtn:disabled{filter:grayscale(.6);opacity:.75;cursor:default}
-#playBtn:disabled .play-ico{display:none}
+#home[data-mode="quiz"] .pl-quiz,#home[data-mode="blocks"] .pl-blocks{display:inline}
+/* The NEW tag on the Block Blitz tab */
+.new-tag{font-family:"Lilita One","Nunito",sans-serif;font-size:.62rem;letter-spacing:.6px;line-height:1;color:#fff;
+  background:var(--red);border:2px solid var(--ink);border-radius:999px;padding:2px 6px 1px;
+  box-shadow:0 2px 0 var(--ink);transform:rotate(-4deg);animation:newPulse 2.4s ease-in-out infinite}
+@keyframes newPulse{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(-4deg) scale(1.1)}}
+/* Daily: a calendar button in the top bar, with a dot until today's is played */
+.daily-btn{position:relative}
+.daily-dot{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--red);
+  border:2px solid var(--ink);animation:newPulse 2.4s ease-in-out infinite}
+.daily-dot[hidden]{display:none}
+.daily-modal{position:fixed;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;
+  padding:calc(12px + var(--safe-t)) 14px calc(12px + var(--safe-b));
+  background:rgba(4,3,53,.55);animation:fbIn .25s}
+.daily-modal[hidden]{display:none}
+.daily-card{position:relative;width:100%;max-width:420px;max-height:100%;overflow-y:auto}
+.daily-close{position:absolute;top:10px;right:10px}
+.daily-card .info-head{padding-right:44px}
+.daily-play{width:100%;margin-top:14px}
+.daily-play:disabled{filter:grayscale(.6);opacity:.75;cursor:default}
+.daily-play:disabled .play-ico{display:none}
+.mode-tab span{white-space:nowrap}
+@media (max-width:359px){
+  /* narrow phones: the tab labels stay on one line, so the icons step aside */
+  .mode-tab{font-size:.92rem;gap:5px}
+  .mode-tab .ico{display:none}
+  .top-btns{gap:5px}
+  .home-top .icon-btn{width:36px;height:36px}
+  .home-top .icon-btn .ico{width:22px;height:22px}
+  .best-chip{padding:5px 10px;font-size:.78rem;gap:6px}
+}
 .res-daily{margin:12px 0 0;font-weight:900;font-size:.9rem;color:var(--green-ink)}
 
 #blocks{gap:8px;position:relative}
@@ -890,6 +918,7 @@ body{
     <div class="home-top">
       <div class="best-chip" id="bestChip"><img class="ico" id="bestIco" src="assets/icons/trophy.png" alt="" draggable="false"> <span id="bestLabel">Best Score</span> <span id="bestScore">0</span></div>
       <div class="top-btns">
+        <button id="dailyBtn" class="icon-btn daily-btn" aria-label="Daily challenge" aria-haspopup="dialog" title="Daily challenge"><img class="ico" src="assets/icons/calendar.png" alt="" draggable="false"><span class="daily-dot" id="dailyDot" hidden></span></button>
         <button id="musicBtn" class="icon-btn" aria-label="Background music" aria-pressed="true" title="Music on/off"><img class="ico" src="assets/icons/music-on.png" alt="" draggable="false"></button>
         <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
       </div>
@@ -903,8 +932,7 @@ body{
 
     <div class="mode-tabs" role="tablist" aria-label="Game mode">
       <button class="mode-tab" role="tab" id="tabQuiz" data-mode="quiz" aria-controls="panelQuiz" aria-selected="true"><img class="ico" src="assets/icons/cat-general.png" alt="" draggable="false"><span>Quiz</span></button>
-      <button class="mode-tab" role="tab" id="tabDaily" data-mode="daily" aria-controls="panelDaily" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/calendar.png" alt="" draggable="false"><span>Daily</span></button>
-      <button class="mode-tab" role="tab" id="tabBlocks" data-mode="blocks" aria-controls="panelBlocks" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><span>Blocks</span></button>
+      <button class="mode-tab" role="tab" id="tabBlocks" data-mode="blocks" aria-controls="panelBlocks" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><span>Block Blitz</span><span class="new-tag">NEW</span></button>
     </div>
 
     <div class="mode-panel" id="panelQuiz" role="tabpanel" aria-labelledby="tabQuiz">
@@ -918,21 +946,6 @@ body{
 
       <div class="cat-scroll scroll">
         <div class="cat-grid" id="catGrid"><!-- built by JS --></div>
-      </div>
-    </div>
-
-    <div class="mode-panel" id="panelDaily" role="tabpanel" aria-labelledby="tabDaily" hidden>
-      <div class="panel-scroll scroll">
-        <div class="card info-card">
-          <div class="info-head"><img class="ico info-ico" src="assets/icons/calendar.png" alt="" draggable="false"><div><p class="info-kicker" id="dailyDate">Today</p><h2 class="info-title">Today's 10</h2></div></div>
-          <p class="info-sub">The same ten questions for every player today, one from each category. One scored try a day, so make it count.</p>
-          <div class="stat-grid info-stats">
-            <div class="stat"><span class="v" id="dailyStreak">0</span><span class="l">Day streak</span></div>
-            <div class="stat"><span class="v" id="dailyLongest">0</span><span class="l">Longest</span></div>
-            <div class="stat"><span class="v" id="dailyToday">–</span><span class="l">Today</span></div>
-          </div>
-          <p class="info-status" id="dailyStatus"></p>
-        </div>
       </div>
     </div>
 
@@ -951,8 +964,22 @@ body{
     </div>
 
     <div class="home-foot">
-      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="pl pl-quiz">PLAY <span id="playCat">Mixed</span></span><span class="pl pl-daily" id="playDaily">PLAY TODAY'S 10</span><span class="pl pl-blocks">PLAY BLOCK BLITZ</span></button>
+      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="pl pl-quiz">PLAY <span id="playCat">Mixed</span></span><span class="pl pl-blocks">PLAY BLOCK BLITZ</span></button>
       <p class="hint" id="playHint">10 questions · 15 seconds each · answer fast for bonus points</p>
+    </div>
+      <div class="daily-modal" id="dailyModal" role="dialog" aria-modal="true" aria-labelledby="dailyTitle" hidden>
+      <div class="card info-card daily-card">
+        <button class="icon-btn daily-close" id="dailyClose" aria-label="Close" title="Close"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+        <div class="info-head"><img class="ico info-ico" src="assets/icons/calendar.png" alt="" draggable="false"><div><p class="info-kicker" id="dailyDate">Today</p><h2 class="info-title" id="dailyTitle">Daily Challenge</h2></div></div>
+        <p class="info-sub">The same ten questions for every player today, one from each category. One scored try a day, so make it count.</p>
+        <div class="stat-grid info-stats">
+          <div class="stat"><span class="v" id="dailyStreak">0</span><span class="l">Day streak</span></div>
+          <div class="stat"><span class="v" id="dailyLongest">0</span><span class="l">Longest</span></div>
+          <div class="stat"><span class="v" id="dailyToday">–</span><span class="l">Today</span></div>
+        </div>
+        <p class="info-status" id="dailyStatus"></p>
+        <button class="btn btn-primary daily-play" id="dailyPlay"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span id="dailyPlayLabel">PLAY TODAY'S 10</span></button>
+      </div>
     </div>
   </section>
 
@@ -3418,7 +3445,7 @@ const progress = {
   best: {},        // best score keyed by round length
   muted: false,
   music: true,     // background music; on until the player turns it off
-  mode: "quiz",    // last home tab: "quiz" | "daily" | "blocks"
+  mode: "quiz",    // last home tab: "quiz" | "blocks"
   daily: null,     // { date, score, correct } for the last daily challenge played
   days: null,      // { last, count, best }: the run of consecutive days with a daily played
   length: 10       // DEFAULT_ROUND_SIZE, restated so this stays declaration-order safe
@@ -3473,7 +3500,7 @@ function applyProgress(data) {
   }
   if (typeof data.muted === "boolean") progress.muted = data.muted;
   if (typeof data.music === "boolean") progress.music = data.music;
-  if (["quiz", "daily", "blocks"].indexOf(data.mode) !== -1) progress.mode = data.mode;
+  if (["quiz", "blocks"].indexOf(data.mode) !== -1) progress.mode = data.mode;
   const d = data.daily;
   if (d && typeof d.date === "string" && typeof d.score === "number") {
     progress.daily = { date: d.date, score: d.score, correct: Number(d.correct) || 0 };
@@ -3794,14 +3821,7 @@ const UI = {
 
   /** Keep the line under the Play button in step with the chosen mode and length. */
   updatePlayHint() {
-    const mode = $("home").dataset.mode;
-    if (mode === "daily") {
-      $("playHint").textContent = dailyPlayed()
-        ? "Come back tomorrow for ten new questions"
-        : "10 questions · one from each category · the same for everyone today";
-      return;
-    }
-    if (mode === "blocks") {
+    if ($("home").dataset.mode === "blocks") {
       $("playHint").textContent = "Answer right to blast blocks before they stack to the top";
       return;
     }
@@ -3828,10 +3848,7 @@ const UI = {
   refreshBest() {
     const mode = $("home").dataset.mode;
     let ico = "trophy", label = "Best Score", value, title;
-    if (mode === "daily") {
-      ico = "fire"; label = "Day streak"; value = dayStreakNow();
-      title = "Days in a row with the daily challenge played";
-    } else if (mode === "blocks") {
+    if (mode === "blocks") {
       label = "Best"; value = parseInt(progress.best.blocks, 10) || 0;
       title = "Best Block Blitz score";
     } else {
@@ -3844,16 +3861,16 @@ const UI = {
     $("bestChip").title = title;
   },
 
-  /** Switch the home screen between Quiz, Daily and Blocks. */
+  /** Switch the home screen between the Quiz and Block Blitz tabs. */
   setMode(mode, quiet) {
-    if (["quiz", "daily", "blocks"].indexOf(mode) === -1) mode = "quiz";
+    if (["quiz", "blocks"].indexOf(mode) === -1) mode = "quiz";
     $("home").dataset.mode = mode;
     document.querySelectorAll(".mode-tab").forEach((t) => {
       const on = t.dataset.mode === mode;
       t.setAttribute("aria-selected", on ? "true" : "false");
       t.tabIndex = on ? 0 : -1;
     });
-    ["Quiz", "Daily", "Blocks"].forEach((m) => { $("panel" + m).hidden = m.toLowerCase() !== mode; });
+    ["Quiz", "Blocks"].forEach((m) => { $("panel" + m).hidden = m.toLowerCase() !== mode; });
     if (!quiet && progress.mode !== mode) {
       progress.mode = mode;
       markProgressDirty();
@@ -3877,15 +3894,31 @@ const UI = {
       ? "Done for today: " + progress.daily.correct + "/10 correct. A new challenge starts at midnight."
       : (dayStreakNow() > 0 ? "Play today to keep your " + dayStreakNow() + "-day streak going!" : "Not played yet today.");
     status.classList.toggle("done", played);
-    $("playDaily").textContent = played ? "DONE FOR TODAY" : "PLAY TODAY'S 10";
-    $("playBtn").disabled = $("home").dataset.mode === "daily" && played;
+    $("dailyPlayLabel").textContent = played ? "DONE FOR TODAY" : "PLAY TODAY'S 10";
+    $("dailyPlay").disabled = played;
+    $("dailyDot").hidden = played;   // the top-bar calendar shows a dot until today's is played
+    $("dailyBtn").setAttribute("aria-label", played ? "Daily challenge (done today)" : "Daily challenge (not played yet)");
   },
+
+  openDaily() {
+    Sound.init();
+    Sound.click();
+    UI.renderDaily();
+    $("dailyModal").hidden = false;
+    ($("dailyPlay").disabled ? $("dailyClose") : $("dailyPlay")).focus();
+  },
+
+  closeDaily() {
+    if ($("dailyModal").hidden) return;
+    $("dailyModal").hidden = true;
+    $("dailyBtn").focus();
+  },
+
+  isDailyOpen: () => !$("dailyModal").hidden,
 
   /** The shared Play button starts whichever mode is selected. */
   playSelected() {
-    const mode = $("home").dataset.mode;
-    if (mode === "blocks") Blocks.start();
-    else if (mode === "daily") Game.start(true);
+    if ($("home").dataset.mode === "blocks") Blocks.start();
     else Game.start();
   },
 
@@ -4917,11 +4950,16 @@ async function init() {
 function wireInput() {
 
   $("playBtn").addEventListener("click", () => UI.playSelected());
+  $("dailyBtn").addEventListener("click", () => UI.openDaily());
+  $("dailyClose").addEventListener("click", () => UI.closeDaily());
+  $("dailyPlay").addEventListener("click", () => { UI.closeDaily(); Game.start(true); });
+  // A tap on the dimmed backdrop, outside the card, closes the dialog.
+  $("dailyModal").addEventListener("click", (e) => { if (e.target === $("dailyModal")) UI.closeDaily(); });
   document.querySelectorAll(".mode-tab").forEach((t) => {
     t.addEventListener("click", () => UI.setMode(t.dataset.mode));
     // Arrow keys move between tabs, as a tablist should.
     t.addEventListener("keydown", (e) => {
-      const order = ["quiz", "daily", "blocks"];
+      const order = ["quiz", "blocks"];
       const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
       if (!step) return;
       e.preventDefault();
@@ -4951,6 +4989,11 @@ function wireInput() {
 
   // Keyboard shortcuts: 1-4 / A-D to answer, Enter or Space to continue.
   document.addEventListener("keydown", (e) => {
+    if (UI.isDailyOpen()) {
+      // The dialog's own buttons handle Enter and Space; Escape closes it.
+      if (e.key === "Escape") { e.preventDefault(); UI.closeDaily(); }
+      return;
+    }
     if (Blocks.isActive()) { Blocks.key(e); return; }
     if (!$("quiz").classList.contains("active")) {
       if ((e.key === "Enter" || e.key === " ") && $("home").classList.contains("active")) {

@@ -1,7 +1,8 @@
 /**
- * Daily challenge and the home mode tabs. The clock is fixed so "today" is
- * known: the same date gives everyone the same ten questions, one scored try
- * a day, consecutive days build a streak, and a missed day resets it.
+ * Daily challenge (opened from the calendar button in the top bar) and the
+ * home mode tabs. The clock is fixed so "today" is known: the same date gives
+ * everyone the same ten questions, one scored try a day, consecutive days
+ * build a streak, and a missed day resets it.
  */
 const { chromium, GAME_URL, createSuite } = require("./harness");
 const suite = createSuite("daily");
@@ -12,8 +13,8 @@ const DAY2 = new Date("2026-11-12T10:00:00Z");
 const DAY4 = new Date("2026-11-14T10:00:00Z");
 
 async function playDaily(page) {
-  await page.locator("#tabDaily").click();
-  await page.locator("#playBtn").click();
+  await page.locator("#dailyBtn").click();
+  await page.locator("#dailyPlay").click();
   await page.waitForTimeout(250);
   for (let i = 0; i < 10; i++) {
     const ci = await page.evaluate(() => state.round[state.index].correctIndex);
@@ -45,20 +46,25 @@ async function playDaily(page) {
   ck(JSON.stringify(a.r) !== JSON.stringify(c.r), "the next day brings a different set");
   ck(a.r.length === 10 && new Set(a.cats).size === 10, "ten questions, one from each category");
 
-  /* ---------------- tabs and a first daily ---------------- */
+  /* ---------------- tabs, the calendar button and a first daily ---------------- */
   const page = suite.watch(await ctx.newPage());
   await page.clock.setFixedTime(DAY1);
   await page.goto(GAME_URL);
   await page.waitForTimeout(300);
+  ck(await page.locator(".mode-tab").count() === 2, "the home screen has two tabs, Quiz and Block Blitz");
   ck(await page.locator("#tabQuiz").getAttribute("aria-selected") === "true", "the Quiz tab is selected by default");
-  ck(await page.locator("#panelDaily").isHidden() && await page.locator("#panelBlocks").isHidden(),
-     "only the Quiz panel shows at first");
+  ck(await page.locator("#panelBlocks").isHidden(), "only the Quiz panel shows at first");
+  ck((await page.locator("#tabBlocks .new-tag").innerText()) === "NEW", "the Block Blitz tab carries a NEW tag");
+  ck(await page.locator("#dailyDot").isVisible(), "the calendar button shows a dot while today's daily is unplayed");
 
-  await page.locator("#tabDaily").click();
-  ck(await page.locator("#panelDaily").isVisible() && await page.locator("#panelQuiz").isHidden(), "the Daily tab swaps the panel");
-  ck((await page.locator("#playBtn").innerText()).includes("TODAY'S 10"), "the Play button names the daily challenge");
-  ck((await page.locator("#bestLabel").innerText()) === "Day streak" && (await page.locator("#bestScore").innerText()) === "0",
-     "the chip shows the day streak on the Daily tab");
+  await page.locator("#dailyBtn").click();
+  ck(await page.locator("#dailyModal").isVisible(), "the calendar button opens the daily challenge");
+  ck((await page.locator("#dailyPlay").innerText()).includes("TODAY'S 10"), "the dialog's Play button names the daily challenge");
+  await page.keyboard.press("Escape");
+  ck(await page.locator("#dailyModal").isHidden(), "Escape closes the dialog");
+  await page.locator("#dailyBtn").click();
+  await page.mouse.click(5, 420);   // the dimmed backdrop, outside the card
+  ck(await page.locator("#dailyModal").isHidden(), "a tap outside the card closes the dialog");
 
   await playDaily(page);
   const st = await page.evaluate(() => ({ daily: state.daily, score: state.score, seen: progress.seen.length }));
@@ -69,24 +75,33 @@ async function playDaily(page) {
 
   await page.locator("#homeBtn").click();
   await page.waitForTimeout(250);
-  ck(await page.locator("#playBtn").isDisabled() && (await page.locator("#playBtn").innerText()).includes("DONE FOR TODAY"),
-     "one scored try a day: Play is disabled once it is done");
+  ck(await page.locator("#dailyDot").isHidden(), "the dot clears once today's daily is played");
+  ck(!(await page.locator("#playBtn").isDisabled()), "the main Play button still starts a quiz");
+  await page.locator("#dailyBtn").click();
+  ck(await page.locator("#dailyPlay").isDisabled() && (await page.locator("#dailyPlay").innerText()).includes("DONE FOR TODAY"),
+     "one scored try a day: the daily's Play is disabled once it is done");
   ck((await page.locator("#dailyToday").innerText()) === String(st.score), "today's score shows on the Daily panel");
   await page.evaluate(() => Game.start(true));
   ck(await page.evaluate(() => !state.roundActive), "starting the daily again by any route is refused");
 
+  await page.locator("#dailyClose").click();
+
   /* ---------------- the tab is remembered ---------------- */
+  await page.locator("#tabBlocks").click();
   await page.waitForTimeout(1000);
   await page.reload();
   await page.waitForTimeout(300);
-  ck(await page.locator("#tabDaily").getAttribute("aria-selected") === "true", "the last tab is remembered after a reload");
+  ck(await page.locator("#tabBlocks").getAttribute("aria-selected") === "true", "the last tab is remembered after a reload");
 
   /* ---------------- consecutive days ---------------- */
   await page.clock.setFixedTime(DAY2);
   await page.reload();
   await page.waitForTimeout(300);
-  ck(!(await page.locator("#playBtn").isDisabled()), "the next day the daily is open again");
+  ck(await page.locator("#dailyDot").isVisible(), "the next day the dot is back");
+  await page.locator("#dailyBtn").click();
+  ck(!(await page.locator("#dailyPlay").isDisabled()), "the next day the daily is open again");
   ck((await page.locator("#dailyStatus").innerText()).includes("1-day streak"), "it nudges the player to keep the streak");
+  await page.locator("#dailyClose").click();
   await playDaily(page);
   ck((await page.locator("#resDaily").innerText()).includes("2-day streak"), "a second day in a row makes a 2-day streak");
 
@@ -95,8 +110,10 @@ async function playDaily(page) {
   await page.clock.setFixedTime(DAY4);
   await page.reload();
   await page.waitForTimeout(300);
+  await page.locator("#dailyBtn").click();
   ck((await page.locator("#dailyStreak").innerText()) === "0", "a missed day breaks the streak");
   ck((await page.locator("#dailyLongest").innerText()) === "2", "the longest streak is kept");
+  await page.locator("#dailyClose").click();
   await playDaily(page);
   ck((await page.locator("#resDaily").innerText()).includes("1-day streak"), "playing again starts a new streak at 1");
 
@@ -106,7 +123,8 @@ async function playDaily(page) {
   /* ---------------- tabs from the keyboard ---------------- */
   await page.locator("#homeBtn").click();
   await page.waitForTimeout(200);
-  await page.locator("#tabDaily").focus();
+  await page.locator("#tabQuiz").click();
+  await page.locator("#tabQuiz").focus();
   await page.keyboard.press("ArrowRight");
   ck(await page.locator("#tabBlocks").getAttribute("aria-selected") === "true", "arrow keys move between tabs");
   ck((await page.locator("#playBtn").innerText()).includes("BLOCK BLITZ"), "the Play button follows the tab");

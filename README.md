@@ -16,12 +16,17 @@ standalone, saving progress to `localStorage` instead of the cloud.
 
 ## Modes
 
-The home screen has three tabs (**Quiz**, **Daily** and **Blocks**) and one Play
-button that starts whichever is selected. The last tab used is remembered. The
-best-score chip in the corner follows the tab: the quiz best for the chosen
-length, the day streak, or the Block Blitz best.
+The home screen has two tabs, **Quiz** and **Block Blitz** (marked NEW), and one
+Play button that starts whichever is selected. The last tab used is remembered.
+The best-score chip in the corner follows the tab: the quiz best for the chosen
+length, or the Block Blitz best.
 
 ### Daily challenge
+
+Opened from the calendar button in the top bar, beside the music and sound
+buttons. A red dot on the button shows until today's challenge is played. The
+button opens a card with the day streak, the longest run and today's score, and
+its own Play button.
 
 The same ten questions for every player on a given day, one from each category.
 There's no server: the local date seeds a small PRNG (`buildDailyRound`) that
@@ -85,8 +90,8 @@ sits beside the board instead of over it.
 
 **Controls:** tap or click a length and a category, then Play; tap or click an
 answer; `1`–`4` / `A`–`D` also work, `Enter` or
-`Space` advances, `Esc` quits to the home screen. The arrow keys switch the home
-tabs. In Block Blitz they move between blocks, `Enter` picks a group, `B` arms a
+`Space` advances, `Esc` quits to the home screen (or closes the daily
+challenge card). The arrow keys switch the home tabs. In Block Blitz they move between blocks, `Enter` picks a group, `B` arms a
 bomb and `Esc` disarms it or quits. Sound can be muted from either
 the home or quiz screen, and the preference is remembered.
 
