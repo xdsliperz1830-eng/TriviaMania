@@ -679,18 +679,35 @@ body{
    beside a one-line title, the mute button floats in the corner, and the
    spacing above the list is tightened. */
 #home{position:relative}
-.home-top{position:absolute;top:0;right:0;z-index:3;padding:2px}
-.logo-wrap{display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 46px 0}
-.brain{font-size:1.95rem}
-.logo{font-size:clamp(1.7rem,8.2vw,2.6rem);letter-spacing:.5px;white-space:nowrap}
+/* A slim top bar holds the best score (left) and mute (right), so the title
+   gets its own row with nothing crowding it. */
+.home-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 0}
+.best-chip{margin:0;padding:6px 14px;font-size:.86rem}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0 0}
+.brain{font-size:2.1rem}
+.logo{font-size:clamp(1.75rem,9vw,2.8rem);letter-spacing:.5px;white-space:nowrap}
 .logo .blitz{display:inline;margin-left:.22em}
-.tagline{margin:6px 0 0;font-size:.9rem;text-align:center}
-@media (max-width:359px){
-  .logo{font-size:1.45rem}
-  .brain{font-size:1.6rem}
+.tagline{margin:8px 0 0;font-size:.9rem;text-align:center}
+/* The round-length picker reads first, centred; "Choose a category" then sits
+   directly above the grid it labels. column-reverse swaps the two without
+   moving the markup, so landscape can keep them side by side. */
+.picker-row{flex-direction:column-reverse;align-items:stretch;flex-wrap:nowrap;gap:0;margin:18px 4px 8px}
+.picker-row .section-label{margin:14px 0 0}
+.len-row{flex:0 0 auto;justify-content:center;min-width:0}
+/* Tall screens have height to spare: spend it on air around the title. */
+@media (orientation:portrait) and (min-height:760px){
+  .logo-wrap{padding-top:28px}
+  .tagline{margin-top:10px}
+  .picker-row{margin-top:26px}
+  .picker-row .section-label{margin-top:20px}
 }
-.best-chip{margin-top:10px;padding:6px 14px;font-size:.88rem}
-.picker-row{margin:12px 4px 8px}
+/* Short screens: tighten again so the grid keeps its rows. */
+@media (max-height:700px){
+  .logo-wrap{padding-top:8px}
+  .tagline{margin-top:5px}
+  .picker-row{margin:10px 4px 6px}
+  .picker-row .section-label{margin-top:10px}
+}
 .cat{padding:10px 12px}
 .cat-grid{gap:9px;padding-top:2px}
 .cat-scroll{-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 14px),transparent 100%);
@@ -704,12 +721,15 @@ body{
 /* Landscape: the tagline goes and the best score moves into the top-left
    corner, mirroring the mute button, so the list gets the height. */
 @media (orientation:landscape) and (max-height:560px){
-  .logo-wrap{padding:0 50px;gap:12px}
+  .home-top{position:absolute;top:0;left:0;right:0;z-index:3;pointer-events:none}
+  .home-top > *{pointer-events:auto}
+  .logo-wrap{padding:0;gap:12px}
   .logo{font-size:2.1rem}
   .brain{font-size:1.7rem}
   .tagline{display:none}
-  .best-chip{position:absolute;top:2px;left:2px;margin:0;z-index:3}
-  .picker-row{margin:8px 4px 6px}
+  .picker-row{flex-direction:row;align-items:center;flex-wrap:wrap;gap:2px 14px;margin:8px 4px 6px}
+  .picker-row .section-label{margin:0}
+  .len-row{justify-content:flex-end;flex:1 1 auto}
 }
 </style>
 </head>
@@ -724,6 +744,7 @@ body{
   <!-- ============================ HOME ============================ -->
   <section id="home" class="screen active" aria-label="Home">
     <div class="home-top">
+      <div class="best-chip" id="bestChip"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> Best Score <span id="bestScore">0</span></div>
       <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
     </div>
 
@@ -732,10 +753,6 @@ body{
       <h1 class="logo">BRAIN<span class="blitz">BLITZ</span></h1>
     </div>
     <p class="tagline">How much do you really know?</p>
-
-    <div style="text-align:center">
-      <div class="best-chip" id="bestChip"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> Best Score <span id="bestScore">0</span></div>
-    </div>
 
     <div class="picker-row">
       <p class="section-label">Choose a category</p>
