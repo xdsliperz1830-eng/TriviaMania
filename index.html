@@ -854,9 +854,14 @@ body{
 
 .bk-hint{flex:0 0 auto;margin:0;text-align:center;color:#E3E9FF;font-size:.8rem;font-weight:800}
 
-.bk-sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;transform:translateY(115%);
-  transition:transform .26s cubic-bezier(.2,.8,.25,1);pointer-events:none}
-.bk-sheet.open{transform:none;pointer-events:auto}
+/* Closed, the sheet is hidden outright, not just slid down. Sliding alone left
+   it peeking out on iPhone: when Safari's toolbar collapses the visible area
+   grows past the page's 100% height, and the "off-screen" sheet showed in the
+   gap. Visibility flips after the slide-out, so the animation still plays. */
+.bk-sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;transform:translateY(115%);visibility:hidden;
+  transition:transform .26s cubic-bezier(.2,.8,.25,1),visibility 0s linear .26s;pointer-events:none}
+.bk-sheet.open{transform:none;visibility:visible;pointer-events:auto;
+  transition:transform .26s cubic-bezier(.2,.8,.25,1),visibility 0s}
 .bk-sheet-card{padding:14px 14px 12px}
 .bk-sheet-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .bk-sheet .cat-badge{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;
