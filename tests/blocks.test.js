@@ -4,6 +4,12 @@
  * raises a row, a full column ends the game, and quitting returns home.
  */
 const { chromium, GAME_URL, createSuite } = require("./harness");
+
+/** Open Block Blitz the way a player does: the Blocks tab, then Play. */
+async function startBlocks(page) {
+  await page.locator("#tabBlocks").click();
+  await page.locator("#playBtn").click();
+}
 const suite = createSuite("blocks");
 const ck = (condition, message) => suite.check(condition, message);
 
@@ -16,11 +22,11 @@ const ck = (condition, message) => suite.check(condition, message);
   const dbg = () => page.evaluate(() => Blocks.debug());
   const count = () => page.evaluate(() => document.querySelectorAll("#bkBoard .bk-block:not(.pop)").length);
 
-  ck(await page.locator("#catGrid .cat").count() === 11, "the mode card leaves the category grid as it was");
-  await page.locator("#blocksBtn").click();
+  ck(await page.locator("#catGrid .cat").count() === 11, "the Blocks tab leaves the category grid as it was");
+  await startBlocks(page);
   await page.waitForTimeout(400);
   let d = await dbg();
-  ck(await page.evaluate(() => document.querySelector("#blocks").classList.contains("active")), "the mode card opens Block Blitz");
+  ck(await page.evaluate(() => document.querySelector("#blocks").classList.contains("active")), "the Blocks tab and Play open Block Blitz");
   ck(d.cats.length === 5 && new Set(d.cats).size === 5, `five distinct categories are in play (${d.cats})`);
   ck(await count() === 35, "the board starts with five full rows of seven");
   ck(d.rows >= 8 && d.rows <= 11, `the board height is within 8-11 rows (${d.rows})`);
@@ -92,7 +98,7 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(await page.evaluate(() => Music.getMode()) === "home", "the music drops back to the light mix at home");
 
   // Regressions: a delayed step from a game that has ended must not touch the next one.
-  await page.locator("#blocksBtn").click();
+  await startBlocks(page);
   await page.waitForTimeout(400);
   await page.locator("#bkBoard .bk-block").first().click();
   await page.waitForTimeout(300);
@@ -103,7 +109,7 @@ const ck = (condition, message) => suite.check(condition, message);
   await page.waitForTimeout(1500);
   ck(true, "quitting while a blast is pending throws nothing (page errors fail the suite)");
 
-  await page.locator("#blocksBtn").click();
+  await startBlocks(page);
   await page.waitForTimeout(400);
   await page.locator("#bkBoard .bk-block").first().click();
   await page.waitForTimeout(300);
@@ -112,14 +118,14 @@ const ck = (condition, message) => suite.check(condition, message);
   await page.waitForTimeout(100);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(100);
-  await page.locator("#blocksBtn").click();                  // ...and a new game starts at once
+  await startBlocks(page);                  // ...and a new game starts at once
   await page.waitForTimeout(2500);
   ck(await count() === 35, `the old game's penalty row does not land on the new board (${await count()} blocks)`);
 
   /* ---------------- power-ups ---------------- */
   await page.keyboard.press("Escape");   // leave the game the regression check started
   await page.waitForTimeout(300);
-  await page.locator("#blocksBtn").click();
+  await startBlocks(page);
   await page.waitForTimeout(400);
   ck(await page.locator("#bkBomb").isDisabled(), "the bomb button starts disabled with no bombs");
 
@@ -178,7 +184,7 @@ const ck = (condition, message) => suite.check(condition, message);
   await land.setViewportSize({ width: 844, height: 390 });
   await land.goto(GAME_URL);
   await land.waitForTimeout(300);
-  await land.locator("#blocksBtn").click();
+  await startBlocks(land);
   await land.waitForTimeout(400);
   await land.locator("#bkBoard .bk-block").first().click();
   await land.waitForTimeout(500);

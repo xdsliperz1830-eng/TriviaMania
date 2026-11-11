@@ -692,22 +692,25 @@ body{
 /* The round-length picker reads first, centred; "Choose a category" then sits
    directly above the grid it labels. column-reverse swaps the two without
    moving the markup, so landscape can keep them side by side. */
-.picker-row{flex-direction:column-reverse;align-items:stretch;flex-wrap:nowrap;gap:0;margin:18px 4px 8px}
+.picker-row{flex-direction:column-reverse;align-items:stretch;flex-wrap:nowrap;gap:0;margin:14px 4px 8px}
 .picker-row .section-label{margin:14px 0 0}
 .len-row{flex:0 0 auto;justify-content:center;min-width:0}
 /* Tall screens have height to spare: spend it on air around the title. */
 @media (orientation:portrait) and (min-height:760px){
-  .logo-wrap{padding-top:28px}
-  .tagline{margin-top:10px}
-  .picker-row{margin-top:26px}
-  .picker-row .section-label{margin-top:20px}
+  .logo-wrap{padding-top:20px}
+  .tagline{margin-top:8px}
+  .mode-tabs{margin-top:18px}
+  .picker-row{margin-top:18px}
+  .picker-row .section-label{margin-top:16px}
 }
 /* Short screens: tighten again so the grid keeps its rows. */
 @media (max-height:700px){
-  .logo-wrap{padding-top:8px}
-  .tagline{margin-top:5px}
-  .picker-row{margin:10px 4px 6px}
-  .picker-row .section-label{margin-top:10px}
+  .logo-wrap{padding-top:6px}
+  .tagline{margin-top:4px}
+  .mode-tabs{margin-top:8px}
+  .mode-tab{padding:4px}
+  .picker-row{margin:8px 4px 6px}
+  .picker-row .section-label{margin-top:8px}
 }
 .cat{padding:10px 12px}
 .cat-grid{gap:9px;padding-top:2px}
@@ -728,7 +731,11 @@ body{
   .logo{font-size:2.1rem}
   .brain{font-size:1.7rem}
   .tagline{display:none}
-  .picker-row{flex-direction:row;align-items:center;flex-wrap:wrap;gap:2px 14px;margin:8px 4px 6px}
+  .picker-row{flex-direction:row;align-items:center;flex-wrap:wrap;gap:2px 14px;margin:6px 4px 4px}
+  /* landscape: a compact tab row of its own, centred under the title */
+  .mode-tabs{align-self:center;width:min(380px,100%);margin:6px 0 0;padding:2px}
+  .mode-tab{padding:2px 4px;font-size:.84rem}
+  .mode-tab .ico{width:1.3em;height:1.3em}
   .picker-row .section-label{margin:0}
   .len-row{justify-content:flex-end;flex:1 1 auto}
 }
@@ -737,18 +744,37 @@ body{
    Block Blitz (draft mode). Each category is a colour; answer a
    question from a group's category to blast the whole group.
    ============================================================ */
-.mode-card{width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;margin:2px 0 10px;border-radius:var(--r-md);
-  text-align:left;color:#fff;background:linear-gradient(135deg,#7B4DFF,#B26CFF);border:var(--edge);
-  box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -5px 0 rgba(40,0,90,.3),var(--drop-sm);
-  transition:transform .1s ease,box-shadow .1s ease}
-.mode-card:active{transform:translateY(2px);box-shadow:inset 0 3px 0 rgba(255,255,255,.35),0 1px 0 var(--ink)}
-.mode-card .ico{width:2.3rem;height:2.3rem;vertical-align:0}
-.mode-card .meta{flex:1 1 auto;min-width:0}
-.mode-card .nm{display:block;font-family:"Lilita One","Nunito",sans-serif;font-size:1.15rem;letter-spacing:.4px;
-  text-shadow:0 2px 0 rgba(4,3,53,.55)}
-.mode-card .ct{display:block;font-size:.74rem;font-weight:800;color:#EDE4FF;margin-top:2px}
-.mode-tag{flex:0 0 auto;font-family:"Lilita One","Nunito",sans-serif;font-size:.72rem;letter-spacing:.8px;color:var(--ink);
-  background:var(--gold);border:2px solid var(--ink);border-radius:999px;padding:2px 9px}
+/* Home mode tabs: Quiz | Daily | Blocks. One shared Play button starts the
+   selected mode; only the matching label inside it is shown. */
+.mode-tabs{flex:0 0 auto;display:flex;gap:5px;margin:14px 2px 0;padding:4px;border-radius:16px;
+  background:rgba(4,3,53,.32);border:3px solid var(--ink)}
+.mode-tab{flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 4px;border-radius:11px;
+  border:2px solid transparent;color:#E3E9FF;font-family:"Lilita One","Nunito",sans-serif;font-size:1rem;letter-spacing:.4px;
+  transition:background .15s ease}
+.mode-tab .ico{width:1.5em;height:1.5em;vertical-align:0}
+.mode-tab:hover{background:rgba(255,255,255,.08)}
+.mode-tab[aria-selected="true"]{background:var(--gold);color:var(--ink);border-color:var(--ink);
+  box-shadow:var(--bevel-gold),0 3px 0 var(--ink)}
+.mode-panel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.mode-panel[hidden]{display:none}
+.panel-scroll{flex:1 1 auto;min-height:0;padding:12px 2px 6px}
+.info-card{padding:16px}
+.info-head{display:flex;align-items:center;gap:12px}
+.info-head .info-ico{width:3.2rem;height:3.2rem;vertical-align:0}
+.info-kicker{margin:0;font-size:.72rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-soft)}
+.info-title{margin:2px 0 0;font-family:"Lilita One","Nunito",sans-serif;font-weight:400;font-size:1.6rem;letter-spacing:.4px;color:var(--ink)}
+.info-sub{margin:10px 0 12px;font-size:.88rem;font-weight:700;line-height:1.45;color:var(--ink-soft)}
+.info-stats .stat{padding:10px 6px}
+.info-status{margin:12px 0 0;text-align:center;font-weight:900;font-size:.9rem;color:var(--ink)}
+.info-status.done{color:var(--green-ink)}
+.info-how{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.info-how li{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:800;line-height:1.35;color:var(--ink)}
+.info-how .ico{width:1.9rem;height:1.9rem;vertical-align:0}
+.pl{display:none}
+#home[data-mode="quiz"] .pl-quiz,#home[data-mode="daily"] .pl-daily,#home[data-mode="blocks"] .pl-blocks{display:inline}
+#playBtn:disabled{filter:grayscale(.6);opacity:.75;cursor:default}
+#playBtn:disabled .play-ico{display:none}
+.res-daily{margin:12px 0 0;font-weight:900;font-size:.9rem;color:var(--green-ink)}
 
 #blocks{gap:8px;position:relative}
 .bk-rise{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:10px;color:#E3E9FF;font-weight:900;
@@ -860,9 +886,9 @@ body{
 <div id="app">
 
   <!-- ============================ HOME ============================ -->
-  <section id="home" class="screen active" aria-label="Home">
+  <section id="home" class="screen active" aria-label="Home" data-mode="quiz">
     <div class="home-top">
-      <div class="best-chip" id="bestChip"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> Best Score <span id="bestScore">0</span></div>
+      <div class="best-chip" id="bestChip"><img class="ico" id="bestIco" src="assets/icons/trophy.png" alt="" draggable="false"> <span id="bestLabel">Best Score</span> <span id="bestScore">0</span></div>
       <div class="top-btns">
         <button id="musicBtn" class="icon-btn" aria-label="Background music" aria-pressed="true" title="Music on/off"><img class="ico" src="assets/icons/music-on.png" alt="" draggable="false"></button>
         <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
@@ -875,25 +901,57 @@ body{
     </div>
     <p class="tagline">How much do you really know?</p>
 
-    <div class="picker-row">
-      <p class="section-label">Choose a category</p>
-      <div class="len-row">
-        <span class="len-label">Questions</span>
-        <div class="len-pills" id="lenPills" role="group" aria-label="Questions per round"></div>
+    <div class="mode-tabs" role="tablist" aria-label="Game mode">
+      <button class="mode-tab" role="tab" id="tabQuiz" data-mode="quiz" aria-controls="panelQuiz" aria-selected="true"><img class="ico" src="assets/icons/cat-general.png" alt="" draggable="false"><span>Quiz</span></button>
+      <button class="mode-tab" role="tab" id="tabDaily" data-mode="daily" aria-controls="panelDaily" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/calendar.png" alt="" draggable="false"><span>Daily</span></button>
+      <button class="mode-tab" role="tab" id="tabBlocks" data-mode="blocks" aria-controls="panelBlocks" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><span>Blocks</span></button>
+    </div>
+
+    <div class="mode-panel" id="panelQuiz" role="tabpanel" aria-labelledby="tabQuiz">
+      <div class="picker-row">
+        <p class="section-label">Choose a category</p>
+        <div class="len-row">
+          <span class="len-label">Questions</span>
+          <div class="len-pills" id="lenPills" role="group" aria-label="Questions per round"></div>
+        </div>
+      </div>
+
+      <div class="cat-scroll scroll">
+        <div class="cat-grid" id="catGrid"><!-- built by JS --></div>
       </div>
     </div>
 
-    <div class="cat-scroll scroll">
-      <button class="mode-card" id="blocksBtn">
-        <img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false">
-        <span class="meta"><span class="nm">Block Blitz</span><span class="ct">Answer right to blast matching blocks</span></span>
-        <span class="mode-tag">NEW</span>
-      </button>
-      <div class="cat-grid" id="catGrid"><!-- built by JS --></div>
+    <div class="mode-panel" id="panelDaily" role="tabpanel" aria-labelledby="tabDaily" hidden>
+      <div class="panel-scroll scroll">
+        <div class="card info-card">
+          <div class="info-head"><img class="ico info-ico" src="assets/icons/calendar.png" alt="" draggable="false"><div><p class="info-kicker" id="dailyDate">Today</p><h2 class="info-title">Today's 10</h2></div></div>
+          <p class="info-sub">The same ten questions for every player today, one from each category. One scored try a day, so make it count.</p>
+          <div class="stat-grid info-stats">
+            <div class="stat"><span class="v" id="dailyStreak">0</span><span class="l">Day streak</span></div>
+            <div class="stat"><span class="v" id="dailyLongest">0</span><span class="l">Longest</span></div>
+            <div class="stat"><span class="v" id="dailyToday">–</span><span class="l">Today</span></div>
+          </div>
+          <p class="info-status" id="dailyStatus"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-panel" id="panelBlocks" role="tabpanel" aria-labelledby="tabBlocks" hidden>
+      <div class="panel-scroll scroll">
+        <div class="card info-card">
+          <div class="info-head"><img class="ico info-ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><div><p class="info-kicker">Puzzle mode</p><h2 class="info-title">Block Blitz</h2></div></div>
+          <ul class="info-how">
+            <li><img class="ico" src="assets/icons/cat-science.png" alt="" draggable="false"><span>Tap a group of matching blocks to get a question from its category.</span></li>
+            <li><img class="ico" src="assets/icons/check.png" alt="" draggable="false"><span>Answer right to blast the group. Bigger groups score far more.</span></li>
+            <li><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"><span>Wrong answers push up a new row. Don't let the blocks reach the top!</span></li>
+            <li><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span>A streak of 5 earns a bomb, and a Lucky Block blasts a whole colour.</span></li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <div class="home-foot">
-      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg> PLAY <span id="playCat">Mixed</span></button>
+      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="pl pl-quiz">PLAY <span id="playCat">Mixed</span></span><span class="pl pl-daily" id="playDaily">PLAY TODAY'S 10</span><span class="pl pl-blocks">PLAY BLOCK BLITZ</span></button>
       <p class="hint" id="playHint">10 questions · 15 seconds each · answer fast for bonus points</p>
     </div>
   </section>
@@ -949,6 +1007,7 @@ body{
         <h2 class="res-title" id="resTitle">Quiz Complete!</h2>
         <p class="res-msg" id="resMsg">Nice work.</p>
         <div><span class="res-score" id="resScore">0</span><span class="res-score-lab">Total Points</span></div>
+        <p class="res-daily" id="resDaily" hidden></p>
         <div class="res-new-best" id="resNewBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> NEW BEST SCORE!</div>
       </div>
 
@@ -1047,7 +1106,7 @@ const ICON_DIR = "assets/icons/";
 const ICON_NAMES = ["cat-mixed", "cat-general", "cat-science", "cat-history", "cat-geo", "cat-movies",
   "cat-sports", "cat-animals", "cat-tech", "cat-food", "cat-space", "logo-bolt", "trophy", "fire",
   "sound-on", "sound-off", "check", "cross", "clock", "tier-crown", "tier-star", "tier-up",
-  "tier-book", "tier-clover", "music-on", "music-off", "lucky-block", "bomb"];
+  "tier-book", "tier-clover", "music-on", "music-off", "lucky-block", "bomb", "calendar"];
 const icon = (name) => '<img class="ico" src="' + ICON_DIR + name + '.png" alt="" draggable="false">';
 /** Fill an element with an icon followed by text, keeping the text out of innerHTML. */
 const setIconText = (el, name, text) => {
@@ -3359,6 +3418,9 @@ const progress = {
   best: {},        // best score keyed by round length
   muted: false,
   music: true,     // background music; on until the player turns it off
+  mode: "quiz",    // last home tab: "quiz" | "daily" | "blocks"
+  daily: null,     // { date, score, correct } for the last daily challenge played
+  days: null,      // { last, count, best }: the run of consecutive days with a daily played
   length: 10       // DEFAULT_ROUND_SIZE, restated so this stays declaration-order safe
 };
 
@@ -3411,6 +3473,15 @@ function applyProgress(data) {
   }
   if (typeof data.muted === "boolean") progress.muted = data.muted;
   if (typeof data.music === "boolean") progress.music = data.music;
+  if (["quiz", "daily", "blocks"].indexOf(data.mode) !== -1) progress.mode = data.mode;
+  const d = data.daily;
+  if (d && typeof d.date === "string" && typeof d.score === "number") {
+    progress.daily = { date: d.date, score: d.score, correct: Number(d.correct) || 0 };
+  }
+  const days = data.days;
+  if (days && typeof days.last === "string" && typeof days.count === "number") {
+    progress.days = { last: days.last, count: days.count, best: Math.max(Number(days.best) || 0, days.count) };
+  }
   const len = parseInt(data.length, 10);
   if (!isNaN(len)) progress.length = len;
 }
@@ -3426,7 +3497,7 @@ function hydrateProgress() {
 
 function snapshotProgress() {
   return { seen: progress.seen, best: progress.best, muted: progress.muted, music: progress.music,
-           length: progress.length };
+           length: progress.length, mode: progress.mode, daily: progress.daily, days: progress.days };
 }
 
 /** Write through to this device now, and to the cloud on a debounce. */
@@ -3569,6 +3640,83 @@ function buildRound(catKey, requested) {
   });
 }
 
+/* ---- daily challenge ---------------------------------------------------
+   Everyone gets the same ten questions on a given day, one from each
+   category, with no server: the day's date seeds a small PRNG that picks the
+   questions and shuffles them and their answers. Dates are the player's local
+   calendar day, so the challenge turns over at their midnight. The daily
+   round leaves the rotation history alone, so it never uses up fresh
+   questions from the regular quiz.
+   ------------------------------------------------------------------------ */
+function dateKey(d) {
+  d = d || new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function dayBefore(key) {
+  const [y, m, dd] = key.split("-").map(Number);
+  return dateKey(new Date(y, m - 1, dd - 1));
+}
+
+/** A seeded PRNG (cyrb-style string hash into mulberry32). */
+function seededRandom(seed) {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle(arr, rnd) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildDailyRound(key) {
+  const rnd = seededRandom("brainblitz-daily-" + key);
+  const picked = Object.keys(CATEGORIES).map((c) => {
+    const pool = questionsIn(c);
+    return pool[Math.floor(rnd() * pool.length)];
+  });
+  return seededShuffle(picked, rnd).map((q) => {
+    const options = seededShuffle(q.a.map((text, i) => ({ text, correct: i === 0 })), rnd);
+    return { category: q.c, text: q.q, explanation: q.e, options, correctIndex: options.findIndex((o) => o.correct) };
+  });
+}
+
+function dailyPlayed(key) {
+  return !!(progress.daily && progress.daily.date === (key || dateKey()));
+}
+
+/** The current run of consecutive days; a missed day breaks it to 0. */
+function dayStreakNow() {
+  const d = progress.days;
+  if (!d || !d.last) return 0;
+  const today = dateKey();
+  return d.last === today || d.last === dayBefore(today) ? d.count : 0;
+}
+
+function recordDaily(key, score, correct) {
+  progress.daily = { date: key, score, correct };
+  const d = progress.days || { last: "", count: 0, best: 0 };
+  if (d.last !== key) d.count = d.last === dayBefore(key) ? d.count + 1 : 1;
+  d.last = key;
+  d.best = Math.max(d.best || 0, d.count);
+  progress.days = d;
+  markProgressDirty();
+}
+
 /* ================================================================
    5. UI RENDERING
    ================================================================ */
@@ -3644,8 +3792,19 @@ const UI = {
     UI.updatePlayHint();
   },
 
-  /** Keep the line under the Play button in step with the chosen length. */
+  /** Keep the line under the Play button in step with the chosen mode and length. */
   updatePlayHint() {
+    const mode = $("home").dataset.mode;
+    if (mode === "daily") {
+      $("playHint").textContent = dailyPlayed()
+        ? "Come back tomorrow for ten new questions"
+        : "10 questions · one from each category · the same for everyone today";
+      return;
+    }
+    if (mode === "blocks") {
+      $("playHint").textContent = "Answer right to blast blocks before they stack to the top";
+      return;
+    }
     const pool = state.category === "mixed" ? QUESTIONS.length : questionsIn(state.category).length;
     const n = Math.min(state.roundSize, pool);
     $("playHint").textContent =
@@ -3665,15 +3824,76 @@ const UI = {
     UI.updatePlayHint();
   },
 
+  /** The chip shows what matters for the selected mode. */
   refreshBest() {
-    $("bestScore").textContent = loadBest(state.roundSize);
-    $("bestChip").title = "Best score for a " + state.roundSize + "-question round";
+    const mode = $("home").dataset.mode;
+    let ico = "trophy", label = "Best Score", value, title;
+    if (mode === "daily") {
+      ico = "fire"; label = "Day streak"; value = dayStreakNow();
+      title = "Days in a row with the daily challenge played";
+    } else if (mode === "blocks") {
+      label = "Best"; value = parseInt(progress.best.blocks, 10) || 0;
+      title = "Best Block Blitz score";
+    } else {
+      value = loadBest(state.roundSize);
+      title = "Best score for a " + state.roundSize + "-question round";
+    }
+    $("bestIco").src = ICON_DIR + ico + ".png";
+    $("bestLabel").textContent = label;
+    $("bestScore").textContent = value;
+    $("bestChip").title = title;
+  },
+
+  /** Switch the home screen between Quiz, Daily and Blocks. */
+  setMode(mode, quiet) {
+    if (["quiz", "daily", "blocks"].indexOf(mode) === -1) mode = "quiz";
+    $("home").dataset.mode = mode;
+    document.querySelectorAll(".mode-tab").forEach((t) => {
+      const on = t.dataset.mode === mode;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+    });
+    ["Quiz", "Daily", "Blocks"].forEach((m) => { $("panel" + m).hidden = m.toLowerCase() !== mode; });
+    if (!quiet && progress.mode !== mode) {
+      progress.mode = mode;
+      markProgressDirty();
+      Sound.init();
+      Sound.click();
+    }
+    progress.mode = mode;
+    UI.refreshBest();
+    UI.renderDaily();
+    UI.updatePlayHint();
+  },
+
+  renderDaily() {
+    const today = dateKey(), played = dailyPlayed(today);
+    $("dailyDate").textContent = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+    $("dailyStreak").textContent = dayStreakNow();
+    $("dailyLongest").textContent = progress.days ? progress.days.best : 0;
+    $("dailyToday").textContent = played ? progress.daily.score : "–";
+    const status = $("dailyStatus");
+    status.textContent = played
+      ? "Done for today: " + progress.daily.correct + "/10 correct. A new challenge starts at midnight."
+      : (dayStreakNow() > 0 ? "Play today to keep your " + dayStreakNow() + "-day streak going!" : "Not played yet today.");
+    status.classList.toggle("done", played);
+    $("playDaily").textContent = played ? "DONE FOR TODAY" : "PLAY TODAY'S 10";
+    $("playBtn").disabled = $("home").dataset.mode === "daily" && played;
+  },
+
+  /** The shared Play button starts whichever mode is selected. */
+  playSelected() {
+    const mode = $("home").dataset.mode;
+    if (mode === "blocks") Blocks.start();
+    else if (mode === "daily") Game.start(true);
+    else Game.start();
   },
 
   /** Repaint everything on the home screen that a finished round can change. */
   refreshHome() {
     UI.refreshBest();
     UI.buildCategoryGrid();
+    UI.renderDaily();
     UI.updatePlayHint();
   },
 
@@ -3862,6 +4082,13 @@ const UI = {
     $("statAccV").textContent = acc + "%";
     $("statStreakV").textContent = state.bestStreak;
     $("resNewBest").classList.toggle("show", newBest);
+    const daily = $("resDaily");
+    daily.hidden = !state.daily;
+    if (state.daily) {
+      const n = dayStreakNow();
+      daily.textContent = "Daily challenge done · " + n + "-day streak" + (n > 1 ? "!" : "");
+    }
+    $("againBtn").textContent = state.daily ? "Play a Quiz" : "Play Again";
 
     const list = $("reviewList");
     list.innerHTML = "";
@@ -3884,13 +4111,18 @@ const UI = {
    6. GAME FLOW
    ================================================================ */
 const Game = {
-  start() {
+  /** Start a quiz round, or with daily === true today's daily challenge. */
+  start(daily) {
     // Building a round marks its questions as seen, so a second tap arriving
     // before the first round finishes would silently burn a second set of
     // questions the player never gets shown. Play, Play Again and the Enter
     // key all land here, so one guard covers every entry point.
     if (state.roundActive) return;
+    const isDaily = daily === true;
+    if (isDaily && dailyPlayed()) return;          // one scored try a day
     state.roundActive = true;
+    state.daily = isDaily;
+    state.dailyKey = isDaily ? dateKey() : null;   // fixed at the start, so a round across midnight counts for its own day
 
     Sound.init();
     Sound.start();
@@ -3898,8 +4130,12 @@ const Game = {
     Music.setMode("quiz");
     Game.stopTimer();
 
-    state.round = buildRound(state.category, state.roundSize);
-    state.roundSize = state.round.length;   // a short pool can cap the round
+    if (isDaily) {
+      state.round = buildDailyRound(state.dailyKey);
+    } else {
+      state.round = buildRound(state.category, state.roundSize);
+      state.roundSize = state.round.length;   // a short pool can cap the round
+    }
     state.index = 0;
     state.score = 0;
     state.displayedScore = 0;
@@ -4032,9 +4268,15 @@ const Game = {
     state.locked = true;
     $("progFill").style.width = "100%";
 
-    const best = loadBest(state.roundSize);
-    const newBest = state.score > best;
-    if (newBest) saveBest(state.roundSize, state.score);
+    let newBest;
+    if (state.daily) {
+      newBest = state.score > (parseInt(progress.best.daily, 10) || 0);
+      if (newBest) progress.best.daily = state.score;
+      recordDaily(state.dailyKey, state.score, state.correctCount);
+    } else {
+      newBest = state.score > loadBest(state.roundSize);
+      if (newBest) saveBest(state.roundSize, state.score);
+    }
 
     Music.setMode("home");
     UI.refreshHome();
@@ -4661,8 +4903,7 @@ async function init() {
   UI.buildCategoryGrid();
   UI.buildLengthPills();
   $("playCat").textContent = "Mixed";
-  UI.refreshBest();
-  UI.updatePlayHint();
+  UI.setMode(progress.mode, true);
 
   // Pause and resume on YouTube's terms, reusing the countdown handling the
   // hidden-tab path already uses.
@@ -4675,7 +4916,21 @@ async function init() {
 
 function wireInput() {
 
-  $("playBtn").addEventListener("click", () => Game.start());
+  $("playBtn").addEventListener("click", () => UI.playSelected());
+  document.querySelectorAll(".mode-tab").forEach((t) => {
+    t.addEventListener("click", () => UI.setMode(t.dataset.mode));
+    // Arrow keys move between tabs, as a tablist should.
+    t.addEventListener("keydown", (e) => {
+      const order = ["quiz", "daily", "blocks"];
+      const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const next = order[(order.indexOf(t.dataset.mode) + step + order.length) % order.length];
+      UI.setMode(next);
+      document.querySelector('.mode-tab[data-mode="' + next + '"]').focus();
+    });
+  });
   $("nextBtn").addEventListener("click", () => Game.next());
   $("againBtn").addEventListener("click", () => Game.start());
   $("homeBtn").addEventListener("click", () => Game.quitToHome());
@@ -4683,7 +4938,6 @@ function wireInput() {
   $("muteBtn").addEventListener("click", toggleMute);
   $("muteBtn2").addEventListener("click", toggleMute);
   $("musicBtn").addEventListener("click", toggleMusic);
-  $("blocksBtn").addEventListener("click", () => Blocks.start());
   $("bkQuit").addEventListener("click", () => Blocks.quit());
   $("bkHome").addEventListener("click", () => Blocks.quit());
   $("bkAgain").addEventListener("click", () => Blocks.start());
@@ -4700,7 +4954,7 @@ function wireInput() {
     if (Blocks.isActive()) { Blocks.key(e); return; }
     if (!$("quiz").classList.contains("active")) {
       if ((e.key === "Enter" || e.key === " ") && $("home").classList.contains("active")) {
-        e.preventDefault(); Game.start();
+        e.preventDefault(); UI.playSelected();
       } else if (e.key === "Escape" && $("results").classList.contains("active")) {
         e.preventDefault(); Game.quitToHome();
       }
