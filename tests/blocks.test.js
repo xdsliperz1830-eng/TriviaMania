@@ -179,6 +179,32 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(await page.evaluate(() => document.activeElement.classList.contains("bk-block")),
      "after a turn, the arrow keys pick up again on the board");
 
+  /* ---------------- a closed sheet stays hidden ---------------- */
+  // Regression: on iPhone, when Safari's toolbar collapses, the visible area
+  // grows past the page's 100% height. A sheet that was only slid down then
+  // peeked out under the board after quitting and reopening Block Blitz.
+  const tall = suite.watch(await browser.newPage());
+  await tall.setViewportSize({ width: 390, height: 844 });
+  await tall.goto(GAME_URL);
+  await tall.waitForTimeout(300);
+  await tall.addStyleTag({ content: "html,body{height:760px !important}" });
+  await startBlocks(tall);
+  await tall.waitForTimeout(400);
+  await tall.locator("#bkBoard .bk-block").first().click();
+  await tall.waitForTimeout(400);
+  ck(await tall.evaluate(() => getComputedStyle(document.querySelector("#bkSheet")).visibility === "visible"),
+     "an open question sheet is visible");
+  const tci = await tall.evaluate(() => Blocks.debug().correctIndex);
+  await tall.keyboard.press(String(tci + 1));
+  await tall.waitForTimeout(1900);
+  await tall.locator("#bkQuit").click();
+  await tall.waitForTimeout(300);
+  await tall.locator("#playBtn").click();
+  await tall.waitForTimeout(600);
+  ck(await tall.evaluate(() => getComputedStyle(document.querySelector("#bkSheet")).visibility === "hidden"),
+     "after quitting and reopening, the closed sheet is hidden even when the screen is taller than the page");
+  await tall.close();
+
   /* ---------------- landscape ---------------- */
   const land = suite.watch(await browser.newPage());
   await land.setViewportSize({ width: 844, height: 390 });

@@ -854,9 +854,14 @@ body{
 
 .bk-hint{flex:0 0 auto;margin:0;text-align:center;color:#E3E9FF;font-size:.8rem;font-weight:800}
 
-.bk-sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;transform:translateY(115%);
-  transition:transform .26s cubic-bezier(.2,.8,.25,1);pointer-events:none}
-.bk-sheet.open{transform:none;pointer-events:auto}
+/* Closed, the sheet is hidden outright, not just slid down. Sliding alone left
+   it peeking out on iPhone: when Safari's toolbar collapses the visible area
+   grows past the page's 100% height, and the "off-screen" sheet showed in the
+   gap. Visibility flips after the slide-out, so the animation still plays. */
+.bk-sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;transform:translateY(115%);visibility:hidden;
+  transition:transform .26s cubic-bezier(.2,.8,.25,1),visibility 0s linear .26s;pointer-events:none}
+.bk-sheet.open{transform:none;visibility:visible;pointer-events:auto;
+  transition:transform .26s cubic-bezier(.2,.8,.25,1),visibility 0s}
 .bk-sheet-card{padding:14px 14px 12px}
 .bk-sheet-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .bk-sheet .cat-badge{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;
@@ -902,6 +907,29 @@ body{
   .bk-timer{margin:6px 0}
   .bk-answers .ans{min-height:42px;padding:7px 10px}
   .bk-over-card{max-width:520px;gap:8px;padding:12px}
+}
+
+/* ============================================================
+   iPhone layout: fill the real visible screen
+   ============================================================ */
+/* 100% is Safari's small viewport, measured with its toolbars showing. When
+   the toolbar collapses, the screen grows past it and a flat strip appeared
+   under the game. dvh follows the visible area, and the backdrop is sized to
+   the largest it can be, so the gradient always reaches the bottom edge. */
+@supports (height:100dvh){
+  html,body{height:100dvh}
+}
+@supports (height:100lvh){
+  #bg{bottom:auto;height:100lvh}
+}
+/* The hint shares the footer slot the Next button appears in, so the bottom
+   of the quiz is never an empty reserved gap: hint before an answer, Next
+   after. */
+.quiz-foot{position:relative}
+.quiz-foot .q-hint{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);margin:0}
+/* Tall portrait phones have room to spare: bigger answer buttons. */
+@media (orientation:portrait) and (min-height:780px){
+  .answers{max-height:388px;grid-auto-rows:minmax(64px,1fr)}
 }
 </style>
 </head>
@@ -1013,8 +1041,6 @@ body{
 
       <div class="answers" id="answers" role="group" aria-label="Answer choices"></div>
 
-      <p class="q-hint" id="qHint"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"> Faster answers earn more bonus points</p>
-
       <div class="feedback" id="feedback" role="status" aria-live="polite">
         <div class="fb-head"><span id="fbTitle">Correct!</span><span class="fb-pts" id="fbPts"></span></div>
         <p class="fb-exp" id="fbExp"></p>
@@ -1022,6 +1048,7 @@ body{
     </div>
 
     <div class="quiz-foot">
+      <p class="q-hint" id="qHint"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"> Faster answers earn more bonus points</p>
       <button id="nextBtn" class="btn btn-primary">NEXT QUESTION →</button>
     </div>
   </section>
