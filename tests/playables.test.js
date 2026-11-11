@@ -124,7 +124,7 @@ const calls = (page) => page.evaluate(() => window.__sdk.calls.slice());
   await page.waitForTimeout(150);
   ck((await page.locator("#bestScore").innerText()) === "4321",
      "switching length shows that length's cloud-saved best");
-  ck((await page.locator("#muteBtn").innerText()) === "🔇",
+  ck((await page.locator("#muteBtn").getAttribute("data-sound")) === "off",
      "the saved mute preference is restored");
   await page.close();
 
@@ -186,7 +186,7 @@ const calls = (page) => page.evaluate(() => window.__sdk.calls.slice());
   page = await openWith(browser, { inEnv: true, audioEnabled: false });
   ck(await page.evaluate(() => Sound.isAudible() === false),
      "the game is silent when YouTube reports audio disabled");
-  ck((await page.locator("#muteBtn").innerText()) === "🔇",
+  ck((await page.locator("#muteBtn").getAttribute("data-sound")) === "off",
      "the mute button shows muted while YouTube has audio off");
   await page.evaluate(() => window.__sdk.handlers.audio(true));
   await page.waitForTimeout(150);

@@ -147,6 +147,14 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   transition:transform .15s ease,background .2s ease;flex:0 0 auto;}
 .icon-btn:hover{background:rgba(139,92,246,.28)}
 .icon-btn:active{transform:scale(.9)}
+/* Icons from gvesster's Free Icon Pack (see assets/icons/CREDITS.md). Sized in em so each
+   one follows the text it sits beside; the containers below override where it must fill. */
+.ico{width:1.35em;height:1.35em;object-fit:contain;display:inline-block;vertical-align:-.32em;flex:0 0 auto;
+  -webkit-user-drag:none;user-select:none;pointer-events:none}
+.icon-btn .ico{width:26px;height:26px;vertical-align:0}
+.hud-stat .val .ico{width:1.15em;height:1.15em;vertical-align:-.2em;margin-right:.15em}
+#fbTitle{display:inline-flex;align-items:center;gap:.4em}
+#fbTitle .ico{width:1.5em;height:1.5em}
 
 /* ============================================================
    Home screen
@@ -162,6 +170,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 @keyframes shine{to{background-position:220% center}}
 .logo .blitz{display:block;}
 .tagline{margin:10px 0 0;color:var(--muted);font-size:clamp(.9rem,3.6vw,1.05rem);font-weight:600;}
+.brain .ico{width:1.45em;height:1.45em;vertical-align:0;display:block}
 .brain{font-size:2.6rem;display:inline-block;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(34,211,238,.6));}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
 
@@ -181,6 +190,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   transition:transform .15s ease,border-color .2s ease,background .2s ease;}
 .cat:hover{transform:translateY(-2px);border-color:rgba(34,211,238,.5);background:rgba(39,52,73,.9)}
 .cat:active{transform:scale(.97)}
+.cat .emoji .ico{width:1.5em;height:1.5em;vertical-align:0;display:block}
 .cat .emoji{font-size:1.45rem;flex:0 0 auto;filter:drop-shadow(0 0 8px rgba(255,255,255,.18))}
 .cat .meta{min-width:0}
 .cat .nm{display:block;font-weight:800;font-size:.9rem;line-height:1.2;}
@@ -318,6 +328,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 #results{gap:10px;}
 .res-scroll{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:12px;padding:2px;}
 .res-hero{text-align:center;padding:22px 18px;}
+.res-emoji .ico{width:1.4em;height:1.4em;vertical-align:0;display:block}
 .res-emoji{font-size:3.1rem;line-height:1;animation:bob 3s ease-in-out infinite;display:inline-block}
 .res-title{margin:10px 0 4px;font-size:1.32rem;font-weight:900;
   background:linear-gradient(95deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -424,6 +435,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   .hud-stat .lab{font-size:.55rem}
   .hud-stat .val{font-size:.84rem}
   .icon-btn{width:34px;height:34px;font-size:1rem}
+  .icon-btn .ico{width:21px;height:21px}
   .timer{width:38px;height:38px}
   .timer .num{font-size:.85rem}
   .q-card{padding:8px 12px 9px}
@@ -463,11 +475,11 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   <!-- ============================ HOME ============================ -->
   <section id="home" class="screen active" aria-label="Home">
     <div class="home-top">
-      <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off">🔊</button>
+      <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
     </div>
 
     <div class="logo-wrap">
-      <span class="brain" aria-hidden="true">🧠</span>
+      <span class="brain" aria-hidden="true"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"></span>
       <div>
         <h1 class="logo">BRAIN<span class="blitz">BLITZ</span></h1>
         <p class="tagline">How much do you really know?</p>
@@ -475,7 +487,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
     </div>
 
     <div style="text-align:center">
-      <div class="best-chip" id="bestChip">🏆 Best Score <span id="bestScore">0</span></div>
+      <div class="best-chip" id="bestChip"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> Best Score <span id="bestScore">0</span></div>
     </div>
 
     <div class="picker-row">
@@ -501,9 +513,9 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
     <div class="hud">
       <div class="hud-stat"><span class="lab">Score</span><span class="val" id="scoreVal">0</span></div>
       <div class="hud-stat"><span class="lab">Question</span><span class="val" id="qNum">1/10</span></div>
-      <div class="hud-stat" id="streakBox"><span class="lab">Streak</span><span class="val" id="streakVal">🔥 0</span></div>
-      <button id="muteBtn2" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off">🔊</button>
-      <button id="quitBtn" class="icon-btn" aria-label="Quit to home" title="Quit">✕</button>
+      <div class="hud-stat" id="streakBox"><span class="lab">Streak</span><span class="val"><img class="ico" src="assets/icons/fire.png" alt="" draggable="false"><span id="streakVal">0</span></span></div>
+      <button id="muteBtn2" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
+      <button id="quitBtn" class="icon-btn" aria-label="Quit to home" title="Quit"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
     </div>
 
     <div class="progress-row">
@@ -520,13 +532,13 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
 
     <div class="q-area" id="qArea">
       <div class="q-card card">
-        <span class="cat-badge" id="catBadge">🌎 General Knowledge</span>
+        <span class="cat-badge" id="catBadge"><img class="ico" src="assets/icons/cat-general.png" alt="" draggable="false"><span>General Knowledge</span></span>
         <p class="q-text" id="qText">Question</p>
       </div>
 
       <div class="answers" id="answers" role="group" aria-label="Answer choices"></div>
 
-      <p class="q-hint" id="qHint">⚡ Faster answers earn more bonus points</p>
+      <p class="q-hint" id="qHint"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"> Faster answers earn more bonus points</p>
 
       <div class="feedback" id="feedback" role="status" aria-live="polite">
         <div class="fb-head"><span id="fbTitle">Correct!</span><span class="fb-pts" id="fbPts"></span></div>
@@ -543,11 +555,11 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   <section id="results" class="screen" aria-label="Results">
     <div class="res-scroll scroll">
       <div class="res-hero card">
-        <span class="res-emoji" id="resEmoji">🎉</span>
+        <span class="res-emoji" id="resEmoji"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"></span>
         <h2 class="res-title" id="resTitle">Quiz Complete!</h2>
         <p class="res-msg" id="resMsg">Nice work.</p>
         <div><span class="res-score" id="resScore">0</span><span class="res-score-lab">Total Points</span></div>
-        <div class="res-new-best" id="resNewBest">🏆 NEW BEST SCORE!</div>
+        <div class="res-new-best" id="resNewBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> NEW BEST SCORE!</div>
       </div>
 
       <div class="stat-grid">
@@ -563,8 +575,8 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
     </div>
 
     <div class="res-foot">
-      <button id="homeBtn" class="btn btn-ghost">🏠 Home</button>
-      <button id="againBtn" class="btn btn-primary">🔁 Play Again</button>
+      <button id="homeBtn" class="btn btn-ghost">Home</button>
+      <button id="againBtn" class="btn btn-primary">Play Again</button>
     </div>
   </section>
 
@@ -589,17 +601,32 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
    The first answer is always the correct one — options are shuffled
    at runtime, so authoring order never leaks into the game.
    ================================================================ */
+/* Icons are PNGs in assets/icons/, referenced by file name without the extension. */
+const ICON_DIR = "assets/icons/";
+const ICON_NAMES = ["cat-mixed", "cat-general", "cat-science", "cat-history", "cat-geo", "cat-movies",
+  "cat-sports", "cat-animals", "cat-tech", "cat-food", "cat-space", "logo-bolt", "trophy", "fire",
+  "sound-on", "sound-off", "check", "cross", "clock", "tier-crown", "tier-star", "tier-up",
+  "tier-book", "tier-clover"];
+const icon = (name) => '<img class="ico" src="' + ICON_DIR + name + '.png" alt="" draggable="false">';
+/** Fill an element with an icon followed by text, keeping the text out of innerHTML. */
+const setIconText = (el, name, text) => {
+  el.innerHTML = icon(name) + "<span></span>";
+  el.lastChild.textContent = text;
+};
+// Warm the cache so icons that first appear mid-round (feedback, results) never pop in late.
+ICON_NAMES.forEach((name) => { new Image().src = ICON_DIR + name + ".png"; });
+
 const CATEGORIES = {
-  general:  { name: "General Knowledge", icon: "🌎" },
-  science:  { name: "Science",           icon: "🔬" },
-  history:  { name: "History",           icon: "🏛️" },
-  geo:      { name: "Geography",         icon: "🌍" },
-  movies:   { name: "Movies & TV",       icon: "🎬" },
-  sports:   { name: "Sports",            icon: "⚽" },
-  animals:  { name: "Animals",           icon: "🐾" },
-  tech:     { name: "Technology",        icon: "💻" },
-  food:     { name: "Food & Culture",    icon: "🍔" },
-  space:    { name: "Space",             icon: "🚀" }
+  general:  { name: "General Knowledge", icon: "cat-general" },
+  science:  { name: "Science",           icon: "cat-science" },
+  history:  { name: "History",           icon: "cat-history" },
+  geo:      { name: "Geography",         icon: "cat-geo" },
+  movies:   { name: "Movies & TV",       icon: "cat-movies" },
+  sports:   { name: "Sports",            icon: "cat-sports" },
+  animals:  { name: "Animals",           icon: "cat-animals" },
+  tech:     { name: "Technology",        icon: "cat-tech" },
+  food:     { name: "Food & Culture",    icon: "cat-food" },
+  space:    { name: "Space",             icon: "cat-space" }
 };
 
 const QUESTIONS = [
@@ -2902,13 +2929,13 @@ const UI = {
       return fresh + " new of " + pool.length;
     };
 
-    const makeBtn = (key, icon, name, count, wide) => {
+    const makeBtn = (key, iconName, name, count, wide) => {
       const b = document.createElement("button");
       b.className = "cat" + (wide ? " wide" : "") + (state.category === key ? " selected" : "");
       b.dataset.cat = key;
       b.setAttribute("aria-pressed", state.category === key ? "true" : "false");
       b.innerHTML =
-        '<span class="emoji" aria-hidden="true">' + icon + '</span>' +
+        '<span class="emoji" aria-hidden="true">' + icon(iconName) + '</span>' +
         '<span class="meta"><span class="nm"></span><span class="ct"></span></span>';
       b.querySelector(".nm").textContent = name;
       b.querySelector(".ct").textContent = count;
@@ -2916,7 +2943,7 @@ const UI = {
       return b;
     };
 
-    grid.appendChild(makeBtn("mixed", "🎲", "Mixed Blitz", label(QUESTIONS), true));
+    grid.appendChild(makeBtn("mixed", "cat-mixed", "Mixed Blitz", label(QUESTIONS), true));
     Object.keys(CATEGORIES).forEach(key => {
       const c = CATEGORIES[key];
       grid.appendChild(makeBtn(key, c.icon, c.name, label(questionsIn(key))));
@@ -2987,14 +3014,17 @@ const UI = {
   },
 
   updateMuteButtons() {
-    const label = Sound.isAudible() ? "🔊" : "🔇";
-    $("muteBtn").textContent = label;
-    $("muteBtn2").textContent = label;
+    const on = Sound.isAudible();
+    ["muteBtn", "muteBtn2"].forEach((id) => {
+      const b = $(id);
+      b.innerHTML = icon(on ? "sound-on" : "sound-off");
+      b.dataset.sound = on ? "on" : "off";
+    });
   },
 
   renderHud() {
     $("qNum").textContent = (state.index + 1) + "/" + state.round.length;
-    $("streakVal").textContent = "🔥 " + state.streak;
+    $("streakVal").textContent = state.streak;
     $("streakBox").classList.toggle("hot", state.streak >= 3);
     const answered = state.index + (state.locked ? 1 : 0);
     $("progFill").style.width = (answered / state.round.length * 100) + "%";
@@ -3021,7 +3051,7 @@ const UI = {
     const q = state.round[state.index];
     const cat = CATEGORIES[q.category];
 
-    $("catBadge").textContent = cat.icon + "  " + cat.name;
+    setIconText($("catBadge"), cat.icon, cat.name);
     $("qText").textContent = q.text;
 
     const wrap = $("answers");
@@ -3061,10 +3091,10 @@ const UI = {
       btn.classList.add("locked");
       if (i === correctIdx) {
         btn.classList.add("correct");
-        btn.querySelector(".mark").textContent = "✓";
+        btn.querySelector(".mark").innerHTML = icon("check");
       } else if (i === chosenIdx) {
         btn.classList.add("wrong");
-        btn.querySelector(".mark").textContent = "✗";
+        btn.querySelector(".mark").innerHTML = icon("cross");
       } else {
         btn.classList.add("faded");
       }
@@ -3075,10 +3105,11 @@ const UI = {
     const fb = $("feedback");
     $("qHint").classList.add("hide");
     fb.className = "feedback show " + (kind === "correct" ? "good" : "bad");
-    $("fbTitle").textContent =
-      kind === "correct" ? (state.streak >= 3 ? "🔥 " + state.streak + " in a row!" : "✅ Correct!")
-      : kind === "timeout" ? "⏰ Time's up!"
-      : "❌ Not quite";
+    const hot = kind === "correct" && state.streak >= 3;
+    setIconText($("fbTitle"),
+      hot ? "fire" : kind === "correct" ? "check" : kind === "timeout" ? "clock" : "cross",
+      hot ? state.streak + " in a row!" : kind === "correct" ? "Correct!"
+      : kind === "timeout" ? "Time's up!" : "Not quite");
     $("fbPts").textContent = points > 0 ? "+" + points + " pts" : "";
     $("fbExp").textContent = explanation;
     $("nextBtn").textContent = state.index === state.round.length - 1 ? "SEE RESULTS →" : "NEXT QUESTION →";
@@ -3142,16 +3173,16 @@ const UI = {
     const acc = Math.round((state.correctCount / total) * 100);
 
     const tiers = [
-      { min: 100, emoji: "🏆", title: "Flawless Blitz!", msg: "A perfect round. You did not miss a single question." },
-      { min: 80,  emoji: "🌟", title: "Brilliant!",      msg: "Outstanding knowledge — you are in the top tier." },
-      { min: 60,  emoji: "🎉", title: "Well Played!",    msg: "Solid round. A little more speed and you'll be unstoppable." },
-      { min: 40,  emoji: "💪", title: "Getting There!",  msg: "Halfway there. One more round should push you higher." },
-      { min: 20,  emoji: "📚", title: "Keep Training!",  msg: "Every round teaches you something new. Try again!" },
-      { min: 0,   emoji: "🌱", title: "Fresh Start",     msg: "Everyone starts somewhere. Give it another blitz!" }
+      { min: 100, icon: "trophy", title: "Flawless Blitz!", msg: "A perfect round. You did not miss a single question." },
+      { min: 80,  icon: "tier-crown", title: "Brilliant!",      msg: "Outstanding knowledge — you are in the top tier." },
+      { min: 60,  icon: "tier-star", title: "Well Played!",    msg: "Solid round. A little more speed and you'll be unstoppable." },
+      { min: 40,  icon: "tier-up", title: "Getting There!",  msg: "Halfway there. One more round should push you higher." },
+      { min: 20,  icon: "tier-book", title: "Keep Training!",  msg: "Every round teaches you something new. Try again!" },
+      { min: 0,   icon: "tier-clover", title: "Fresh Start",     msg: "Everyone starts somewhere. Give it another blitz!" }
     ];
     const tier = tiers.find(t => acc >= t.min);
 
-    $("resEmoji").textContent = tier.emoji;
+    $("resEmoji").innerHTML = icon(tier.icon);
     $("resTitle").textContent = tier.title;
     $("resMsg").textContent = tier.msg;
     $("resScore").textContent = state.score;
