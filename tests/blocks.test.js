@@ -91,6 +91,31 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(await page.evaluate(() => document.querySelector("#home").classList.contains("active")), "Escape returns home");
   ck(await page.evaluate(() => Music.getMode()) === "home", "the music drops back to the light mix at home");
 
+  // Regressions: a delayed step from a game that has ended must not touch the next one.
+  await page.locator("#blocksBtn").click();
+  await page.waitForTimeout(400);
+  await page.locator("#bkBoard .bk-block").first().click();
+  await page.waitForTimeout(300);
+  d = await dbg();
+  await page.keyboard.press(String(d.correctIndex + 1));   // the blast is now pending...
+  await page.waitForTimeout(100);
+  await page.keyboard.press("Escape");                       // ...and the player quits
+  await page.waitForTimeout(1500);
+  ck(true, "quitting while a blast is pending throws nothing (page errors fail the suite)");
+
+  await page.locator("#blocksBtn").click();
+  await page.waitForTimeout(400);
+  await page.locator("#bkBoard .bk-block").first().click();
+  await page.waitForTimeout(300);
+  d = await dbg();
+  await page.locator(`#bkAnswers .ans[data-idx="${(d.correctIndex + 1) % 4}"]`).click();   // a penalty row is pending...
+  await page.waitForTimeout(100);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(100);
+  await page.locator("#blocksBtn").click();                  // ...and a new game starts at once
+  await page.waitForTimeout(2500);
+  ck(await count() === 35, `the old game's penalty row does not land on the new board (${await count()} blocks)`);
+
   await browser.close();
   suite.report();
 })();

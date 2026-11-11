@@ -4072,8 +4072,15 @@ const Blocks = (() => {
   let picked = null;               // { cat, blocks: [...] } while a question is open
   let q = null, locked = true, busy = false, over = true;
   let rafId = null, endsAt = 0, timeLeft = TIME, lastTick = null;
+  let gen = 0;                     // bumped by start() and quit(), so delayed steps from an old game do nothing
 
   const board = () => $("bkBoard");
+
+  /** setTimeout that is cancelled if the game it belongs to has ended or been replaced. */
+  function later(fn, ms) {
+    const mine = gen;
+    setTimeout(() => { if (mine === gen) fn(); }, ms);
+  }
 
   /* ---------- board ---------- */
   function randomCat(col, row) {
@@ -4250,18 +4257,18 @@ const Blocks = (() => {
       // Every 8 correct answers the automatic rise comes one answer sooner, down to every 2.
       if (correctCount % 8 === 0) riseEvery = Math.max(2, riseEvery - 1);
       renderHud();
-      setTimeout(() => { closeSheet(); setTimeout(() => blast(points), 180); }, 750);
+      later(() => { closeSheet(); later(() => blast(points), 180); }, 750);
     } else {
       streak = 0;
       fb.className = "bk-fb bad";
       fb.textContent = (idx === -1 ? "Time's up! " : "Not quite. ") + "It's " + q.options[q.correctIndex].text + ".";
       idx === -1 ? Sound.timeout() : Sound.wrong();
       renderHud();
-      setTimeout(() => {
+      later(() => {
         closeSheet();
         unpick();
         sinceRise = 0;               // the penalty row is this turn's rise
-        setTimeout(() => rise(), 200);
+        later(() => rise(), 200);
       }, 1700);
     }
   }
@@ -4293,9 +4300,9 @@ const Blocks = (() => {
       setTimeout(() => b.el.remove(), 320);
     });
     blasted += blocks.length;
-    setTimeout(() => {
+    later(() => {
       gravity();
-      setTimeout(() => {
+      later(() => {
         let empty = true;
         eachBlock(() => { empty = false; });
         if (empty) {
@@ -4345,7 +4352,7 @@ const Blocks = (() => {
     if (!addRow()) { gameOver(); return; }
     Sound.tick();
     renderHud();
-    setTimeout(() => { busy = false; renderHud(); }, 320);
+    later(() => { busy = false; renderHud(); }, 320);
   }
 
   function afterTurn() {
@@ -4376,6 +4383,7 @@ const Blocks = (() => {
 
   /* ---------- lifecycle ---------- */
   function start() {
+    gen++;
     Sound.init();
     Music.start();
     Music.setMode("quiz");
@@ -4401,6 +4409,7 @@ const Blocks = (() => {
   }
 
   function quit() {
+    gen++;
     cancelAnimationFrame(rafId);
     locked = true; over = true; busy = false;
     closeSheet(); unpick();
