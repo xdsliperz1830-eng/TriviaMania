@@ -683,6 +683,7 @@ body{
    gets its own row with nothing crowding it. */
 .home-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 0}
 .best-chip{margin:0;padding:6px 14px;font-size:.86rem}
+.top-btns{display:flex;gap:8px}
 .logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0 0}
 .brain{font-size:2.1rem}
 .logo{font-size:clamp(1.75rem,9vw,2.8rem);letter-spacing:.5px;white-space:nowrap}
@@ -745,7 +746,10 @@ body{
   <section id="home" class="screen active" aria-label="Home">
     <div class="home-top">
       <div class="best-chip" id="bestChip"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> Best Score <span id="bestScore">0</span></div>
-      <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
+      <div class="top-btns">
+        <button id="musicBtn" class="icon-btn" aria-label="Background music" aria-pressed="true" title="Music on/off"><img class="ico" src="assets/icons/music-on.png" alt="" draggable="false"></button>
+        <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
+      </div>
     </div>
 
     <div class="logo-wrap">
@@ -870,7 +874,7 @@ const ICON_DIR = "assets/icons/";
 const ICON_NAMES = ["cat-mixed", "cat-general", "cat-science", "cat-history", "cat-geo", "cat-movies",
   "cat-sports", "cat-animals", "cat-tech", "cat-food", "cat-space", "logo-bolt", "trophy", "fire",
   "sound-on", "sound-off", "check", "cross", "clock", "tier-crown", "tier-star", "tier-up",
-  "tier-book", "tier-clover"];
+  "tier-book", "tier-clover", "music-on", "music-off"];
 const icon = (name) => '<img class="ico" src="' + ICON_DIR + name + '.png" alt="" draggable="false">';
 /** Fill an element with an icon followed by text, keeping the text out of innerHTML. */
 const setIconText = (el, name, text) => {
@@ -2884,6 +2888,8 @@ const Sound = (() => {
 
   return {
     init,
+    /** The live context and master gain, or null before the first gesture. */
+    graph: () => (ctx && master ? { ctx, master } : null),
     isMuted: () => muted,
     /** True when sound would actually be heard — both gates open. */
     isAudible: () => !silent(),
@@ -2910,6 +2916,224 @@ const Sound = (() => {
       const notes = good ? [523.25, 659.25, 783.99, 1046.5, 1318.5] : [440, 392, 349.23, 293.66];
       notes.forEach((f, i) => tone(f, i * 0.13, 0.45, "triangle", 0.24));
     }
+  };
+})();
+
+/* ================================================================
+   3b. MUSIC — a looping game-show tune, synthesised live
+   ----------------------------------------------------------------
+   No audio files. The loop is written below as note lists and played
+   through the same graph as the effects, into Sound's master gain, so the
+   mute button and YouTube's audio setting silence it with no extra wiring.
+
+   One 8-bar loop in C (I-vi-IV-V, then I-vi-ii-V back to the top), about
+   16 seconds at 116 BPM. Variety without length: the hook plays on every
+   other pass and a soft arpeggio fills the passes between. On the home
+   screen it is bass, chord stabs and melody; during a round a drum kit
+   comes in for drive. Bass and lead sit above ~110 Hz so a phone speaker
+   still carries them.
+
+   Notes are booked a little ahead on the audio clock by a short timer (the
+   usual Web Audio lookahead pattern), so timing does not depend on the
+   main thread being free at the exact moment a note is due.
+   ================================================================ */
+const Music = (() => {
+  const BPM = 116;
+  const STEP = 60 / BPM / 4;        // one sixteenth note, in seconds
+  const LOOKAHEAD_MS = 25;          // how often the scheduler wakes
+  const SCHEDULE_AHEAD = 0.12;      // how far ahead it books notes, in seconds
+  const LEVEL = 0.55;               // music bus level: about 8 dB under the effects
+
+  const hz = (note) => 440 * Math.pow(2, (note - 69) / 12);   // MIDI note to Hz
+
+  const BARS = [
+    { root: 48, chord: [60, 64, 67] },   // C
+    { root: 45, chord: [57, 60, 64] },   // Am
+    { root: 41, chord: [57, 60, 65] },   // F
+    { root: 43, chord: [55, 59, 62] },   // G
+    { root: 48, chord: [60, 64, 67] },   // C
+    { root: 45, chord: [57, 60, 64] },   // Am
+    { root: 50, chord: [57, 62, 65] },   // Dm
+    { root: 43, chord: [55, 59, 62] }    // G
+  ];
+  const LOOP_STEPS = BARS.length * 16;
+
+  // The hook, per bar: [sixteenth within the bar, MIDI note, length in sixteenths].
+  const HOOK = [
+    [[0, 76, 2], [2, 79, 2], [4, 84, 3], [8, 83, 2], [10, 79, 2], [12, 76, 4]],
+    [[0, 72, 2], [2, 76, 2], [4, 81, 3], [8, 79, 2], [10, 76, 2], [12, 72, 4]],
+    [[0, 77, 2], [2, 81, 2], [4, 84, 3], [8, 81, 2], [10, 77, 2], [12, 81, 2], [14, 84, 2]],
+    [[0, 83, 3], [4, 79, 2], [6, 83, 2], [8, 86, 6]],
+    [[0, 76, 2], [2, 79, 2], [4, 84, 3], [8, 83, 2], [10, 79, 2], [12, 76, 4]],
+    [[0, 72, 2], [2, 76, 2], [4, 81, 3], [8, 79, 2], [10, 76, 2], [12, 72, 4]],
+    [[0, 74, 2], [2, 77, 2], [4, 81, 3], [8, 79, 2], [10, 77, 2], [12, 74, 4]],
+    [[0, 79, 2], [2, 81, 2], [4, 83, 2], [6, 86, 2], [8, 84, 6]]
+  ];
+  // Indexed for the scheduler: HOOK_AT[bar][sixteenth] = [note, length] or undefined.
+  const HOOK_AT = HOOK.map((bar) => {
+    const at = [];
+    bar.forEach(([pos, note, len]) => { at[pos] = [note, len]; });
+    return at;
+  });
+
+  let bus = null, noise = null, timer = null;
+  let enabled = true;     // the player's music preference
+  let wanted = false;     // started by a gesture; pause/resume keeps this
+  let mode = "home";      // "home" | "quiz"
+  let nextTime = 0, step = 0, pass = 0;
+
+  function setup(g) {
+    if (bus) return;
+    bus = g.ctx.createGain();
+    bus.gain.value = enabled ? LEVEL : 0;
+    bus.connect(g.master);
+    // One shared buffer of white noise for the hats and snare.
+    const len = Math.floor(g.ctx.sampleRate * 0.25);
+    noise = g.ctx.createBuffer(1, len, g.ctx.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  }
+
+  /** A plucked note, or with `held` a sung one that keeps most of its level to the end. */
+  function note(ctx, type, freq, t, dur, vol, cutoff, held) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    if (held) {
+      gain.gain.linearRampToValueAtTime(vol * 0.7, t + Math.max(0.02, dur - 0.05));
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    } else {
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    }
+    if (cutoff) {
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = cutoff;
+      osc.connect(lp); lp.connect(gain);
+    } else {
+      osc.connect(gain);
+    }
+    gain.connect(bus);
+    osc.start(t); osc.stop(t + dur + 0.02);
+  }
+
+  /** A soft chord tone held for a whole bar, fading in and out, to fill the gaps. */
+  function pad(ctx, freq, t, dur, vol) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.15);
+    gain.gain.setValueAtTime(vol, t + dur - 0.15);
+    gain.gain.linearRampToValueAtTime(0, t + dur);
+    osc.connect(gain); gain.connect(bus);
+    osc.start(t); osc.stop(t + dur + 0.02);
+  }
+
+  function hit(ctx, t, dur, vol, filter, freq) {
+    const src = ctx.createBufferSource();
+    const f = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    src.buffer = noise;
+    f.type = filter;
+    f.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(gain); gain.connect(bus);
+    src.start(t); src.stop(t + dur + 0.02);
+  }
+
+  function kick(ctx, t) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(50, t + 0.12);
+    gain.gain.setValueAtTime(0.13, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    osc.connect(gain); gain.connect(bus);
+    osc.start(t); osc.stop(t + 0.18);
+  }
+
+  /** Book everything that sounds on one sixteenth of the loop. */
+  function playStep(ctx, s, t) {
+    const b = Math.floor(s / 16), pos = s % 16, bar = BARS[b];
+
+    // Bass: an octave bounce on the eighths.
+    if (pos % 2 === 0) {
+      note(ctx, "square", hz(bar.root + (pos % 4 === 2 ? 12 : 0)), t, STEP * 1.6, 0.09, 900);
+    }
+    // A held pad under the whole bar, so the loop never drops to silence.
+    if (pos === 0) bar.chord.forEach((n) => pad(ctx, hz(n), t, STEP * 16, 0.015));
+    // Chord stabs on the off-beats.
+    if (pos % 4 === 2) bar.chord.forEach((n) => note(ctx, "triangle", hz(n), t, STEP * 1.2, 0.045));
+
+    // The hook on even passes, a soft arpeggio on odd ones.
+    if (pass % 2 === 0) {
+      const h = HOOK_AT[b][pos];
+      if (h) note(ctx, "triangle", hz(h[0]), t, STEP * h[1] * 0.95, 0.09, 0, true);
+    } else if (pos % 2 === 0) {
+      note(ctx, "sine", hz(bar.chord[(pos / 2) % 3] + 12), t, STEP * 1.5, 0.05);
+    }
+
+    // During a round: kick, snare and hats.
+    if (mode === "quiz") {
+      if (pos === 0 || pos === 8 || pos === 10) kick(ctx, t);
+      if (pos === 4 || pos === 12) hit(ctx, t, 0.12, 0.14, "bandpass", 1800);
+      if (pos % 2 === 0) hit(ctx, t, 0.03, 0.07, "highpass", 7000);
+    }
+  }
+
+  function tick() {
+    const g = Sound.graph();
+    if (!g) return;
+    const ctx = g.ctx;
+    // If the timer fell behind (a throttled or busy tab), jump ahead rather
+    // than firing a burst of late notes all at once.
+    if (nextTime < ctx.currentTime - 0.05) nextTime = ctx.currentTime + 0.05;
+    while (nextTime < ctx.currentTime + SCHEDULE_AHEAD) {
+      // Muted or switched off: keep the clock moving but book nothing.
+      if (enabled && Sound.isAudible()) playStep(ctx, step, nextTime);
+      nextTime += STEP;
+      step = (step + 1) % LOOP_STEPS;
+      if (step === 0) pass++;
+    }
+  }
+
+  function run() {
+    if (timer) return;
+    const g = Sound.graph();
+    if (!g) return;
+    setup(g);
+    nextTime = g.ctx.currentTime + 0.08;
+    timer = setInterval(tick, LOOKAHEAD_MS);
+  }
+
+  function halt() {
+    clearInterval(timer);
+    timer = null;
+  }
+
+  return {
+    /** Begin playing. Needs a live audio context, so call it from a gesture. */
+    start() { wanted = true; run(); },
+    /** Hidden tab or YouTube pause: stop booking notes, resume where we left off. */
+    pause() { halt(); },
+    resume() { if (wanted) run(); },
+    isEnabled: () => enabled,
+    isPlaying: () => !!timer,
+    getMode: () => mode,
+    setEnabled(v) {
+      enabled = !!v;
+      const g = Sound.graph();
+      if (bus && g) bus.gain.setTargetAtTime(enabled ? LEVEL : 0, g.ctx.currentTime, 0.05);
+    },
+    /** "home" plays without drums; "quiz" brings the kit in. Applies from the next sixteenth. */
+    setMode(m) { mode = m === "quiz" ? "quiz" : "home"; }
   };
 })();
 
@@ -2961,6 +3185,7 @@ const progress = {
   seen: [],        // ids of questions already served
   best: {},        // best score keyed by round length
   muted: false,
+  music: true,     // background music; on until the player turns it off
   length: 10       // DEFAULT_ROUND_SIZE, restated so this stays declaration-order safe
 };
 
@@ -3012,6 +3237,7 @@ function applyProgress(data) {
     });
   }
   if (typeof data.muted === "boolean") progress.muted = data.muted;
+  if (typeof data.music === "boolean") progress.music = data.music;
   const len = parseInt(data.length, 10);
   if (!isNaN(len)) progress.length = len;
 }
@@ -3026,7 +3252,8 @@ function hydrateProgress() {
 }
 
 function snapshotProgress() {
-  return { seen: progress.seen, best: progress.best, muted: progress.muted, length: progress.length };
+  return { seen: progress.seen, best: progress.best, muted: progress.muted, music: progress.music,
+           length: progress.length };
 }
 
 /** Write through to this device now, and to the cloud on a debounce. */
@@ -3286,6 +3513,14 @@ const UI = {
     });
   },
 
+  updateMusicButton() {
+    const on = Music.isEnabled();
+    const b = $("musicBtn");
+    b.innerHTML = icon(on ? "music-on" : "music-off");
+    b.dataset.music = on ? "on" : "off";
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  },
+
   renderHud() {
     $("qNum").textContent = (state.index + 1) + "/" + state.round.length;
     $("streakVal").textContent = state.streak;
@@ -3486,6 +3721,8 @@ const Game = {
 
     Sound.init();
     Sound.start();
+    Music.start();
+    Music.setMode("quiz");
     Game.stopTimer();
 
     state.round = buildRound(state.category, state.roundSize);
@@ -3626,6 +3863,7 @@ const Game = {
     const newBest = state.score > best;
     if (newBest) saveBest(state.roundSize, state.score);
 
+    Music.setMode("home");
     UI.refreshHome();
     UI.renderResults(newBest);
     UI.showScreen("results");
@@ -3653,6 +3891,7 @@ const Game = {
     state.roundActive = false;
     state.locked = true;
     Sound.click();
+    Music.setMode("home");
     UI.refreshHome();
     UI.showScreen("home");
   }
@@ -3669,6 +3908,17 @@ function toggleMute() {
   markProgressDirty();
   UI.updateMuteButtons();
   if (!next) Sound.click();
+}
+
+function toggleMusic() {
+  Sound.init();
+  const next = !Music.isEnabled();
+  Music.setEnabled(next);
+  progress.music = next;
+  markProgressDirty();
+  UI.updateMusicButton();
+  Music.start();
+  Sound.click();
 }
 
 function spawnSparks() {
@@ -3700,6 +3950,8 @@ async function init() {
   await hydrateProgress();
 
   Sound.setMuted(progress.muted);
+  Music.setEnabled(progress.music);
+  UI.updateMusicButton();
   Sound.setPlatformAudio(Platform.audioEnabled());
   Platform.onAudioEnabledChange((enabled) => {
     Sound.setPlatformAudio(enabled);
@@ -3717,8 +3969,8 @@ async function init() {
 
   // Pause and resume on YouTube's terms, reusing the countdown handling the
   // hidden-tab path already uses.
-  Platform.onPause(() => { flushProgress(); Game.suspend(); });
-  Platform.onResume(() => Game.wake());
+  Platform.onPause(() => { flushProgress(); Game.suspend(); Music.pause(); });
+  Platform.onResume(() => { Game.wake(); Music.resume(); });
 
   // Interactive and waiting for the player.
   Platform.gameReady();
@@ -3733,10 +3985,12 @@ function wireInput() {
   $("quitBtn").addEventListener("click", () => Game.quitToHome());
   $("muteBtn").addEventListener("click", toggleMute);
   $("muteBtn2").addEventListener("click", toggleMute);
+  $("musicBtn").addEventListener("click", toggleMusic);
 
-  // Unlock audio on the very first interaction, whatever it is.
+  // Unlock audio on the very first interaction, whatever it is, and start the
+  // music there: browsers only allow sound to begin inside a gesture.
   ["pointerdown", "keydown", "touchstart"].forEach(ev =>
-    window.addEventListener(ev, () => Sound.init(), { once: true, passive: true }));
+    window.addEventListener(ev, () => { Sound.init(); Music.start(); }, { once: true, passive: true }));
 
   // Keyboard shortcuts: 1-4 / A-D to answer, Enter or Space to continue.
   document.addEventListener("keydown", (e) => {
@@ -3762,7 +4016,8 @@ function wireInput() {
 
   // Pause the clock if the player leaves the tab mid-question, and resume on return.
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { flushProgress(); Game.suspend(); } else { Game.wake(); }
+    if (document.hidden) { flushProgress(); Game.suspend(); Music.pause(); }
+    else { Game.wake(); Music.resume(); }
   });
 }
 

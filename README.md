@@ -49,6 +49,17 @@ answer; `1`–`4` / `A`–`D` also work, `Enter` or
 `Space` advances, `Esc` quits to the home screen. Sound can be muted from either
 the home or quiz screen, and the preference is remembered.
 
+**Music:** an upbeat looping tune plays from the first tap: bass, chord stabs
+and a melody on the home screen, with a drum kit joining in during a round. It
+is synthesised live with Web Audio from note lists in the `Music` module, so
+there are no audio files and nothing to license. The 8-bar loop is about 16
+seconds, and the melody alternates with an arpeggio on alternate passes so it
+does not wear thin. It sits about 8 dB under the sound effects. The note
+button on the home screen turns the music off on its own, and that choice is
+remembered. The speaker button (and YouTube's own audio setting) silences
+everything. The music pauses while the tab is hidden or YouTube pauses the
+game. On iPhone, the ring/silent switch also silences web audio.
+
 ## Tests
 
 ```bash
@@ -58,10 +69,10 @@ npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
 ```
 
-Ten suites in `tests/` drive the real page in a headless browser: gameplay,
+Eleven suites in `tests/` drive the real page in a headless browser: gameplay,
 question rotation, round length, geography balance, picker layout, an
 18-viewport layout sweep, regressions for previously fixed defects, the launcher
-icons and manifest, the YouTube Playables integration (against a mock `ytgame`,
+icons and manifest, the background music, the YouTube Playables integration (against a mock `ytgame`,
 since YouTube is not reachable from a test runner), and performance against the
 published Playables limits under CPU throttling. They run in CI on every push
 and pull request.
@@ -69,7 +80,7 @@ and pull request.
 ## Building for submission
 
 ```bash
-npm run build      # -> dist/brain-blitz-playable.zip (581 KB)
+npm run build      # -> dist/brain-blitz-playable.zip (589 KB)
 npm run art        # -> art/ store key art and listing tiles
 npm run icons      # -> icons/ launcher icons and favicons
 npm run questions  # -> dist/brain-blitz-questions.csv, the whole bank for review
