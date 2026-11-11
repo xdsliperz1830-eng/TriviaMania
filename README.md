@@ -2,9 +2,10 @@
 
 A fast-paced HTML5 trivia game built for YouTube Playables. Everything — markup,
 styles, game logic, question bank and sound engine — lives in a single
-self-contained `index.html`. No backend, no build step, no accounts, no external
-requests, so it runs offline once loaded. The only other files the page touches
-are the launcher icons and the web app manifest, which nothing at runtime reads.
+self-contained `index.html`, plus the icon images in `assets/icons/`. No backend,
+no build step, no accounts, no external requests, so it runs offline once loaded.
+The launcher icons and the web app manifest are the only other files, and nothing
+at runtime reads them.
 
 **Play:** open `index.html` in any modern browser.
 
@@ -68,7 +69,7 @@ and pull request.
 ## Building for submission
 
 ```bash
-npm run build      # -> dist/brain-blitz-playable.zip (440 KB)
+npm run build      # -> dist/brain-blitz-playable.zip (511 KB)
 npm run art        # -> art/ store key art and listing tiles
 npm run icons      # -> icons/ launcher icons and favicons
 npm run questions  # -> dist/brain-blitz-questions.csv, the whole bank for review
@@ -79,6 +80,14 @@ built file and plays a round before declaring it ready. See
 [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the metadata, art inventory and
 certification self-check, and [`docs/PLAYABLES_PLAN.md`](docs/PLAYABLES_PLAN.md)
 for how the game got here.
+
+## In-game icons
+
+The category, HUD, feedback and results icons are from gvesster's Free Icon
+Pack, used under its licence. [`assets/icons/CREDITS.md`](assets/icons/CREDITS.md)
+lists each file, its source icon and where it is used. Only the icons the game
+uses are committed, never the whole pack, because the licence forbids
+redistributing it.
 
 ## The app icon
 
@@ -110,7 +119,8 @@ shuffled at runtime, so authoring order never leaks into the game:
   e: "Plants take in carbon dioxide during photosynthesis." } // shown after answering
 ```
 
-New categories go in the `CATEGORIES` map (key, display name and an emoji icon);
+New categories go in the `CATEGORIES` map (key, display name and the file name
+of an icon in `assets/icons/`, without `.png`; add it to `ICON_NAMES` too);
 the home screen grid and question counts build themselves from it.
 
 Rotation needs no bookkeeping: each question is identified by a short hash of

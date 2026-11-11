@@ -22,7 +22,7 @@ const RECOMMENDED = 15 * MiB;
 const BUNDLE_CAP = 250 * MiB;
 const FILE_CAP = 30 * MiB;        // per file inside the bundle
 
-const CONTENTS = ["index.html", "manifest.webmanifest", "icons"];
+const CONTENTS = ["index.html", "manifest.webmanifest", "icons", "assets"];
 
 /** Every file under a bundle entry, so a directory is measured, not stat'd. */
 function filesUnder(entry) {

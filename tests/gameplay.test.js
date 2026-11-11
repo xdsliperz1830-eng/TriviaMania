@@ -26,9 +26,9 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // mute toggle
   await page.locator('#muteBtn').click();
-  ck((await page.locator('#muteBtn').innerText()) === '🔇', 'mute button toggles to muted');
+  ck((await page.locator('#muteBtn').getAttribute('data-sound')) === 'off', 'mute button toggles to muted');
   await page.locator('#muteBtn').click();
-  ck((await page.locator('#muteBtn').innerText()) === '🔊', 'mute button toggles back');
+  ck((await page.locator('#muteBtn').getAttribute('data-sound')) === 'on', 'mute button toggles back');
 
   // ---- START GAME ----
   await page.locator('#playBtn').click();
@@ -48,7 +48,7 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(await page.locator('#feedback').evaluate(e=>e.classList.contains('good')), 'green feedback for correct');
   ck((await page.locator('#fbExp').innerText()).length > 20, 'explanation shown');
   ck(await page.locator(`.ans[data-idx="${ci}"]`).evaluate(e=>e.classList.contains('correct')), 'correct answer highlighted');
-  ck((await page.locator('#streakVal').innerText()) === '🔥 1', 'streak = 1');
+  ck((await page.locator('#streakVal').innerText()) === '1', 'streak = 1');
   ck(await page.locator('#nextBtn').evaluate(e=>e.classList.contains('show')), 'next button appears');
 
   // ---- DOUBLE-ANSWER GUARD ----
@@ -83,7 +83,7 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(await page.locator('#feedback').evaluate(e=>e.classList.contains('bad')), 'red feedback for wrong');
   ck(await page.locator(`.ans[data-idx="${bad}"]`).evaluate(e=>e.classList.contains('wrong')), 'chosen wrong answer marked');
   ck(await page.locator(`.ans[data-idx="${ci}"]`).evaluate(e=>e.classList.contains('correct')), 'correct answer still revealed');
-  ck((await page.locator('#streakVal').innerText()) === '🔥 0', 'streak reset after wrong answer');
+  ck((await page.locator('#streakVal').innerText()) === '0', 'streak reset after wrong answer');
 
   // ---- TIMEOUT PATH (fast-forward the clock) ----
   await page.locator('#nextBtn').click();
