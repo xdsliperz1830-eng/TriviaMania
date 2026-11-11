@@ -32,6 +32,13 @@ committed to this repository and should not be added to it.
 | `tier-up.png` | Green Upgrade | Results, 40%+ |
 | `tier-book.png` | Blue Book | Results, 20%+ |
 | `tier-clover.png` | Clover | Results, under 20% |
+| `music-on.png`, `music-off.png` | Music ON / Music OFF | Music toggle |
+| `lucky-block.png` | Lucky Block | Blocks tab, Block Blitz wild block |
+| `bomb.png` | Bomb | Block Blitz bomb power-up |
+| `calendar.png` | Calendar | Daily tab |
+
+The store key art in `art/` (rendered from `tools/keyart.html`) also shows
+some of these icons, as part of promoting this game.
 
 All are the "1st Outline" style. The dark outline keeps them legible on the
 game's dark background.

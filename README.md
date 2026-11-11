@@ -1,4 +1,4 @@
-# Brain Blitz 🧠⚡
+# Brain Blitz
 
 A fast-paced HTML5 trivia game built for YouTube Playables. Everything — markup,
 styles, game logic, question bank and sound engine — lives in a single
@@ -14,7 +14,51 @@ YouTube as a Playable. The YouTube Playables SDK is loaded first and wrapped in 
 `Platform` adapter; outside YouTube that request simply fails and the game runs
 standalone, saving progress to `localStorage` instead of the cloud.
 
-## Gameplay
+## Modes
+
+The home screen has two tabs, **Quiz** and **Block Blitz** (marked NEW), and one
+Play button that starts whichever is selected. The last tab used is remembered.
+The best-score chip in the corner follows the tab: the quiz best for the chosen
+length, or the Block Blitz best.
+
+### Daily challenge
+
+Opened from the calendar button in the top bar, beside the music and sound
+buttons. A red dot on the button shows until today's challenge is played. The
+button opens a card with the day streak, the longest run and today's score, and
+its own Play button.
+
+The same ten questions for every player on a given day, one from each category.
+There's no server: the local date seeds a small PRNG (`buildDailyRound`) that
+picks the questions and shuffles them and their answers, so the challenge turns
+over at the player's midnight. Each day gets one scored try. Playing on
+consecutive days builds a **day streak**, and a missed day resets it to zero,
+though the longest run is kept. The daily round doesn't touch the quiz's
+rotation history, and the day is fixed when the round starts, so a round that
+crosses midnight counts for the day it began.
+
+### Block Blitz
+
+A puzzle mode. The board is a stack of blocks, each one a category, shown by
+its colour and icon. Each game uses five random categories.
+
+- Tap a block to pick its whole connected group, then answer a question from
+  that category. A right answer blasts the group for size² × 10 points,
+  multiplied by the answer streak (up to ×2), and the blocks above fall.
+- A wrong answer or a timeout pushes a new row up from the bottom. A row also
+  rises every few answers regardless: every 4 at first, one answer sooner for
+  every 8 correct, down to every 2. The label and the board's edge warn one
+  answer ahead. The game ends when the stack reaches the top.
+- **Bombs:** every fifth answer in a streak earns one, up to three. Arm it
+  (button or `B`) and tap a block to blast its whole row, with no question.
+- **Lucky Block:** a rising row sometimes carries one. Answering its question
+  blasts every block of one category on the board.
+- Clearing the board scores a 500-point bonus and refills it.
+
+The board picks 8–11 rows to suit the screen. In landscape, the question panel
+sits beside the board instead of over it.
+
+## Quiz
 
 - **Pick your round length** — 5, 10, 20 or 30 questions — from the picker on
   the home screen. The choice is remembered between sessions.
@@ -46,7 +90,9 @@ standalone, saving progress to `localStorage` instead of the cloud.
 
 **Controls:** tap or click a length and a category, then Play; tap or click an
 answer; `1`–`4` / `A`–`D` also work, `Enter` or
-`Space` advances, `Esc` quits to the home screen. Sound can be muted from either
+`Space` advances, `Esc` quits to the home screen (or closes the daily
+challenge card). The arrow keys switch the home tabs. In Block Blitz they move between blocks, `Enter` picks a group, `B` arms a
+bomb and `Esc` disarms it or quits. Sound can be muted from either
 the home or quiz screen, and the preference is remembered.
 
 **Music:** an upbeat looping tune plays from the first tap: bass, chord stabs
@@ -63,16 +109,17 @@ game. On iPhone, the ring/silent switch also silences web audio.
 ## Tests
 
 ```bash
-npm install
+npm ci
 npx playwright install chromium
 npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
 ```
 
-Eleven suites in `tests/` drive the real page in a headless browser: gameplay,
+Thirteen suites in `tests/` drive the real page in a headless browser: gameplay,
 question rotation, round length, geography balance, picker layout, an
 18-viewport layout sweep, regressions for previously fixed defects, the launcher
-icons and manifest, the background music, the YouTube Playables integration (against a mock `ytgame`,
+icons and manifest, the background music, Block Blitz, the daily challenge (on a
+fixed clock), the YouTube Playables integration (against a mock `ytgame`,
 since YouTube is not reachable from a test runner), and performance against the
 published Playables limits under CPU throttling. They run in CI on every push
 and pull request.
@@ -80,7 +127,7 @@ and pull request.
 ## Building for submission
 
 ```bash
-npm run build      # -> dist/brain-blitz-playable.zip (589 KB)
+npm run build      # -> dist/brain-blitz-playable.zip (545 KB)
 npm run art        # -> art/ store key art and listing tiles
 npm run icons      # -> icons/ launcher icons and favicons
 npm run questions  # -> dist/brain-blitz-questions.csv, the whole bank for review

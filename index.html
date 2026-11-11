@@ -692,22 +692,25 @@ body{
 /* The round-length picker reads first, centred; "Choose a category" then sits
    directly above the grid it labels. column-reverse swaps the two without
    moving the markup, so landscape can keep them side by side. */
-.picker-row{flex-direction:column-reverse;align-items:stretch;flex-wrap:nowrap;gap:0;margin:18px 4px 8px}
+.picker-row{flex-direction:column-reverse;align-items:stretch;flex-wrap:nowrap;gap:0;margin:14px 4px 8px}
 .picker-row .section-label{margin:14px 0 0}
 .len-row{flex:0 0 auto;justify-content:center;min-width:0}
 /* Tall screens have height to spare: spend it on air around the title. */
 @media (orientation:portrait) and (min-height:760px){
-  .logo-wrap{padding-top:28px}
-  .tagline{margin-top:10px}
-  .picker-row{margin-top:26px}
-  .picker-row .section-label{margin-top:20px}
+  .logo-wrap{padding-top:20px}
+  .tagline{margin-top:8px}
+  .mode-tabs{margin-top:18px}
+  .picker-row{margin-top:18px}
+  .picker-row .section-label{margin-top:16px}
 }
 /* Short screens: tighten again so the grid keeps its rows. */
 @media (max-height:700px){
-  .logo-wrap{padding-top:8px}
-  .tagline{margin-top:5px}
-  .picker-row{margin:10px 4px 6px}
-  .picker-row .section-label{margin-top:10px}
+  .logo-wrap{padding-top:6px}
+  .tagline{margin-top:4px}
+  .mode-tabs{margin-top:8px}
+  .mode-tab{padding:4px}
+  .picker-row{margin:8px 4px 6px}
+  .picker-row .section-label{margin-top:8px}
 }
 .cat{padding:10px 12px}
 .cat-grid{gap:9px;padding-top:2px}
@@ -728,9 +731,177 @@ body{
   .logo{font-size:2.1rem}
   .brain{font-size:1.7rem}
   .tagline{display:none}
-  .picker-row{flex-direction:row;align-items:center;flex-wrap:wrap;gap:2px 14px;margin:8px 4px 6px}
+  .picker-row{flex-direction:row;align-items:center;flex-wrap:wrap;gap:2px 14px;margin:6px 4px 4px}
+  /* landscape: a compact tab row of its own, centred under the title */
+  .mode-tabs{align-self:center;width:min(380px,100%);margin:6px 0 0;padding:2px}
+  .mode-tab{padding:2px 4px;font-size:.84rem}
+  .mode-tab .ico{width:1.3em;height:1.3em}
   .picker-row .section-label{margin:0}
   .len-row{justify-content:flex-end;flex:1 1 auto}
+}
+
+/* ============================================================
+   Block Blitz. Each category is a colour; answer a
+   question from a group's category to blast the whole group.
+   ============================================================ */
+/* Home mode tabs: Quiz | Daily | Blocks. One shared Play button starts the
+   selected mode; only the matching label inside it is shown. */
+.mode-tabs{flex:0 0 auto;display:flex;gap:5px;margin:14px 2px 0;padding:4px;border-radius:16px;
+  background:rgba(4,3,53,.32);border:3px solid var(--ink)}
+.mode-tab{flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 4px;border-radius:11px;
+  border:2px solid transparent;color:#E3E9FF;font-family:"Lilita One","Nunito",sans-serif;font-size:1rem;letter-spacing:.4px;
+  transition:background .15s ease}
+.mode-tab .ico{width:1.5em;height:1.5em;vertical-align:0}
+.mode-tab:hover{background:rgba(255,255,255,.08)}
+.mode-tab[aria-selected="true"]{background:var(--gold);color:var(--ink);border-color:var(--ink);
+  box-shadow:var(--bevel-gold),0 3px 0 var(--ink)}
+.mode-panel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.mode-panel[hidden]{display:none}
+.panel-scroll{flex:1 1 auto;min-height:0;padding:12px 2px 6px}
+.info-card{padding:16px}
+.info-head{display:flex;align-items:center;gap:12px}
+.info-head .info-ico{width:3.2rem;height:3.2rem;vertical-align:0}
+.info-kicker{margin:0;font-size:.72rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-soft)}
+.info-title{margin:2px 0 0;font-family:"Lilita One","Nunito",sans-serif;font-weight:400;font-size:1.6rem;letter-spacing:.4px;color:var(--ink)}
+.info-sub{margin:10px 0 12px;font-size:.88rem;font-weight:700;line-height:1.45;color:var(--ink-soft)}
+.info-stats .stat{padding:10px 6px}
+.info-status{margin:12px 0 0;text-align:center;font-weight:900;font-size:.9rem;color:var(--ink)}
+.info-status.done{color:var(--green-ink)}
+.info-how{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.info-how li{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:800;line-height:1.35;color:var(--ink)}
+.info-how .ico{width:1.9rem;height:1.9rem;vertical-align:0}
+.pl{display:none}
+#home[data-mode="quiz"] .pl-quiz,#home[data-mode="blocks"] .pl-blocks{display:inline}
+/* The NEW tag on the Block Blitz tab */
+.new-tag{font-family:"Lilita One","Nunito",sans-serif;font-size:.62rem;letter-spacing:.6px;line-height:1;color:#fff;
+  background:var(--red);border:2px solid var(--ink);border-radius:999px;padding:2px 6px 1px;
+  box-shadow:0 2px 0 var(--ink);transform:rotate(-4deg);animation:newPulse 2.4s ease-in-out infinite}
+@keyframes newPulse{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(-4deg) scale(1.1)}}
+/* Daily: a calendar button in the top bar, with a dot until today's is played */
+.daily-btn{position:relative}
+.daily-dot{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--red);
+  border:2px solid var(--ink);animation:newPulse 2.4s ease-in-out infinite}
+.daily-dot[hidden]{display:none}
+.daily-modal{position:fixed;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;
+  padding:calc(12px + var(--safe-t)) 14px calc(12px + var(--safe-b));
+  background:rgba(4,3,53,.55);animation:fbIn .25s}
+.daily-modal[hidden]{display:none}
+.daily-card{position:relative;width:100%;max-width:420px;max-height:100%;overflow-y:auto}
+.daily-close{position:absolute;top:10px;right:10px}
+.daily-card .info-head{padding-right:44px}
+.daily-play{width:100%;margin-top:14px}
+.daily-play:disabled{filter:grayscale(.6);opacity:.75;cursor:default}
+.daily-play:disabled .play-ico{display:none}
+.mode-tab span{white-space:nowrap}
+@media (max-width:359px){
+  /* narrow phones: the tab labels stay on one line, so the icons step aside */
+  .mode-tab{font-size:.92rem;gap:5px}
+  .mode-tab .ico{display:none}
+  .top-btns{gap:5px}
+  .home-top .icon-btn{width:36px;height:36px}
+  .home-top .icon-btn .ico{width:22px;height:22px}
+  .best-chip{padding:5px 10px;font-size:.78rem;gap:6px}
+}
+.res-daily{margin:12px 0 0;font-weight:900;font-size:.9rem;color:var(--green-ink)}
+
+#blocks{gap:8px;position:relative}
+.bk-rise{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:10px;color:#E3E9FF;font-weight:900;
+  font-size:.72rem;letter-spacing:1.4px;text-transform:uppercase}
+.bk-pips{display:flex;gap:6px}
+.bk-pip{width:14px;height:14px;border-radius:50%;background:rgba(4,3,53,.35);border:2px solid var(--ink)}
+.bk-pip.on{background:var(--gold)}
+.bk-pips.urgent .bk-pip.on{background:var(--red)}
+.bk-rise-lab{white-space:nowrap}
+.bk-rise-lab.urgent{color:#FFD0DA;animation:bkWarn .8s ease-in-out infinite}
+@keyframes bkWarn{50%{color:#fff}}
+.bk-power{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:3px 10px 3px 5px;border-radius:999px;
+  background:var(--paper);border:var(--edge);box-shadow:var(--bevel),var(--drop-sm);color:var(--ink);
+  font-family:"Lilita One","Nunito",sans-serif;font-size:.95rem;letter-spacing:.3px;
+  transition:transform .1s ease,box-shadow .1s ease}
+.bk-power .ico{width:1.6em;height:1.6em;vertical-align:0}
+.bk-power:disabled{opacity:.45;box-shadow:none;cursor:default}
+.bk-power:not(:disabled):active{transform:translateY(2px);box-shadow:var(--bevel),0 1px 0 var(--ink)}
+.bk-power.armed{background:var(--gold);animation:bkArm .6s ease-in-out infinite}
+@keyframes bkArm{50%{transform:scale(1.08)}}
+.bk-board.arming .bk-block{cursor:crosshair}
+.bk-board.arming{box-shadow:inset 0 4px 0 rgba(4,3,53,.35),0 0 0 4px var(--gold),var(--drop-sm)}
+.bk-board.rise-soon::before{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;z-index:3;pointer-events:none;
+  background:linear-gradient(0deg,rgba(246,54,91,.85),rgba(246,54,91,0));animation:bkWarn2 .8s ease-in-out infinite}
+@keyframes bkWarn2{50%{opacity:.35}}
+.bk-block.lucky{background:linear-gradient(135deg,#FFF6C8,#FFE07A 45%,#FFC31C);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.8),inset 0 -4px 0 rgba(196,106,0,.35),0 0 12px rgba(255,214,74,.8)}
+.bk-block.lucky .ico{width:74%;height:74%}
+.bk-block:focus-visible{outline:3px solid #fff;outline-offset:1px;z-index:4}
+
+.bk-wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
+.bk-board{position:relative;box-sizing:content-box;padding:5px;border-radius:18px;background:rgba(4,3,53,.40);
+  border:3px solid var(--ink);box-shadow:inset 0 4px 0 rgba(4,3,53,.35),var(--drop-sm);overflow:hidden;touch-action:manipulation}
+.bk-board::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:rgba(255,255,255,.18)}
+.bk-board.danger{animation:bkDanger 1s ease-in-out infinite}
+@keyframes bkDanger{0%,100%{box-shadow:inset 0 4px 0 rgba(4,3,53,.35),var(--drop-sm)}
+  50%{box-shadow:inset 0 4px 0 rgba(4,3,53,.35),0 0 0 4px var(--red),var(--drop-sm)}}
+
+.bk-block{position:absolute;left:5px;top:5px;padding:0;display:flex;align-items:center;justify-content:center;
+  border-radius:11px;border:2.5px solid var(--ink);background:var(--c);cursor:pointer;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.5),inset 0 -4px 0 rgba(4,3,53,.22);
+  transition:transform .28s cubic-bezier(.3,1.25,.5,1),opacity .2s ease,filter .2s ease;will-change:transform}
+.bk-block .ico{width:62%;height:62%;vertical-align:0;filter:drop-shadow(0 1px 0 rgba(4,3,53,.35))}
+.bk-board.choosing .bk-block:not(.pick){filter:brightness(.55) saturate(.7)}
+.bk-block.pick{z-index:2;animation:bkPick .7s ease-in-out infinite}
+@keyframes bkPick{0%,100%{filter:brightness(1.05)}50%{filter:brightness(1.35)}}
+.bk-block.pop{animation:bkPop .3s ease-in forwards;pointer-events:none}
+@keyframes bkPop{0%{opacity:1;scale:1}40%{opacity:1;scale:1.25}100%{opacity:0;scale:.2}}
+
+.bk-hint{flex:0 0 auto;margin:0;text-align:center;color:#E3E9FF;font-size:.8rem;font-weight:800}
+
+.bk-sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;transform:translateY(115%);
+  transition:transform .26s cubic-bezier(.2,.8,.25,1);pointer-events:none}
+.bk-sheet.open{transform:none;pointer-events:auto}
+.bk-sheet-card{padding:14px 14px 12px}
+.bk-sheet-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bk-sheet .cat-badge{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;
+  background:var(--paper-2);border:2px solid var(--ink);color:var(--ink);font-size:.72rem;font-weight:900}
+.bk-worth{font-family:"Lilita One","Nunito",sans-serif;font-size:.95rem;color:var(--orange-ink);white-space:nowrap}
+.bk-timer{height:10px;margin:10px 0 10px;border-radius:99px;background:var(--line);border:2px solid var(--ink);overflow:hidden}
+.bk-timer-fill{height:100%;width:100%;background:var(--blue);transform-origin:left center}
+.bk-timer-fill.warn{background:var(--gold-2)}
+.bk-timer-fill.danger{background:var(--red)}
+.bk-sheet .q-text{font-size:1.05rem;margin:0 0 10px}
+.bk-answers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bk-answers .ans{padding:10px 11px;font-size:.9rem;gap:9px;min-height:52px}
+.bk-answers .ans .key{width:24px;height:24px;font-size:.8rem}
+.bk-fb{min-height:1.2em;margin:8px 0 0;font-weight:900;font-size:.86rem;text-align:center;color:var(--ink)}
+.bk-fb.good{color:var(--green-ink)}
+.bk-fb.bad{color:var(--red-2)}
+
+.bk-over{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;padding:6px;
+  background:rgba(4,3,53,.55)}
+.bk-over.show{display:flex;animation:fbIn .3s}
+.bk-over-card{width:100%;max-width:420px;padding:20px 16px 16px;text-align:center;display:flex;flex-direction:column;gap:12px}
+.bk-over-card .res-title{margin:0}
+.bk-over-card .res-emoji{align-self:center}
+.bk-over-card .res-new-best{margin:0 auto}
+.bk-over-card .res-new-best.show{display:inline-flex;align-items:center;gap:6px}
+
+/* Landscape: the board on the left, the question panel on the right, so a
+   question never covers the blocks. The hint holds the panel's place when no
+   question is open. */
+@media (orientation:landscape) and (max-height:560px){
+  #blocks.active{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,48%);
+    grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"hud hud" "board rise" "board panel";
+    column-gap:12px;row-gap:6px}
+  #blocks .hud{grid-area:hud}
+  .bk-rise{grid-area:rise;font-size:.64rem;justify-content:flex-start}
+  .bk-wrap{grid-area:board}
+  .bk-hint{grid-area:panel;display:flex;align-items:center;justify-content:center;padding:0 12px;font-size:.86rem}
+  .bk-sheet{grid-area:panel;position:relative;left:auto;right:auto;bottom:auto;align-self:start;
+    transform:none;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s}
+  .bk-sheet.open{transform:none;opacity:1;visibility:visible}
+  .bk-sheet-card{padding:10px 12px}
+  .bk-sheet .q-text{font-size:.95rem;margin-bottom:8px}
+  .bk-timer{margin:6px 0}
+  .bk-answers .ans{min-height:42px;padding:7px 10px}
+  .bk-over-card{max-width:520px;gap:8px;padding:12px}
 }
 </style>
 </head>
@@ -743,10 +914,11 @@ body{
 <div id="app">
 
   <!-- ============================ HOME ============================ -->
-  <section id="home" class="screen active" aria-label="Home">
+  <section id="home" class="screen active" aria-label="Home" data-mode="quiz">
     <div class="home-top">
-      <div class="best-chip" id="bestChip"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> Best Score <span id="bestScore">0</span></div>
+      <div class="best-chip" id="bestChip"><img class="ico" id="bestIco" src="assets/icons/trophy.png" alt="" draggable="false"> <span id="bestLabel">Best Score</span> <span id="bestScore">0</span></div>
       <div class="top-btns">
+        <button id="dailyBtn" class="icon-btn daily-btn" aria-label="Daily challenge" aria-haspopup="dialog" title="Daily challenge"><img class="ico" src="assets/icons/calendar.png" alt="" draggable="false"><span class="daily-dot" id="dailyDot" hidden></span></button>
         <button id="musicBtn" class="icon-btn" aria-label="Background music" aria-pressed="true" title="Music on/off"><img class="ico" src="assets/icons/music-on.png" alt="" draggable="false"></button>
         <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
       </div>
@@ -758,21 +930,56 @@ body{
     </div>
     <p class="tagline">How much do you really know?</p>
 
-    <div class="picker-row">
-      <p class="section-label">Choose a category</p>
-      <div class="len-row">
-        <span class="len-label">Questions</span>
-        <div class="len-pills" id="lenPills" role="group" aria-label="Questions per round"></div>
+    <div class="mode-tabs" role="tablist" aria-label="Game mode">
+      <button class="mode-tab" role="tab" id="tabQuiz" data-mode="quiz" aria-controls="panelQuiz" aria-selected="true"><img class="ico" src="assets/icons/cat-general.png" alt="" draggable="false"><span>Quiz</span></button>
+      <button class="mode-tab" role="tab" id="tabBlocks" data-mode="blocks" aria-controls="panelBlocks" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><span>Block Blitz</span><span class="new-tag">NEW</span></button>
+    </div>
+
+    <div class="mode-panel" id="panelQuiz" role="tabpanel" aria-labelledby="tabQuiz">
+      <div class="picker-row">
+        <p class="section-label">Choose a category</p>
+        <div class="len-row">
+          <span class="len-label">Questions</span>
+          <div class="len-pills" id="lenPills" role="group" aria-label="Questions per round"></div>
+        </div>
+      </div>
+
+      <div class="cat-scroll scroll">
+        <div class="cat-grid" id="catGrid"><!-- built by JS --></div>
       </div>
     </div>
 
-    <div class="cat-scroll scroll">
-      <div class="cat-grid" id="catGrid"><!-- built by JS --></div>
+    <div class="mode-panel" id="panelBlocks" role="tabpanel" aria-labelledby="tabBlocks" hidden>
+      <div class="panel-scroll scroll">
+        <div class="card info-card">
+          <div class="info-head"><img class="ico info-ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><div><p class="info-kicker">Puzzle mode</p><h2 class="info-title">Block Blitz</h2></div></div>
+          <ul class="info-how">
+            <li><img class="ico" src="assets/icons/cat-science.png" alt="" draggable="false"><span>Tap a group of matching blocks to get a question from its category.</span></li>
+            <li><img class="ico" src="assets/icons/check.png" alt="" draggable="false"><span>Answer right to blast the group. Bigger groups score far more.</span></li>
+            <li><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"><span>Wrong answers push up a new row. Don't let the blocks reach the top!</span></li>
+            <li><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span>A streak of 5 earns a bomb, and a Lucky Block blasts a whole colour.</span></li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <div class="home-foot">
-      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg> PLAY <span id="playCat">Mixed</span></button>
+      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="pl pl-quiz">PLAY <span id="playCat">Mixed</span></span><span class="pl pl-blocks">PLAY BLOCK BLITZ</span></button>
       <p class="hint" id="playHint">10 questions · 15 seconds each · answer fast for bonus points</p>
+    </div>
+      <div class="daily-modal" id="dailyModal" role="dialog" aria-modal="true" aria-labelledby="dailyTitle" hidden>
+      <div class="card info-card daily-card">
+        <button class="icon-btn daily-close" id="dailyClose" aria-label="Close" title="Close"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+        <div class="info-head"><img class="ico info-ico" src="assets/icons/calendar.png" alt="" draggable="false"><div><p class="info-kicker" id="dailyDate">Today</p><h2 class="info-title" id="dailyTitle">Daily Challenge</h2></div></div>
+        <p class="info-sub">The same ten questions for every player today, one from each category. One scored try a day, so make it count.</p>
+        <div class="stat-grid info-stats">
+          <div class="stat"><span class="v" id="dailyStreak">0</span><span class="l">Day streak</span></div>
+          <div class="stat"><span class="v" id="dailyLongest">0</span><span class="l">Longest</span></div>
+          <div class="stat"><span class="v" id="dailyToday">–</span><span class="l">Today</span></div>
+        </div>
+        <p class="info-status" id="dailyStatus"></p>
+        <button class="btn btn-primary daily-play" id="dailyPlay"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span id="dailyPlayLabel">PLAY TODAY'S 10</span></button>
+      </div>
     </div>
   </section>
 
@@ -827,6 +1034,7 @@ body{
         <h2 class="res-title" id="resTitle">Quiz Complete!</h2>
         <p class="res-msg" id="resMsg">Nice work.</p>
         <div><span class="res-score" id="resScore">0</span><span class="res-score-lab">Total Points</span></div>
+        <p class="res-daily" id="resDaily" hidden></p>
         <div class="res-new-best" id="resNewBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> NEW BEST SCORE!</div>
       </div>
 
@@ -845,6 +1053,57 @@ body{
     <div class="res-foot">
       <button id="homeBtn" class="btn btn-ghost">Home</button>
       <button id="againBtn" class="btn btn-primary">Play Again</button>
+    </div>
+  </section>
+
+  <!-- ========================= BLOCK BLITZ ========================= -->
+  <section id="blocks" class="screen" aria-label="Block Blitz">
+    <div class="hud">
+      <div class="hud-stat"><span class="lab">Score</span><span class="val" id="bkScore">0</span></div>
+      <div class="hud-stat"><span class="lab">Best</span><span class="val" id="bkBest">0</span></div>
+      <div class="hud-stat" id="bkStreakBox"><span class="lab">Streak</span><span class="val"><img class="ico" src="assets/icons/fire.png" alt="" draggable="false"><span id="bkStreak">0</span></span></div>
+      <button id="bkQuit" class="icon-btn" aria-label="Quit to home" title="Quit"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+    </div>
+
+    <div class="bk-rise">
+      <span class="bk-rise-lab" id="bkRiseLab">New row in</span><span class="bk-pips" id="bkPips"></span>
+      <button class="bk-power" id="bkBomb" aria-label="Bomb: blast a whole row" title="Bomb (B): blast a whole row" disabled><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span id="bkBombs">0</span></button>
+    </div>
+
+    <div class="bk-wrap" id="bkWrap">
+      <div class="bk-board" id="bkBoard" aria-label="Block board"></div>
+    </div>
+    <p class="bk-hint" id="bkHint">Tap a group of blocks, then answer its question to blast them.</p>
+
+    <div class="bk-sheet" id="bkSheet" role="dialog" aria-modal="true" aria-labelledby="bkQ" aria-hidden="true">
+      <div class="card bk-sheet-card">
+        <div class="bk-sheet-top">
+          <span class="cat-badge" id="bkBadge"></span>
+          <span class="bk-worth" id="bkWorth"></span>
+        </div>
+        <div class="bk-timer"><div class="bk-timer-fill" id="bkTimer"></div></div>
+        <p class="q-text" id="bkQ">Question</p>
+        <div class="bk-answers" id="bkAnswers" role="group" aria-label="Answer choices"></div>
+        <p class="bk-fb" id="bkFb" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="bk-over" id="bkOver" role="dialog" aria-modal="true" aria-labelledby="bkOverTitle">
+      <div class="card bk-over-card">
+        <span class="res-emoji"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"></span>
+        <h2 class="res-title" id="bkOverTitle">The blocks reached the top!</h2>
+        <div><span class="res-score" id="bkOverScore">0</span><span class="res-score-lab">Total Points</span></div>
+        <div class="res-new-best" id="bkOverBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> NEW BEST SCORE!</div>
+        <div class="stat-grid">
+          <div class="stat"><span class="v" id="bkOverBlasted">0</span><span class="l">Blocks</span></div>
+          <div class="stat"><span class="v" id="bkOverCorrect">0</span><span class="l">Correct</span></div>
+          <div class="stat"><span class="v" id="bkOverStreak">0</span><span class="l">Best Streak</span></div>
+        </div>
+        <div class="res-foot">
+          <button id="bkHome" class="btn btn-ghost">Home</button>
+          <button id="bkAgain" class="btn btn-primary">Play Again</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -874,7 +1133,7 @@ const ICON_DIR = "assets/icons/";
 const ICON_NAMES = ["cat-mixed", "cat-general", "cat-science", "cat-history", "cat-geo", "cat-movies",
   "cat-sports", "cat-animals", "cat-tech", "cat-food", "cat-space", "logo-bolt", "trophy", "fire",
   "sound-on", "sound-off", "check", "cross", "clock", "tier-crown", "tier-star", "tier-up",
-  "tier-book", "tier-clover", "music-on", "music-off"];
+  "tier-book", "tier-clover", "music-on", "music-off", "lucky-block", "bomb", "calendar"];
 const icon = (name) => '<img class="ico" src="' + ICON_DIR + name + '.png" alt="" draggable="false">';
 /** Fill an element with an icon followed by text, keeping the text out of innerHTML. */
 const setIconText = (el, name, text) => {
@@ -3186,6 +3445,9 @@ const progress = {
   best: {},        // best score keyed by round length
   muted: false,
   music: true,     // background music; on until the player turns it off
+  mode: "quiz",    // last home tab: "quiz" | "blocks"
+  daily: null,     // { date, score, correct } for the last daily challenge played
+  days: null,      // { last, count, best }: the run of consecutive days with a daily played
   length: 10       // DEFAULT_ROUND_SIZE, restated so this stays declaration-order safe
 };
 
@@ -3238,6 +3500,15 @@ function applyProgress(data) {
   }
   if (typeof data.muted === "boolean") progress.muted = data.muted;
   if (typeof data.music === "boolean") progress.music = data.music;
+  if (["quiz", "blocks"].indexOf(data.mode) !== -1) progress.mode = data.mode;
+  const d = data.daily;
+  if (d && typeof d.date === "string" && typeof d.score === "number") {
+    progress.daily = { date: d.date, score: d.score, correct: Number(d.correct) || 0 };
+  }
+  const days = data.days;
+  if (days && typeof days.last === "string" && typeof days.count === "number") {
+    progress.days = { last: days.last, count: days.count, best: Math.max(Number(days.best) || 0, days.count) };
+  }
   const len = parseInt(data.length, 10);
   if (!isNaN(len)) progress.length = len;
 }
@@ -3253,7 +3524,7 @@ function hydrateProgress() {
 
 function snapshotProgress() {
   return { seen: progress.seen, best: progress.best, muted: progress.muted, music: progress.music,
-           length: progress.length };
+           length: progress.length, mode: progress.mode, daily: progress.daily, days: progress.days };
 }
 
 /** Write through to this device now, and to the cloud on a debounce. */
@@ -3396,6 +3667,83 @@ function buildRound(catKey, requested) {
   });
 }
 
+/* ---- daily challenge ---------------------------------------------------
+   Everyone gets the same ten questions on a given day, one from each
+   category, with no server: the day's date seeds a small PRNG that picks the
+   questions and shuffles them and their answers. Dates are the player's local
+   calendar day, so the challenge turns over at their midnight. The daily
+   round leaves the rotation history alone, so it never uses up fresh
+   questions from the regular quiz.
+   ------------------------------------------------------------------------ */
+function dateKey(d) {
+  d = d || new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function dayBefore(key) {
+  const [y, m, dd] = key.split("-").map(Number);
+  return dateKey(new Date(y, m - 1, dd - 1));
+}
+
+/** A seeded PRNG (cyrb-style string hash into mulberry32). */
+function seededRandom(seed) {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle(arr, rnd) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildDailyRound(key) {
+  const rnd = seededRandom("brainblitz-daily-" + key);
+  const picked = Object.keys(CATEGORIES).map((c) => {
+    const pool = questionsIn(c);
+    return pool[Math.floor(rnd() * pool.length)];
+  });
+  return seededShuffle(picked, rnd).map((q) => {
+    const options = seededShuffle(q.a.map((text, i) => ({ text, correct: i === 0 })), rnd);
+    return { category: q.c, text: q.q, explanation: q.e, options, correctIndex: options.findIndex((o) => o.correct) };
+  });
+}
+
+function dailyPlayed(key) {
+  return !!(progress.daily && progress.daily.date === (key || dateKey()));
+}
+
+/** The current run of consecutive days; a missed day breaks it to 0. */
+function dayStreakNow() {
+  const d = progress.days;
+  if (!d || !d.last) return 0;
+  const today = dateKey();
+  return d.last === today || d.last === dayBefore(today) ? d.count : 0;
+}
+
+function recordDaily(key, score, correct) {
+  progress.daily = { date: key, score, correct };
+  const d = progress.days || { last: "", count: 0, best: 0 };
+  if (d.last !== key) d.count = d.last === dayBefore(key) ? d.count + 1 : 1;
+  d.last = key;
+  d.best = Math.max(d.best || 0, d.count);
+  progress.days = d;
+  markProgressDirty();
+}
+
 /* ================================================================
    5. UI RENDERING
    ================================================================ */
@@ -3471,8 +3819,12 @@ const UI = {
     UI.updatePlayHint();
   },
 
-  /** Keep the line under the Play button in step with the chosen length. */
+  /** Keep the line under the Play button in step with the chosen mode and length. */
   updatePlayHint() {
+    if ($("home").dataset.mode === "blocks") {
+      $("playHint").textContent = "Answer right to blast blocks before they stack to the top";
+      return;
+    }
     const pool = state.category === "mixed" ? QUESTIONS.length : questionsIn(state.category).length;
     const n = Math.min(state.roundSize, pool);
     $("playHint").textContent =
@@ -3492,15 +3844,89 @@ const UI = {
     UI.updatePlayHint();
   },
 
+  /** The chip shows what matters for the selected mode. */
   refreshBest() {
-    $("bestScore").textContent = loadBest(state.roundSize);
-    $("bestChip").title = "Best score for a " + state.roundSize + "-question round";
+    const mode = $("home").dataset.mode;
+    let ico = "trophy", label = "Best Score", value, title;
+    if (mode === "blocks") {
+      label = "Best"; value = parseInt(progress.best.blocks, 10) || 0;
+      title = "Best Block Blitz score";
+    } else {
+      value = loadBest(state.roundSize);
+      title = "Best score for a " + state.roundSize + "-question round";
+    }
+    $("bestIco").src = ICON_DIR + ico + ".png";
+    $("bestLabel").textContent = label;
+    $("bestScore").textContent = value;
+    $("bestChip").title = title;
+  },
+
+  /** Switch the home screen between the Quiz and Block Blitz tabs. */
+  setMode(mode, quiet) {
+    if (["quiz", "blocks"].indexOf(mode) === -1) mode = "quiz";
+    $("home").dataset.mode = mode;
+    document.querySelectorAll(".mode-tab").forEach((t) => {
+      const on = t.dataset.mode === mode;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+    });
+    ["Quiz", "Blocks"].forEach((m) => { $("panel" + m).hidden = m.toLowerCase() !== mode; });
+    if (!quiet && progress.mode !== mode) {
+      progress.mode = mode;
+      markProgressDirty();
+      Sound.init();
+      Sound.click();
+    }
+    progress.mode = mode;
+    UI.refreshBest();
+    UI.renderDaily();
+    UI.updatePlayHint();
+  },
+
+  renderDaily() {
+    const today = dateKey(), played = dailyPlayed(today);
+    $("dailyDate").textContent = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+    $("dailyStreak").textContent = dayStreakNow();
+    $("dailyLongest").textContent = progress.days ? progress.days.best : 0;
+    $("dailyToday").textContent = played ? progress.daily.score : "–";
+    const status = $("dailyStatus");
+    status.textContent = played
+      ? "Done for today: " + progress.daily.correct + "/10 correct. A new challenge starts at midnight."
+      : (dayStreakNow() > 0 ? "Play today to keep your " + dayStreakNow() + "-day streak going!" : "Not played yet today.");
+    status.classList.toggle("done", played);
+    $("dailyPlayLabel").textContent = played ? "DONE FOR TODAY" : "PLAY TODAY'S 10";
+    $("dailyPlay").disabled = played;
+    $("dailyDot").hidden = played;   // the top-bar calendar shows a dot until today's is played
+    $("dailyBtn").setAttribute("aria-label", played ? "Daily challenge (done today)" : "Daily challenge (not played yet)");
+  },
+
+  openDaily() {
+    Sound.init();
+    Sound.click();
+    UI.renderDaily();
+    $("dailyModal").hidden = false;
+    ($("dailyPlay").disabled ? $("dailyClose") : $("dailyPlay")).focus();
+  },
+
+  closeDaily() {
+    if ($("dailyModal").hidden) return;
+    $("dailyModal").hidden = true;
+    $("dailyBtn").focus();
+  },
+
+  isDailyOpen: () => !$("dailyModal").hidden,
+
+  /** The shared Play button starts whichever mode is selected. */
+  playSelected() {
+    if ($("home").dataset.mode === "blocks") Blocks.start();
+    else Game.start();
   },
 
   /** Repaint everything on the home screen that a finished round can change. */
   refreshHome() {
     UI.refreshBest();
     UI.buildCategoryGrid();
+    UI.renderDaily();
     UI.updatePlayHint();
   },
 
@@ -3585,7 +4011,7 @@ const UI = {
   },
 
   revealAnswers(chosenIdx, correctIdx) {
-    document.querySelectorAll(".ans").forEach(btn => {
+    document.querySelectorAll("#answers .ans").forEach(btn => {
       const i = Number(btn.dataset.idx);
       btn.classList.add("locked");
       if (i === correctIdx) {
@@ -3689,6 +4115,13 @@ const UI = {
     $("statAccV").textContent = acc + "%";
     $("statStreakV").textContent = state.bestStreak;
     $("resNewBest").classList.toggle("show", newBest);
+    const daily = $("resDaily");
+    daily.hidden = !state.daily;
+    if (state.daily) {
+      const n = dayStreakNow();
+      daily.textContent = "Daily challenge done · " + n + "-day streak" + (n > 1 ? "!" : "");
+    }
+    $("againBtn").textContent = state.daily ? "Play a Quiz" : "Play Again";
 
     const list = $("reviewList");
     list.innerHTML = "";
@@ -3711,13 +4144,18 @@ const UI = {
    6. GAME FLOW
    ================================================================ */
 const Game = {
-  start() {
+  /** Start a quiz round, or with daily === true today's daily challenge. */
+  start(daily) {
     // Building a round marks its questions as seen, so a second tap arriving
     // before the first round finishes would silently burn a second set of
     // questions the player never gets shown. Play, Play Again and the Enter
     // key all land here, so one guard covers every entry point.
     if (state.roundActive) return;
+    const isDaily = daily === true;
+    if (isDaily && dailyPlayed()) return;          // one scored try a day
     state.roundActive = true;
+    state.daily = isDaily;
+    state.dailyKey = isDaily ? dateKey() : null;   // fixed at the start, so a round across midnight counts for its own day
 
     Sound.init();
     Sound.start();
@@ -3725,8 +4163,12 @@ const Game = {
     Music.setMode("quiz");
     Game.stopTimer();
 
-    state.round = buildRound(state.category, state.roundSize);
-    state.roundSize = state.round.length;   // a short pool can cap the round
+    if (isDaily) {
+      state.round = buildDailyRound(state.dailyKey);
+    } else {
+      state.round = buildRound(state.category, state.roundSize);
+      state.roundSize = state.round.length;   // a short pool can cap the round
+    }
     state.index = 0;
     state.score = 0;
     state.displayedScore = 0;
@@ -3807,7 +4249,7 @@ const Game = {
 
       Sound.correct(state.streak);
       UI.revealAnswers(idx, q.correctIndex);
-      const btn = document.querySelector('.ans[data-idx="' + idx + '"]');
+      const btn = document.querySelector('#answers .ans[data-idx="' + idx + '"]');
       if (btn) { UI.floatPoints(points, btn); UI.burst(btn); }
       UI.animateScore();
 
@@ -3859,9 +4301,15 @@ const Game = {
     state.locked = true;
     $("progFill").style.width = "100%";
 
-    const best = loadBest(state.roundSize);
-    const newBest = state.score > best;
-    if (newBest) saveBest(state.roundSize, state.score);
+    let newBest;
+    if (state.daily) {
+      newBest = state.score > (parseInt(progress.best.daily, 10) || 0);
+      if (newBest) progress.best.daily = state.score;
+      recordDaily(state.dailyKey, state.score, state.correctCount);
+    } else {
+      newBest = state.score > loadBest(state.roundSize);
+      if (newBest) saveBest(state.roundSize, state.score);
+    }
 
     Music.setMode("home");
     UI.refreshHome();
@@ -3896,6 +4344,530 @@ const Game = {
     UI.showScreen("home");
   }
 };
+
+/* ================================================================
+   6b. BLOCK BLITZ — a block-blasting mode
+   ----------------------------------------------------------------
+   The board is a stack of blocks, each one a category (its colour and
+   icon). Tap a block and its whole connected group of that category is
+   picked; answer a question from that category and the group blasts,
+   scoring size² × 10, multiplied by the answer streak. A wrong answer or
+   a timeout pushes a new row up from the bottom, and a row also rises
+   every few answers regardless, faster as the game goes on. Blocks
+   reaching the top end the game.
+
+   Each game uses five random categories so the board stays readable, and
+   questions come through the same rotation as the quiz, so a player is
+   not asked something they have just seen in either mode.
+
+   Power-ups. Every fifth answer in a streak earns a bomb (up to three):
+   arm it, tap any block, and that block's whole row goes with no question.
+   A rising row sometimes carries a Lucky Block; answer its question and
+   every block of one category on the board blasts at once.
+
+   Keyboard: arrow keys move between blocks, Enter or Space picks a group,
+   B arms a bomb, 1-4 / A-D answer, Escape quits.
+   ================================================================ */
+const BLOCK_COLORS = {
+  general: "#A66CFF", science: "#32B6FE", history: "#E3A45A", geo: "#47C64D", movies: "#FEC41C",
+  sports: "#FE9100", animals: "#3DD6B5", tech: "#8FA3C8", food: "#F6365B", space: "#E25BD8"
+};
+
+const Blocks = (() => {
+  const COLS = 7, START_ROWS = 5, CATS_PER_GAME = 5;
+  const MIN_ROWS = 8, MAX_ROWS = 11;   // the board is as tall as the screen allows, within these
+  let ROWS = 9;
+  const TIME = 15;                 // seconds per question, as in the quiz
+  const FIRST_RISE_EVERY = 4;      // answers between automatic rises at the start
+  const CLEAR_BONUS = 500;
+  const LUCKY = "lucky";           // the wild block's "category"
+  const LUCKY_CHANCE = 0.3;        // chance that a rising row carries one (never two on the board)
+  const BOMB_EVERY = 5, MAX_BOMBS = 3, BOMB_POINTS = 20;
+
+  let grid = [];                   // grid[col][row] = block | null; row 0 is the bottom
+  let cats = [];
+  let cell = 40;
+  let score = 0, best = 0, streak = 0, bestStreak = 0, blasted = 0, correctCount = 0;
+  let riseEvery = FIRST_RISE_EVERY, sinceRise = 0;
+  let bombs = 0, arming = false;
+  let cursor = { col: 0, row: 0 }; // where arrow keys resume after focus leaves the board
+  let picked = null;               // { cat, blocks: [...], lucky } while a question is open
+  let q = null, locked = true, busy = false, over = true;
+  let rafId = null, endsAt = 0, timeLeft = TIME, lastTick = null;
+  let gen = 0;                     // bumped by start() and quit(), so delayed steps from an old game do nothing
+
+  const board = () => $("bkBoard");
+
+  /** setTimeout that is cancelled if the game it belongs to has ended or been replaced. */
+  function later(fn, ms) {
+    const mine = gen;
+    setTimeout(() => { if (mine === gen) fn(); }, ms);
+  }
+
+  /* ---------- board ---------- */
+  function randomCat(col, row) {
+    // Lean towards the neighbour below or to the left, so groups form.
+    const r = Math.random();
+    const below = row > 0 && grid[col][row - 1], left = col > 0 && grid[col - 1][row];
+    if (below && below.cat !== LUCKY && r < 0.42) return below.cat;
+    if (left && left.cat !== LUCKY && r < 0.62) return left.cat;
+    return cats[Math.floor(Math.random() * cats.length)];
+  }
+
+  const nameOf = (cat) => (cat === LUCKY ? "Lucky" : CATEGORIES[cat].name);
+
+  function makeBlock(cat, col, row) {
+    const el = document.createElement("button");
+    el.className = "bk-block" + (cat === LUCKY ? " lucky" : "");
+    if (cat !== LUCKY) el.style.setProperty("--c", BLOCK_COLORS[cat]);
+    el.innerHTML = icon(cat === LUCKY ? "lucky-block" : CATEGORIES[cat].icon);
+    const block = { cat, col, row, el };
+    el._block = block;
+    el.addEventListener("click", () => tap(block));
+    el.addEventListener("focus", () => { cursor = { col: block.col, row: block.row }; });
+    board().appendChild(el);
+    return block;
+  }
+
+  function place(block, instant) {
+    if (instant) block.el.style.transition = "none";
+    block.el.style.width = block.el.style.height = (cell - 4) + "px";
+    block.el.style.transform =
+      "translate(" + (block.col * cell + 2) + "px," + ((ROWS - 1 - block.row) * cell + 2) + "px)";
+    block.el.setAttribute("aria-label",
+      nameOf(block.cat) + " block, column " + (block.col + 1) + ", row " + (block.row + 1));
+    if (instant) { void block.el.offsetWidth; block.el.style.transition = ""; }
+  }
+
+  function eachBlock(fn) {
+    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) if (grid[c][r]) fn(grid[c][r]);
+  }
+
+  const PAD = 16;   // board padding and border, both sides
+
+  /** At the start of a game: as many rows as fit at the width-limited cell size. */
+  function chooseRows() {
+    const wrap = $("bkWrap");
+    const w = (wrap.clientWidth - PAD) / COLS;
+    ROWS = Math.max(MIN_ROWS, Math.min(MAX_ROWS, Math.floor((wrap.clientHeight - PAD) / w)));
+  }
+
+  /** Size the board to the space it has, keeping square cells. */
+  function layout() {
+    const wrap = $("bkWrap");
+    cell = Math.max(24, Math.floor(Math.min((wrap.clientWidth - PAD) / COLS, (wrap.clientHeight - PAD) / ROWS)));
+    board().style.width = cell * COLS + "px";
+    board().style.height = cell * ROWS + "px";
+    eachBlock((b) => place(b, true));
+  }
+
+  function groupAt(block) {
+    const seen = new Set(), out = [], stack = [block];
+    while (stack.length) {
+      const b = stack.pop();
+      if (!b || seen.has(b) || b.cat !== block.cat) continue;
+      seen.add(b); out.push(b);
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dc, dr]) => {
+        const c = b.col + dc, r = b.row + dr;
+        if (c >= 0 && c < COLS && r >= 0 && r < ROWS) stack.push(grid[c][r]);
+      });
+    }
+    return out;
+  }
+
+  function topFull() {
+    for (let c = 0; c < COLS; c++) if (grid[c][ROWS - 1]) return true;
+    return false;
+  }
+
+  function renderHud() {
+    $("bkScore").textContent = score;
+    $("bkBest").textContent = Math.max(best, score);
+    $("bkStreak").textContent = streak;
+    $("bkStreakBox").classList.toggle("hot", streak >= 3);
+    const pips = $("bkPips");
+    pips.innerHTML = "";
+    for (let i = 0; i < riseEvery; i++) {
+      const p = document.createElement("span");
+      p.className = "bk-pip" + (i < sinceRise ? " on" : "");
+      pips.appendChild(p);
+    }
+    const soon = !over && sinceRise >= riseEvery - 1;
+    pips.classList.toggle("urgent", soon);
+    $("bkRiseLab").textContent = soon ? "Row coming next!" : "New row in";
+    $("bkRiseLab").classList.toggle("urgent", soon);
+    board().classList.toggle("rise-soon", soon);
+    board().classList.toggle("danger", topFull());
+    $("bkBombs").textContent = bombs;
+    $("bkBomb").disabled = bombs === 0 || over;
+    $("bkBomb").classList.toggle("armed", arming);
+  }
+
+  /* ---------- turns ---------- */
+  function tap(block) {
+    if (busy || over || picked) return;
+    Sound.init();
+    if (arming) { bombRow(block.row); return; }
+    let cat = block.cat, blocks;
+    if (cat === LUCKY) {
+      // The wild block: a random category on the board, and every block of it.
+      const present = [];
+      eachBlock((b) => { if (b.cat !== LUCKY && present.indexOf(b.cat) === -1) present.push(b.cat); });
+      if (!present.length) return;
+      cat = present[Math.floor(Math.random() * present.length)];
+      blocks = [block];
+      eachBlock((b) => { if (b.cat === cat) blocks.push(b); });
+    } else {
+      blocks = groupAt(block);
+    }
+    picked = { cat, blocks, lucky: block.cat === LUCKY };
+    blocks.forEach((b) => b.el.classList.add("pick"));
+    board().classList.add("choosing");
+    Sound.click();
+    openQuestion(cat, blocks.length);
+  }
+
+  function toggleBomb() {
+    if (busy || over || picked || (!arming && bombs === 0)) return;
+    Sound.init();
+    arming = !arming;
+    board().classList.toggle("arming", arming);
+    $("bkHint").textContent = arming ? "Bomb ready: tap any block to blast its whole row."
+                                     : "Tap a group of blocks, then answer its question to blast them.";
+    Sound.click();
+    renderHud();
+  }
+
+  function bombRow(row) {
+    arming = false;
+    board().classList.remove("arming");
+    bombs--;
+    const blocks = [];
+    for (let c = 0; c < COLS; c++) if (grid[c][row]) blocks.push(grid[c][row]);
+    const points = blocks.length * BOMB_POINTS;
+    score += points;
+    picked = { cat: null, blocks };
+    $("bkHint").textContent = "Boom! +" + points;
+    Sound.wrong();   // the low sweep doubles as an explosion
+    renderHud();
+    blast(points);
+  }
+
+  function multiplier(s) { return 1 + 0.25 * Math.min(Math.max(s - 1, 0), 4); }
+  function worth(n, s) { return Math.round(n * n * 10 * multiplier(s)); }
+
+  function openQuestion(cat, n) {
+    const seen = loadSeen();
+    const [raw] = drawQuestions(questionsIn(cat), 1, seen);
+    saveSeen(seen);
+    const options = shuffle(raw.a.map((text, i) => ({ text, correct: i === 0 })));
+    q = { cat, text: raw.q, explanation: raw.e, options, correctIndex: options.findIndex((o) => o.correct) };
+
+    setIconText($("bkBadge"), CATEGORIES[cat].icon, CATEGORIES[cat].name);
+    $("bkWorth").textContent = (picked && picked.lucky ? "Lucky! " : "") + "Blast " + n + " · +" + worth(n, streak + 1);
+    $("bkQ").textContent = q.text;
+    $("bkFb").textContent = "";
+    $("bkFb").className = "bk-fb";
+    const wrap = $("bkAnswers");
+    wrap.innerHTML = "";
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.className = "ans";
+      btn.dataset.idx = i;
+      btn.innerHTML = '<span class="key">' + LETTERS[i] + '</span><span class="txt"></span><span class="mark"></span>';
+      btn.querySelector(".txt").textContent = opt.text;
+      btn.addEventListener("click", () => answer(i));
+      wrap.appendChild(btn);
+    });
+    $("bkSheet").classList.add("open");
+    $("bkSheet").setAttribute("aria-hidden", "false");
+    locked = false;
+    timeLeft = TIME;
+    runTimer();
+  }
+
+  function runTimer() {
+    cancelAnimationFrame(rafId);
+    endsAt = performance.now() + timeLeft * 1000;
+    lastTick = null;
+    const frame = (now) => {
+      if (locked) return;
+      timeLeft = Math.max(0, (endsAt - now) / 1000);
+      const fill = $("bkTimer");
+      fill.style.transform = "scaleX(" + (timeLeft / TIME).toFixed(3) + ")";
+      fill.classList.toggle("warn", timeLeft <= 5 && timeLeft > 3);
+      fill.classList.toggle("danger", timeLeft <= 3);
+      const whole = Math.ceil(timeLeft);
+      if (whole !== lastTick) { if (lastTick !== null && whole <= 5 && whole > 0) Sound.tick(); lastTick = whole; }
+      if (timeLeft <= 0) { answer(-1); return; }
+      rafId = requestAnimationFrame(frame);
+    };
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function answer(idx) {
+    if (locked || !q) return;
+    locked = true;
+    cancelAnimationFrame(rafId);
+    const right = idx === q.correctIndex;
+    document.querySelectorAll("#bkAnswers .ans").forEach((btn) => {
+      const i = Number(btn.dataset.idx);
+      btn.classList.add("locked");
+      if (i === q.correctIndex) { btn.classList.add("correct"); btn.querySelector(".mark").innerHTML = icon("check"); }
+      else if (i === idx) { btn.classList.add("wrong"); btn.querySelector(".mark").innerHTML = icon("cross"); }
+      else btn.classList.add("faded");
+    });
+    const fb = $("bkFb");
+    sinceRise++;
+    if (right) {
+      streak++; correctCount++;
+      bestStreak = Math.max(bestStreak, streak);
+      const points = worth(picked.blocks.length, streak);
+      score += points;
+      fb.className = "bk-fb good";
+      fb.textContent = (streak >= 3 ? streak + " in a row! " : "Correct! ") + "+" + points;
+      if (streak % BOMB_EVERY === 0 && bombs < MAX_BOMBS) {
+        bombs++;
+        fb.textContent += " · Bomb earned!";
+      }
+      Sound.correct(streak);
+      // Every 8 correct answers the automatic rise comes one answer sooner, down to every 2.
+      if (correctCount % 8 === 0) riseEvery = Math.max(2, riseEvery - 1);
+      renderHud();
+      later(() => { closeSheet(); later(() => blast(points), 180); }, 750);
+    } else {
+      streak = 0;
+      fb.className = "bk-fb bad";
+      fb.textContent = (idx === -1 ? "Time's up! " : "Not quite. ") + "It's " + q.options[q.correctIndex].text + ".";
+      idx === -1 ? Sound.timeout() : Sound.wrong();
+      renderHud();
+      later(() => {
+        closeSheet();
+        unpick();
+        sinceRise = 0;               // the penalty row is this turn's rise
+        later(() => rise(), 200);
+      }, 1700);
+    }
+  }
+
+  function closeSheet() {
+    $("bkSheet").classList.remove("open");
+    $("bkSheet").setAttribute("aria-hidden", "true");
+    board().classList.remove("choosing");
+    q = null;
+  }
+
+  function unpick() {
+    if (picked) picked.blocks.forEach((b) => b.el.classList.remove("pick"));
+    picked = null;
+  }
+
+  /* ---------- board changes ---------- */
+  function blast(points) {
+    busy = true;
+    const blocks = picked.blocks;
+    picked = null;
+    const mid = blocks[Math.floor(blocks.length / 2)].el;
+    UI.floatPoints(points, mid);
+    UI.burst(mid);
+    blocks.forEach((b) => {
+      b.el.classList.remove("pick");
+      b.el.classList.add("pop");
+      grid[b.col][b.row] = null;
+      setTimeout(() => b.el.remove(), 320);
+    });
+    blasted += blocks.length;
+    later(() => {
+      gravity();
+      later(() => {
+        let empty = true;
+        eachBlock(() => { empty = false; });
+        if (empty) {
+          score += CLEAR_BONUS;
+          $("bkHint").textContent = "Board cleared! +" + CLEAR_BONUS;
+          Sound.finish(true);
+          for (let i = 0; i < 3; i++) addRow();
+        }
+        afterTurn();
+      }, 300);
+    }, 260);
+  }
+
+  function gravity() {
+    for (let c = 0; c < COLS; c++) {
+      let to = 0;
+      for (let r = 0; r < ROWS; r++) {
+        const b = grid[c][r];
+        if (!b) continue;
+        if (r !== to) { grid[c][to] = b; grid[c][r] = null; b.row = to; place(b); }
+        to++;
+      }
+    }
+  }
+
+  /** Push every column up by one and fill the bottom row. Returns false when there is no room. */
+  function addRow() {
+    if (topFull()) return false;
+    for (let c = 0; c < COLS; c++) {
+      for (let r = ROWS - 1; r > 0; r--) {
+        grid[c][r] = grid[c][r - 1];
+        if (grid[c][r]) { grid[c][r].row = r; place(grid[c][r]); }
+      }
+      grid[c][0] = null;
+    }
+    let luckyCol = -1;
+    let hasLucky = false;
+    eachBlock((b) => { if (b.cat === LUCKY) hasLucky = true; });
+    if (!hasLucky && Math.random() < LUCKY_CHANCE) luckyCol = Math.floor(Math.random() * COLS);
+    for (let c = 0; c < COLS; c++) {
+      const b = makeBlock(c === luckyCol ? LUCKY : randomCat(c, 0), c, -1);   // start below the board, then slide in
+      place(b, true);
+      b.row = 0; grid[c][0] = b;
+      requestAnimationFrame(() => place(b));
+    }
+    return true;
+  }
+
+  function rise() {
+    busy = true;
+    if (!addRow()) { gameOver(); return; }
+    Sound.tick();
+    renderHud();
+    later(() => { busy = false; renderHud(); }, 320);
+  }
+
+  function afterTurn() {
+    if (sinceRise >= riseEvery) {
+      sinceRise = 0;
+      rise();
+    } else {
+      busy = false;
+      renderHud();
+    }
+  }
+
+  function gameOver() {
+    over = true; busy = false;
+    cancelAnimationFrame(rafId);
+    Music.setMode("home");
+    const newBest = score > best;
+    if (newBest) { best = score; progress.best.blocks = score; markProgressDirty(); flushProgress(); }
+    $("bkOverScore").textContent = score;
+    $("bkOverBlasted").textContent = blasted;
+    $("bkOverCorrect").textContent = correctCount;
+    $("bkOverStreak").textContent = bestStreak;
+    $("bkOverBest").classList.toggle("show", newBest);
+    $("bkOver").classList.add("show");
+    Sound.finish(score > 0);
+    renderHud();
+  }
+
+  /** Arrow-key navigation: step to the nearest block in that direction. */
+  function moveFocus(dc, dr) {
+    const active = document.activeElement && document.activeElement._block;
+    let { col, row } = active && active.el.isConnected ? active : cursor;
+    if (!active || !active.el.isConnected) {
+      // Resume where the player left off, or the nearest block below it.
+      col = Math.min(col, COLS - 1);
+      row = Math.min(row, ROWS - 1);
+      while (row > 0 && !grid[col][row]) row--;
+      if (grid[col][row]) { grid[col][row].el.focus(); return; }
+    }
+    if (dr !== 0) {
+      const r = row + dr;
+      if (r >= 0 && r < ROWS && grid[col][r]) grid[col][r].el.focus();
+      return;
+    }
+    for (let c = col + dc; c >= 0 && c < COLS; c += dc) {
+      // Same row if there is a block there, otherwise the top of that column.
+      let r = Math.min(row, ROWS - 1);
+      while (r > 0 && !grid[c][r]) r--;
+      if (grid[c][r]) { grid[c][r].el.focus(); return; }
+    }
+  }
+
+  /* ---------- lifecycle ---------- */
+  function start() {
+    gen++;
+    Sound.init();
+    Music.start();
+    Music.setMode("quiz");
+    cats = shuffle(Object.keys(CATEGORIES)).slice(0, CATS_PER_GAME);
+    board().innerHTML = "";
+    grid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
+    score = 0; streak = 0; bestStreak = 0; blasted = 0; correctCount = 0;
+    riseEvery = FIRST_RISE_EVERY; sinceRise = 0;
+    bombs = 0; arming = false; cursor = { col: 0, row: 0 };
+    board().classList.remove("arming");
+    picked = null; q = null; locked = true; busy = false; over = false;
+    best = parseInt(progress.best.blocks, 10) || 0;
+    $("bkOver").classList.remove("show");
+    closeSheet();
+    $("bkHint").textContent = "Tap a group of blocks, then answer its question to blast them.";
+    UI.showScreen("blocks");
+    chooseRows();
+    grid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
+    for (let r = 0; r < START_ROWS; r++) {
+      for (let c = 0; c < COLS; c++) grid[c][r] = makeBlock(randomCat(c, r), c, r);
+    }
+    layout();
+    renderHud();
+    Sound.start();
+  }
+
+  function quit() {
+    gen++;
+    cancelAnimationFrame(rafId);
+    locked = true; over = true; busy = false; arming = false;
+    board().classList.remove("arming");
+    closeSheet(); unpick();
+    $("bkOver").classList.remove("show");
+    Music.setMode("home");
+    flushProgress();
+    UI.refreshHome();
+    UI.showScreen("home");
+  }
+
+  const isActive = () => $("blocks").classList.contains("active");
+
+  return {
+    start, quit, layout, toggleBomb,
+    isActive,
+    /** Keyboard: arrows move, Enter/Space pick, B bomb, 1-4 / A-D answer, Escape quits. */
+    key(e) {
+      const k = e.key.toLowerCase();
+      const map = { "1": 0, "2": 1, "3": 2, "4": 3, "a": 0, "b": 1, "c": 2, "d": 3 };
+      const arrows = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, 1], arrowdown: [0, -1] };
+      if (k in map && q && !locked) { e.preventDefault(); answer(map[k]); }
+      else if ((e.key === "Enter" || e.key === " ") && over) { e.preventDefault(); start(); }
+      else if (k in arrows && !q && !over) { e.preventDefault(); moveFocus(arrows[k][0], arrows[k][1]); }
+      else if (k === "b" && !q) { e.preventDefault(); toggleBomb(); }
+      else if (e.key === "Escape") {
+        e.preventDefault();
+        if (arming) toggleBomb(); else quit();
+      }
+      // Enter or Space on a focused block clicks it natively, which picks its group.
+    },
+    suspend() { if (isActive() && q && !locked) cancelAnimationFrame(rafId); },
+    wake() { if (isActive() && q && !locked) runTimer(); },
+    /** For tests: a snapshot of the board, bottom row first. */
+    debug: () => ({ cats, score, streak, riseEvery, sinceRise, over, busy, open: !!q, bombs, arming,
+      lucky: picked ? !!picked.lucky : false, pickedCat: picked ? picked.cat : null,
+      correctIndex: q ? q.correctIndex : -1, picked: picked ? picked.blocks.length : 0,
+      rows: ROWS, grid: grid.map((col) => col.map((b) => (b ? b.cat : null))) }),
+    /** For tests: put the board into a state that would otherwise take luck or a long streak. */
+    testSetup(opts) {
+      if (opts.bombs != null) { bombs = opts.bombs; renderHud(); }
+      if (opts.luckyAt) {
+        const [c, r] = opts.luckyAt;
+        if (grid[c][r]) grid[c][r].el.remove();
+        grid[c][r] = makeBlock(LUCKY, c, r);
+        place(grid[c][r], true);
+      }
+      if (opts.sinceRise != null) { sinceRise = opts.sinceRise; renderHud(); }
+    }
+  };
+})();
 
 /* ================================================================
    7. BOOT — wiring, input, background flourishes
@@ -3964,13 +4936,12 @@ async function init() {
   UI.buildCategoryGrid();
   UI.buildLengthPills();
   $("playCat").textContent = "Mixed";
-  UI.refreshBest();
-  UI.updatePlayHint();
+  UI.setMode(progress.mode, true);
 
   // Pause and resume on YouTube's terms, reusing the countdown handling the
   // hidden-tab path already uses.
-  Platform.onPause(() => { flushProgress(); Game.suspend(); Music.pause(); });
-  Platform.onResume(() => { Game.wake(); Music.resume(); });
+  Platform.onPause(() => { flushProgress(); Game.suspend(); Blocks.suspend(); Music.pause(); });
+  Platform.onResume(() => { Game.wake(); Blocks.wake(); Music.resume(); });
 
   // Interactive and waiting for the player.
   Platform.gameReady();
@@ -3978,7 +4949,26 @@ async function init() {
 
 function wireInput() {
 
-  $("playBtn").addEventListener("click", () => Game.start());
+  $("playBtn").addEventListener("click", () => UI.playSelected());
+  $("dailyBtn").addEventListener("click", () => UI.openDaily());
+  $("dailyClose").addEventListener("click", () => UI.closeDaily());
+  $("dailyPlay").addEventListener("click", () => { UI.closeDaily(); Game.start(true); });
+  // A tap on the dimmed backdrop, outside the card, closes the dialog.
+  $("dailyModal").addEventListener("click", (e) => { if (e.target === $("dailyModal")) UI.closeDaily(); });
+  document.querySelectorAll(".mode-tab").forEach((t) => {
+    t.addEventListener("click", () => UI.setMode(t.dataset.mode));
+    // Arrow keys move between tabs, as a tablist should.
+    t.addEventListener("keydown", (e) => {
+      const order = ["quiz", "blocks"];
+      const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const next = order[(order.indexOf(t.dataset.mode) + step + order.length) % order.length];
+      UI.setMode(next);
+      document.querySelector('.mode-tab[data-mode="' + next + '"]').focus();
+    });
+  });
   $("nextBtn").addEventListener("click", () => Game.next());
   $("againBtn").addEventListener("click", () => Game.start());
   $("homeBtn").addEventListener("click", () => Game.quitToHome());
@@ -3986,6 +4976,11 @@ function wireInput() {
   $("muteBtn").addEventListener("click", toggleMute);
   $("muteBtn2").addEventListener("click", toggleMute);
   $("musicBtn").addEventListener("click", toggleMusic);
+  $("bkQuit").addEventListener("click", () => Blocks.quit());
+  $("bkHome").addEventListener("click", () => Blocks.quit());
+  $("bkAgain").addEventListener("click", () => Blocks.start());
+  $("bkBomb").addEventListener("click", () => Blocks.toggleBomb());
+  window.addEventListener("resize", () => { if (Blocks.isActive()) Blocks.layout(); });
 
   // Unlock audio on the very first interaction, whatever it is, and start the
   // music there: browsers only allow sound to begin inside a gesture.
@@ -3994,9 +4989,15 @@ function wireInput() {
 
   // Keyboard shortcuts: 1-4 / A-D to answer, Enter or Space to continue.
   document.addEventListener("keydown", (e) => {
+    if (UI.isDailyOpen()) {
+      // The dialog's own buttons handle Enter and Space; Escape closes it.
+      if (e.key === "Escape") { e.preventDefault(); UI.closeDaily(); }
+      return;
+    }
+    if (Blocks.isActive()) { Blocks.key(e); return; }
     if (!$("quiz").classList.contains("active")) {
       if ((e.key === "Enter" || e.key === " ") && $("home").classList.contains("active")) {
-        e.preventDefault(); Game.start();
+        e.preventDefault(); UI.playSelected();
       } else if (e.key === "Escape" && $("results").classList.contains("active")) {
         e.preventDefault(); Game.quitToHome();
       }
@@ -4005,7 +5006,7 @@ function wireInput() {
     const key = e.key.toLowerCase();
     const map = { "1": 0, "2": 1, "3": 2, "4": 3, "a": 0, "b": 1, "c": 2, "d": 3 };
     if (key in map && !state.locked) {
-      const btn = document.querySelector('.ans[data-idx="' + map[key] + '"]');
+      const btn = document.querySelector('#answers .ans[data-idx="' + map[key] + '"]');
       if (btn) { e.preventDefault(); Game.answer(map[key]); }
     } else if ((e.key === "Enter" || e.key === " ") && state.locked) {
       e.preventDefault(); Game.next();
@@ -4016,8 +5017,8 @@ function wireInput() {
 
   // Pause the clock if the player leaves the tab mid-question, and resume on return.
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { flushProgress(); Game.suspend(); Music.pause(); }
-    else { Game.wake(); Music.resume(); }
+    if (document.hidden) { flushProgress(); Game.suspend(); Blocks.suspend(); Music.pause(); }
+    else { Game.wake(); Blocks.wake(); Music.resume(); }
   });
 }
 

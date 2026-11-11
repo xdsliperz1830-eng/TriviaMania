@@ -7,8 +7,14 @@
  *   node tools/make-art.js            # the default set
  *   node tools/make-art.js 1600x900   # one extra size, wide variant
  */
+const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
+
+// The art uses the game's own fonts. They live in index.html as data URIs, so
+// lift the @font-face rules from there rather than keeping a second copy.
+const FONT_FACES = (fs.readFileSync(path.resolve(__dirname, "..", "index.html"), "utf8")
+  .match(/@font-face\{[^}]*\}/g) || []).join("\n");
 
 const PAGE = "file://" + path.resolve(__dirname, "keyart.html");
 const OUT = path.resolve(__dirname, "..", "art");
@@ -35,7 +41,12 @@ const DEFAULTS = [
       deviceScaleFactor: 1
     });
     await page.goto(`${PAGE}?variant=${job.variant}`);
-    await page.waitForTimeout(250);
+    await page.addStyleTag({ content: FONT_FACES });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForFunction(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0));
+    const fontOk = await page.evaluate(() => document.fonts.check('40px "Lilita One"'));
+    if (!fontOk) throw new Error(`Lilita One did not load — refusing to write ${job.name}`);
+    await page.waitForTimeout(150);
 
     // An invalid value anywhere in the background shorthand drops every layer
     // and silently renders white, which is how a blank key art nearly shipped.
