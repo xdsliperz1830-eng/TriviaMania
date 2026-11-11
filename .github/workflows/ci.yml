@@ -10,7 +10,9 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned rather than ubuntu-latest: that moved to Ubuntu 26.04, which the
+    # pinned Playwright 1.56.1 cannot install Chromium on. Bump both together.
+    runs-on: ubuntu-24.04
     # The suites take about three minutes; this is a backstop so a hung browser
     # can never sit on a runner for the default six hours.
     timeout-minutes: 15
