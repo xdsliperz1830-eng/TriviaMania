@@ -908,6 +908,29 @@ body{
   .bk-answers .ans{min-height:42px;padding:7px 10px}
   .bk-over-card{max-width:520px;gap:8px;padding:12px}
 }
+
+/* ============================================================
+   iPhone layout: fill the real visible screen
+   ============================================================ */
+/* 100% is Safari's small viewport, measured with its toolbars showing. When
+   the toolbar collapses, the screen grows past it and a flat strip appeared
+   under the game. dvh follows the visible area, and the backdrop is sized to
+   the largest it can be, so the gradient always reaches the bottom edge. */
+@supports (height:100dvh){
+  html,body{height:100dvh}
+}
+@supports (height:100lvh){
+  #bg{bottom:auto;height:100lvh}
+}
+/* The hint shares the footer slot the Next button appears in, so the bottom
+   of the quiz is never an empty reserved gap: hint before an answer, Next
+   after. */
+.quiz-foot{position:relative}
+.quiz-foot .q-hint{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);margin:0}
+/* Tall portrait phones have room to spare: bigger answer buttons. */
+@media (orientation:portrait) and (min-height:780px){
+  .answers{max-height:388px;grid-auto-rows:minmax(64px,1fr)}
+}
 </style>
 </head>
 <body>
@@ -1018,8 +1041,6 @@ body{
 
       <div class="answers" id="answers" role="group" aria-label="Answer choices"></div>
 
-      <p class="q-hint" id="qHint"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"> Faster answers earn more bonus points</p>
-
       <div class="feedback" id="feedback" role="status" aria-live="polite">
         <div class="fb-head"><span id="fbTitle">Correct!</span><span class="fb-pts" id="fbPts"></span></div>
         <p class="fb-exp" id="fbExp"></p>
@@ -1027,6 +1048,7 @@ body{
     </div>
 
     <div class="quiz-foot">
+      <p class="q-hint" id="qHint"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"> Faster answers earn more bonus points</p>
       <button id="nextBtn" class="btn btn-primary">NEXT QUESTION →</button>
     </div>
   </section>
