@@ -69,7 +69,7 @@ and pull request.
 ## Building for submission
 
 ```bash
-npm run build      # -> dist/brain-blitz-playable.zip (511 KB)
+npm run build      # -> dist/brain-blitz-playable.zip (581 KB)
 npm run art        # -> art/ store key art and listing tiles
 npm run icons      # -> icons/ launcher icons and favicons
 npm run questions  # -> dist/brain-blitz-questions.csv, the whole bank for review
@@ -80,6 +80,25 @@ built file and plays a round before declaring it ready. See
 [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the metadata, art inventory and
 certification self-check, and [`docs/PLAYABLES_PLAN.md`](docs/PLAYABLES_PLAN.md)
 for how the game got here.
+
+## Look and feel
+
+The "Toybox" theme is built to match the icon pack. Every card and button has
+the icons' dark navy outline (`#040335`), a solid drop underneath and a light
+bevel, and the palette (gold, orange, red, green, blue) is sampled from the
+icons themselves. The theme is the last block in the `<style>`, after the base
+layout rules, and its colour tokens are on `:root` at the top of that block.
+
+The top of the background is a flat `#2F48C7`, the same value as the
+`theme-color` meta tag and the manifest's `theme_color`, so the phone's status
+bar (and any app chrome around the page) blends in with no seam. Change all
+three together.
+
+Text is set in **Lilita One** (headings, scores, buttons) and **Nunito**
+(questions and body), both under the SIL Open Font License; the licence texts
+are in `assets/fonts/`. The fonts are embedded in `index.html` as data URIs
+rather than linked, because browsers refuse font files over `file://`, and
+inline keeps the game a single file with no extra requests.
 
 ## In-game icons
 
