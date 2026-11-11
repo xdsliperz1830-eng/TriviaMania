@@ -1,5 +1,5 @@
 /**
- * Block Blitz (draft mode): tapping picks a whole same-category group, a
+ * Block Blitz: tapping picks a whole same-category group, a
  * right answer blasts exactly that group and scores size² × 10, a wrong one
  * raises a row, a full column ends the game, and quitting returns home.
  */
