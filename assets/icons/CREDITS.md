@@ -10,7 +10,7 @@ committed to this repository and should not be added to it.
 
 | File | Source icon | Used for |
 |---|---|---|
-| `cat-mixed.png` | Dice | Mixed Blitz |
+| `cat-mixed.png` | Dice | Mixed Blast |
 | `cat-general.png` | Question Mark | General Knowledge |
 | `cat-science.png` | Blue Potion | Science |
 | `cat-history.png` | Scroll | History |

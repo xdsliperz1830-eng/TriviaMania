@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="description" content="Brain Blitz — a fast-paced HTML5 trivia game across 10 categories.">
+<meta name="description" content="Brain Blast — a fast-paced HTML5 trivia game across 10 categories.">
 <meta name="theme-color" content="#2F48C7">
-<title>Brain Blitz</title>
+<title>Brain Blast</title>
 
 <!-- Added to a home screen, the launcher needs real artwork or the OS falls
      back to the first letter of the title. iOS reads apple-touch-icon and
@@ -15,8 +15,8 @@
 <link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="application-name" content="Brain Blitz">
-<meta name="apple-mobile-web-app-title" content="Brain Blitz">
+<meta name="application-name" content="Brain Blast">
+<meta name="apple-mobile-web-app-title" content="Brain Blast">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <!-- The layout already pads for env(safe-area-inset-*), so the game can run
@@ -30,7 +30,7 @@
 
 <style>
 /* ============================================================
-   BRAIN BLITZ — Design tokens
+   BRAIN BLAST — Design tokens
    ============================================================ */
 :root{
   --navy:#0F172A;
@@ -168,7 +168,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 4px 20px rgba(139,92,246,.55));animation:shine 7s linear infinite;}
 @keyframes shine{to{background-position:220% center}}
-.logo .blitz{display:block;}
+.logo .blast{display:block;}
 .tagline{margin:10px 0 0;color:var(--muted);font-size:clamp(.9rem,3.6vw,1.05rem);font-weight:600;}
 .brain .ico{width:1.45em;height:1.45em;vertical-align:0;display:block}
 .brain{font-size:2.6rem;display:inline-block;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(34,211,238,.6));}
@@ -391,7 +391,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   .screen{max-width:860px}
   .logo-wrap{display:flex;align-items:center;justify-content:center;gap:18px;padding:0}
   .logo{font-size:2.1rem;text-align:left}
-  .logo .blitz{display:inline;margin-left:.3em}
+  .logo .blast{display:inline;margin-left:.3em}
   .brain{font-size:1.8rem}
   .tagline{margin:4px 0 0;font-size:.8rem}
   .best-chip{margin-top:8px;padding:6px 14px;font-size:.8rem}
@@ -561,7 +561,7 @@ body{
     3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),
     2px 2px 0 var(--ink),-2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px -2px 0 var(--ink),
     0 7px 0 var(--ink);}
-.logo .blitz{color:var(--gold)}
+.logo .blast{color:var(--gold)}
 .brain{filter:drop-shadow(0 6px 0 rgba(4,3,53,.35))}
 .tagline{color:#E3E9FF;font-weight:800}
 
@@ -686,7 +686,7 @@ body{
 .logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0 0}
 .brain{font-size:2.1rem}
 .logo{font-size:clamp(1.75rem,9vw,2.8rem);letter-spacing:.5px;white-space:nowrap}
-.logo .blitz{display:inline;margin-left:.22em}
+.logo .blast{display:inline;margin-left:.22em}
 .tagline{margin:8px 0 0;font-size:.9rem;text-align:center}
 /* The round-length picker reads first, centred; "Choose a category" then sits
    directly above the grid it labels. column-reverse swaps the two without
@@ -1013,7 +1013,7 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 
     <div class="logo-wrap">
       <span class="brain" aria-hidden="true"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"></span>
-      <h1 class="logo">BRAIN<span class="blitz">BLITZ</span></h1>
+      <h1 class="logo">BRAIN<span class="blast">BLAST</span></h1>
     </div>
     <p class="tagline">How much do you really know?</p>
 
@@ -1197,7 +1197,7 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 <script>
 "use strict";
 /* ================================================================
-   BRAIN BLITZ
+   BRAIN BLAST
    1. DATA      — categories + question bank
    2. AUDIO     — Web Audio API sound engine
    4. STATE     — game state + helpers
@@ -3524,6 +3524,8 @@ const state = {
    after every answer.
    ------------------------------------------------------------------------ */
 const SAVE_KEY = "brainblitz.save";     // single blob, mirrors the cloud payload
+// Storage keys and the daily seed keep the game's original name (Brain Blitz):
+// renaming them would wipe players' saved progress and change today's daily.
 const SAVE_DEBOUNCE_MS = 800;
 
 const progress = {
@@ -3873,7 +3875,7 @@ const UI = {
       return b;
     };
 
-    grid.appendChild(makeBtn("mixed", "cat-mixed", "Mixed Blitz", label(QUESTIONS), true));
+    grid.appendChild(makeBtn("mixed", "cat-mixed", "Mixed Blast", label(QUESTIONS), true));
     Object.keys(CATEGORIES).forEach(key => {
       const c = CATEGORIES[key];
       grid.appendChild(makeBtn(key, c.icon, c.name, label(questionsIn(key))));
@@ -4312,12 +4314,12 @@ const UI = {
     const acc = Math.round((state.correctCount / total) * 100);
 
     const tiers = [
-      { min: 100, icon: "trophy", title: "Flawless Blitz!", msg: "A perfect round. You did not miss a single question." },
+      { min: 100, icon: "trophy", title: "Flawless Blast!", msg: "A perfect round. You did not miss a single question." },
       { min: 80,  icon: "tier-crown", title: "Brilliant!",      msg: "Outstanding knowledge — you are in the top tier." },
       { min: 60,  icon: "tier-star", title: "Well Played!",    msg: "Solid round. A little more speed and you'll be unstoppable." },
       { min: 40,  icon: "tier-up", title: "Getting There!",  msg: "Halfway there. One more round should push you higher." },
       { min: 20,  icon: "tier-book", title: "Keep Training!",  msg: "Every round teaches you something new. Try again!" },
-      { min: 0,   icon: "tier-clover", title: "Fresh Start",     msg: "Everyone starts somewhere. Give it another blitz!" }
+      { min: 0,   icon: "tier-clover", title: "Fresh Start",     msg: "Everyone starts somewhere. Give it another blast!" }
     ];
     const tier = tiers.find(t => acc >= t.min);
 

@@ -1,5 +1,5 @@
 /**
- * The Brain Blitz app mark, as SVG.
+ * The Brain Blast app mark, as SVG.
  *
  * This is deliberately NOT the store key art (art/icon-512.png): that one is a
  * listing tile with a wordmark, and at home-screen size — around 48 CSS pixels —
@@ -92,7 +92,7 @@ function build(options = {}) {
     ? `<g transform="translate(256 256) scale(${scale * 1.5}) translate(-256 -256) translate(-10 -10)">${bolt}</g>`
     : `${open}${brain}${bolt}</g>`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Brain Blitz">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Brain Blast">
 <defs>
 <linearGradient id="bb-bg" x1="0" y1="0" x2="0" y2="1">
 <stop offset="0" stop-color="#3A57DB"/><stop offset=".5" stop-color="#2F48C7"/><stop offset="1" stop-color="#1C2687"/>

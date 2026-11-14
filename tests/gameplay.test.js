@@ -14,7 +14,7 @@ const ck = (condition, message) => suite.check(condition, message);
 
   // ---- HOME ----
   ck(await page.locator('#home').isVisible(), 'home screen visible');
-  ck((await page.locator('.logo').innerText()).replace(/\s/g,'') === 'BRAINBLITZ', 'logo text');
+  ck((await page.locator('.logo').innerText()).replace(/\s/g,'') === 'BRAINBLAST', 'logo text');
   ck(await page.locator('#catGrid .cat').count() === 11, 'category grid has mixed + 10 categories');
   ck((await page.locator('#bestScore').innerText()) === '0', 'best score starts at 0');
 

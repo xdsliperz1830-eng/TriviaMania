@@ -1,4 +1,4 @@
-# Brain Blitz
+# Brain Blast
 
 A fast-paced HTML5 trivia game built for YouTube Playables. Everything — markup,
 styles, game logic, question bank and sound engine — lives in a single
@@ -64,7 +64,7 @@ sits beside the board instead of over it.
   the home screen. The choice is remembered between sessions.
 - 15 seconds per question, drawn from a bank of **900 questions** — 90 in each
   of the 10 categories.
-- Pick a single category or **Mixed Blitz**, which spreads the round evenly over
+- Pick a single category or **Mixed Blast**, which spreads the round evenly over
   the categories: 10 questions means one from each, 20 means two, and a length
   that does not divide evenly gives the remainder to whichever categories come
   up first in the shuffle.
@@ -72,7 +72,7 @@ sits beside the board instead of over it.
   yet, so playing the same category three times in a row at 10 questions gives
   30 different questions. Only once a category is used up does the cycle restart
   and mix in earlier questions. Progress is stored in `localStorage`, so it survives a
-  reload, and category play and Mixed Blitz share the same history.
+  reload, and category play and Mixed Blast share the same history.
 - Category cards show what is left — `90 questions`, then `80 new of 90`, then
   `all 90 seen`.
 - Answer choices are reshuffled every round, so the correct answer never sits
@@ -127,10 +127,10 @@ and pull request.
 ## Building for submission
 
 ```bash
-npm run build      # -> dist/brain-blitz-playable.zip (545 KB)
+npm run build      # -> dist/brain-blast-playable.zip (545 KB)
 npm run art        # -> art/ store key art and listing tiles
 npm run icons      # -> icons/ launcher icons and favicons
-npm run questions  # -> dist/brain-blitz-questions.csv, the whole bank for review
+npm run questions  # -> dist/brain-blast-questions.csv, the whole bank for review
 ```
 
 The build checks the bundle against every Playables size cap, then launches the

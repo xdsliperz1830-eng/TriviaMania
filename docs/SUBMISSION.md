@@ -1,6 +1,6 @@
 # Submission pack
 
-Everything needed to submit Brain Blitz as a YouTube Playable, minus the parts
+Everything needed to submit Brain Blast as a YouTube Playable, minus the parts
 that require portal access.
 
 > **Unverified specs.** `developers.google.com` is blocked from the environment
@@ -17,7 +17,7 @@ that require portal access.
 ```bash
 npm ci
 npx playwright install chromium
-npm run build          # -> dist/brain-blitz-playable.zip
+npm run build          # -> dist/brain-blast-playable.zip
 ```
 
 All the game code, data, styling, fonts and music are in `index.html` at the
@@ -39,7 +39,7 @@ built file and playing a round, so what you upload is what was tested.
 
 ## 2. Store metadata
 
-**Title** — `Brain Blitz` (11 characters)
+**Title** — `Brain Blast` (11 characters)
 
 **Short description**, in ascending length so one fits the limit **[verify]**:
 
@@ -53,12 +53,12 @@ built file and playing a round, so what you upload is what was tested.
 
 > How much do you really know?
 >
-> Brain Blitz is fast-fire trivia across ten categories — general knowledge,
+> Brain Blast is fast-fire trivia across ten categories — general knowledge,
 > science, history, geography, movies, sports, animals, technology, food and
 > space. You get fifteen seconds a question, and the quicker you answer the more
 > you score, so hesitating is expensive.
 >
-> Pick a category or take the Mixed Blitz, which draws from all ten at once, and
+> Pick a category or take the Mixed Blast, which draws from all ten at once, and
 > choose how long you want to play: 5, 10, 20 or 30 questions. Every round pulls
 > questions you have not seen yet, so playing again gives you new ones rather
 > than the same set in a different order.
@@ -183,7 +183,7 @@ answers below; adjust the ones about you.
 
 | Field | Answer |
 |---|---|
-| Game title | Brain Blitz |
+| Game title | Brain Blast |
 | Genre | Trivia / quiz, casual |
 | Playable URL | https://xdsliperz1830-eng.github.io/TriviaMania/ |
 | Source | https://github.com/xdsliperz1830-eng/TriviaMania |
@@ -201,7 +201,7 @@ answers below; adjust the ones about you.
 
 **One-paragraph pitch, if the form wants one**
 
-> Brain Blitz is a fast-fire trivia game: ten categories, fifteen seconds a
+> Brain Blast is a fast-fire trivia game: ten categories, fifteen seconds a
 > question, and more points the quicker you answer. Alongside the quiz there
 > is a daily challenge with a day streak, and Block Blitz, a puzzle mode where
 > right answers blast matching blocks. It is one 385 KB HTML file plus small

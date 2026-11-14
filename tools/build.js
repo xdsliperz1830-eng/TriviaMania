@@ -14,7 +14,7 @@ const { execFileSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
-const ZIP = path.join(DIST, "brain-blitz-playable.zip");
+const ZIP = path.join(DIST, "brain-blast-playable.zip");
 
 const MiB = 1024 * 1024;
 const INITIAL_CAP = 30 * MiB;     // hard: the game will not launch above this

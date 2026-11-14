@@ -1,7 +1,7 @@
 /**
  * Exports the question bank to CSV for review.
  *
- *   node tools/export-csv.js            -> dist/brain-blitz-questions.csv
+ *   node tools/export-csv.js            -> dist/brain-blast-questions.csv
  *   node tools/export-csv.js out.csv    -> a path of your choosing
  *
  * Columns are ordered for fact-checking: the correct answer sits next to the
@@ -42,7 +42,7 @@ rows.forEach((r, i) => {
                r.explanation, "", "" ].map(quote).join(","));
 });
 
-const out = process.argv[2] || path.join(ROOT, "dist", "brain-blitz-questions.csv");
+const out = process.argv[2] || path.join(ROOT, "dist", "brain-blast-questions.csv");
 fs.mkdirSync(path.dirname(out), { recursive: true });
 // A BOM makes Excel open UTF-8 correctly on Windows.
 fs.writeFileSync(out, "\uFEFF" + lines.join("\r\n") + "\r\n", "utf8");
