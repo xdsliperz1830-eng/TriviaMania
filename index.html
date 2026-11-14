@@ -984,6 +984,12 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){
   .fx-banner,.fx-flash,#quiz::after{display:none}
 }
+
+/* The answer list scrolls, and a scroll area clips whatever pokes past its
+   edges: the wrong answer's shake (up to 8px) and the correct answer's pop
+   (about 7px) lost their outlines at the sides. 10px of padding, cancelled by
+   a negative margin so nothing moves, gives them room. */
+.q-area{padding-left:10px;padding-right:10px;margin-left:-10px;margin-right:-10px}
 </style>
 </head>
 <body>

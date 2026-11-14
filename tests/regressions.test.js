@@ -149,6 +149,41 @@ const seenCount = (page) => page.evaluate(() => progress.seen.length);
     ck(fps >= 50, `3.3 home screen holds a healthy frame rate (${fps} fps, was 43 before the fix)`);
   }
 
+  /* ---------------------------------------------------------------------
+     Defect 3.4 — the answer list is a scroll area, so it clipped the wrong
+     answer's shake and the correct answer's pop at the sides, cutting off
+     the button outline. Follow the button frame by frame through each.
+     --------------------------------------------------------------------- */
+  for (const [w, h] of [[390, 844], [360, 640]]) {
+    const clipPage = suite.watch(await browser.newPage());
+    await clipPage.setViewportSize({ width: w, height: h });
+    await clipPage.goto(GAME_URL);
+    await clipPage.waitForTimeout(300);
+    await clipPage.locator("#playBtn").click();
+    for (const kind of ["wrong", "correct"]) {
+      await clipPage.waitForTimeout(500);
+      const past = await clipPage.evaluate((kind) => new Promise((resolve) => {
+        const area = document.querySelector("#qArea");
+        const box = area.getBoundingClientRect();
+        const ci = state.round[state.index].correctIndex;
+        const idx = kind === "wrong" ? (ci + 1) % 4 : ci;
+        const btn = document.querySelector('#answers .ans[data-idx="' + idx + '"]');
+        let worst = 0;
+        const t0 = performance.now();
+        Game.answer(idx);
+        (function tick() {
+          const r = btn.getBoundingClientRect();
+          worst = Math.max(worst, box.left - r.left, r.right - (box.left + area.clientWidth));
+          if (performance.now() - t0 < 700) requestAnimationFrame(tick);
+          else resolve(Math.round(worst * 10) / 10);
+        })();
+      }), kind);
+      ck(past <= 0, `3.4 at ${w}x${h} the ${kind} answer's animation stays inside the answer area (${past}px past the edge)`);
+      await clipPage.evaluate(() => Game.next());
+    }
+    await clipPage.close();
+  }
+
   await browser.close();
   suite.report();
 })();
