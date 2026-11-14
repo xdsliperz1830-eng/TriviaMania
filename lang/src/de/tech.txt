@@ -1,0 +1,90 @@
+Wofür steht „WWW“? | World Wide Web | Wide World Web | World Web Wire | Web Wide World | Tim Berners-Lee erfand das World Wide Web, das „weltweite Netz“, im Jahr 1989.
+Welches Unternehmen entwickelte das iPhone? | Apple | Samsung | Microsoft | Nokia | Apple brachte das erste iPhone 2007 heraus.
+Wofür steht „CPU“? | Central Processing Unit | Computer Power Unit | Control Program Utility | Core Processing Underlay | Die CPU, der Hauptprozessor, ist der Chip, der die Befehle eines Computers ausführt.
+Wie viele Bits hat ein Byte? | 8 | 4 | 16 | 10 | Ein Byte sind acht Bits, genug für 256 verschiedene Werte.
+Welches Unternehmen entwickelte das Betriebssystem Windows? | Microsoft | Apple | IBM | Google | Microsoft veröffentlichte die erste Windows-Version 1985.
+Mit welcher Sprache gestaltet man das Aussehen von Webseiten? | CSS | HTML | SQL | JSON | CSS regelt Layout und Aussehen; HTML liefert die Struktur.
+Wofür steht „GPS“? | Global Positioning System | General Position Service | Geographic Point Sensor | Global Path Signal | GPS, das globale Positionsbestimmungssystem, ortet dich mit einem Netz von Satelliten.
+Wofür steht das S in „HTTPS“? | Secure (sicher) | Standard | Server | Simple (einfach) | Das S zeigt, dass die Verbindung zwischen dir und der Website verschlüsselt ist.
+Welches Unternehmen entwickelt das Betriebssystem Android? | Google | Apple | Samsung | Meta | Google kaufte Android 2005 und leitet die Entwicklung bis heute.
+Wie nennt man die physischen Teile eines Computers? | Hardware | Software | Firmware | Freeware | Hardware kann man anfassen; Software ist der Code, der darauf läuft.
+Wofür steht RAM? | Random Access Memory | Rapid Access Module | Read And Modify | Runtime Allocation Map | RAM, der Arbeitsspeicher, ist der schnelle, flüchtige Speicher, in dem ein Computer arbeitet.
+Mit welchem Zeichen beginnt ein Hashtag? | # | @ | & | * | Das Zeichen # macht aus einem Wort ein durchsuchbares Schlagwort.
+Wofür steht USB? | Universal Serial Bus | United System Bus | Universal Storage Box | Unified Signal Buffer | USB wurde Ende der 1990er-Jahre zum Standard für den Anschluss von Geräten.
+Wer gründete Microsoft zusammen mit Paul Allen? | Bill Gates | Steve Jobs | Larry Page | Michael Dell | Gates und Allen gründeten Microsoft 1975.
+Wofür steht KI? | Künstliche Intelligenz | Kontrollierte Information | Komplexe Infrastruktur | Kommunikations-Interface | KI bezeichnet Software, die Aufgaben löst, für die man menschenähnliches Denken braucht.
+Welches Unternehmen stellt die PlayStation her? | Sony | Nintendo | Microsoft | Sega | Sony brachte die erste PlayStation 1994 heraus.
+Wofür steht das E in E-Mail? | Elektronisch | Extern | Express | Verschlüsselt | E-Mail ist die Kurzform von „electronic mail“, elektronische Post.
+Mit welcher Tastenkombination kopiert man unter Windows markierten Text? | Strg + C | Strg + V | Strg + X | Strg + P | Strg + C kopiert, Strg + X schneidet aus und Strg + V fügt ein.
+Wie heißt der Sprachassistent von Apple? | Siri | Alexa | Cortana | Bixby | Siri kam 2011 mit dem iPhone 4S.
+Wofür steht HTML? | HyperText Markup Language | High Transfer Machine Language | Hyperlink Text Mode Layout | Home Tool Markup Logic | HTML, die Hypertext-Auszeichnungssprache, gibt jeder Webseite ihre Struktur.
+Welches Unternehmen entwickelte TikTok? | ByteDance | Meta | Tencent | Snap | Das chinesische Unternehmen ByteDance brachte TikTok 2017 international heraus.
+Welches Gerät verteilt die Internetverbindung in der Wohnung? | Der Router | Der Monitor | Der Scanner | Das Modemkabel | Ein Router lenkt den Datenverkehr zwischen deinen Geräten und dem Internet.
+Wofür steht PDF? | Portable Document Format | Printed Document File | Public Data Form | Page Display Framework | Ein PDF, ein „portables Dokumentenformat“, sieht auf jedem Gerät gleich aus und wird deshalb für Formulare genutzt.
+Wie nennt man ein Schadprogramm, das deinem Gerät schaden soll? | Virus | Cookie | Firewall | Treiber | Viren sind eine Art von Malware, also Software, die Schaden anrichten soll.
+Was ermöglicht WLAN einem Gerät? | Sich ohne Kabel mit einem Netzwerk zu verbinden | Ohne Kabel zu laden | Dateien online zu speichern | Schneller zu laufen | WLAN überträgt Netzwerkdaten per Funk.
+Welche Programmiersprache trägt den Namen einer Kaffeesorte? | Java | Python | Ruby | Swift | Java wurde nach Kaffee benannt, daher die dampfende Tasse im Logo.
+Was gibt eine URL an? | Die Adresse einer Webseite | Die Geschwindigkeit einer Verbindung | Die Größe einer Datei | Den Namen eines Browsers | URL steht für Uniform Resource Locator, also eine Webadresse.
+Welcher Videospiel-Klempner wurde von Nintendo erfunden? | Mario | Sonic | Crash | Rayman | Mario trat 1981 in Donkey Kong zum ersten Mal auf.
+Wofür steht LED? | Light Emitting Diode | Low Energy Display | Linear Electronic Device | Luminous Electric Dot | LEDs, Leuchtdioden, leuchten, wenn Strom durch sie fließt.
+Wie viele Bytes hat ein Kilobyte, so wie Computer meist zählen? | 1.024 | 1.000 | 512 | 2.048 | Computer rechnen in Zweierpotenzen, ein Kilobyte ist also 2 hoch 10.
+Was regelt im Computer normalerweise die Temperatur der CPU? | Ein Lüfter oder Kühlkörper | Das Netzteil | Die Festplatte | Der Monitor | Ohne Kühlung drosseln Chips ihre Leistung oder schalten ab.
+Wofür steht SSD? | Solid state drive | Single system disk | Secure storage device | Standard serial drive | Ein Festkörperlaufwerk hat anders als eine Festplatte keine beweglichen Teile.
+Wofür steht HDD? | Hard disk drive | High density disk | Hybrid data drive | Hosted data domain | Die Festplatte speichert Daten magnetisch auf rotierenden Scheiben.
+Wofür steht GPU? | Graphics processing unit | General power unit | Global parsing unit | Grid protocol unit | Der Grafikprozessor berechnet Bilder und immer öfter auch parallele Rechenaufgaben.
+Wofür steht OS in der Informatik? | Operating system | Online service | Output source | Open standard | Auf Deutsch heißt es Betriebssystem; Windows, macOS, Linux und Android sind welche.
+Wofür steht ISP? | Internet service provider | Internal system protocol | Integrated search platform | Internet security program | Das ist der Internetanbieter, der dich mit dem Netz verbindet.
+Wofür steht VPN? | Virtual private network | Verified public node | Variable packet network | Virtual protocol number | Ein virtuelles privates Netz leitet deine Daten durch einen verschlüsselten Tunnel.
+Wofür steht IP in IP-Adresse? | Internet protocol | Internal packet | Information point | Indexed path | Jedes Gerät in einem Netzwerk hat eine; IP heißt Internetprotokoll.
+Was macht das DNS im Internet? | Es übersetzt Namen in Adressen | Es verschlüsselt Daten | Es speichert Passwörter | Es komprimiert Bilder | Man nennt es oft das Telefonbuch des Internets.
+Wofür steht HTTP? | Hypertext transfer protocol | High tech transit process | Hosted text transfer program | Hyperlink text transport path | Mit dem Hypertext-Übertragungsprotokoll rufen Browser Seiten von Servern ab.
+Wie nennt man eine kleine Textdatei, die eine Website in deinem Browser ablegt? | Cookie | Cache | Krümel | Token-Datei | Sie dienen unter anderem für Anmeldungen und Einstellungen.
+Was bedeutet es, den Browser-Cache zu leeren? | Gespeicherte Kopien von Webdateien löschen | Passwörter löschen | Alle Tabs schließen | Die Verbindung zurücksetzen | Der Cache beschleunigt wiederholte Besuche, indem er Dateien lokal speichert.
+Wie nennt man Schadsoftware, die Lösegeld fordert? | Ransomware | Adware | Spyware | Freeware | Sie verschlüsselt meist Dateien, bis ein Lösegeld gezahlt wird.
+Wie nennt man den Versuch, dir per E-Mail Passwörter zu entlocken? | Phishing | Spoofing | Sniffing | Cracking | Die Nachrichten ahmen einen Dienst nach, dem du vertraust.
+Was ist die Zwei-Faktor-Authentifizierung? | Ein zweiter Nachweis zusätzlich zum Passwort | Zwei Passwörter | Ein längeres Passwort | Ein neues Passwort | Meist ist es ein Code vom Handy oder aus einer App.
+Was macht Verschlüsselung mit Daten? | Sie macht sie nur mit dem richtigen Schlüssel lesbar | Sie komprimiert sie | Sie löscht sie | Sie kopiert sie | Moderne Verschlüsselung lässt sich durch Raten praktisch nicht knacken.
+Was ist Open-Source-Software? | Software, deren Code jeder einsehen kann | Software, die immer kostenlos ist | Software ohne Lizenz | Software ohne Updates | Bei Open Source geht es um den Zugang zum Quellcode, nicht nur um den Preis.
+Welches Betriebssystem baut auf dem Linux-Kern auf und läuft auf den meisten Handys? | Android | iOS | Windows Phone | Symbian | Android läuft auf den meisten Smartphones weltweit.
+Welches Unternehmen stellt das Betriebssystem macOS her? | Apple | Microsoft | Google | IBM | Es läuft auf Mac-Computern.
+Mit welcher Sprache macht man Webseiten vor allem interaktiv? | JavaScript | HTML | CSS | SQL | HTML gibt die Struktur, CSS das Aussehen und JavaScript das Verhalten.
+Wofür nutzt man SQL? | Für die Arbeit mit Datenbanken | Für das Aussehen von Webseiten | Für die Bildbearbeitung | Für das Komprimieren von Dateien | Es steht für Structured Query Language, eine strukturierte Abfragesprache.
+Was ist ein Bug in einer Software? | Ein Fehler im Code | Eine Art Virus | Ein Hardwaredefekt | Ein Sicherheitsschlüssel | Der Begriff stammt aus der Frühzeit der Computer; „bug“ heißt Käfer.
+Wie nennt man das Suchen und Beheben von Fehlern im Code? | Debugging | Kompilieren | Deployment | Refactoring | Wörtlich: die Käfer entfernen.
+Was macht ein Compiler? | Er übersetzt Quellcode in Maschinencode | Er findet Fehler | Er speichert Dateien | Er entwirft Oberflächen | Interpretierte Sprachen laufen stattdessen über einen Interpreter.
+Worauf beruht das binäre Zahlensystem? | Auf zwei Ziffern | Auf zehn Ziffern | Auf acht Ziffern | Auf sechzehn Ziffern | In einem Computer lässt sich alles auf Nullen und Einsen zurückführen.
+Welche Dezimalzahl ist die Binärzahl 1010? | 10 | 8 | 12 | 5 | Acht plus zwei.
+Wie viele Bytes hat ein Megabyte ungefähr? | Eine Million | Tausend | Eine Milliarde | Hunderttausend | In Zweierpotenzen gezählt sind es genau 1.048.576.
+Wie heißt das erste Programm, das beim Einschalten eines Rechners läuft? | Der Bootloader | Der Treiber | Der Kernel-Patch | Das Installationsprogramm | „Booten“ kommt von der englischen Redensart, sich an den eigenen Stiefelschlaufen hochzuziehen.
+Was verliert der RAM, wenn der Strom ausfällt? | Alles, was darin gespeichert war | Nichts | Nur geöffnete Dateien | Nur Systemeinstellungen | Er ist ein flüchtiger Speicher, anders als ein Laufwerk.
+Welches Bauteil speichert auf einem Handy die Daten dauerhaft? | Der Flash-Speicher | Der RAM | Der Prozessor | Das Modem | Flash-Speicher behält Daten auch ohne Strom.
+Was verbessert USB-C vor allem gegenüber älteren USB-Steckern? | Er ist beidseitig steckbar und schneller | Er ist billiger | Er ist größer | Er ist kabellos | Er kann auch Video und viel Strom übertragen.
+Worüber verbindet Bluetooth Geräte? | Über Funk mit kurzer Reichweite | Über Infrarotlicht | Über Schallwellen | Über Stromkabel | Benannt nach einem dänischen König, der Stämme vereinte.
+Was ermöglicht NFC auf einem Handy? | Bezahlen oder Teilen durch Dranhalten | Schnellere Downloads | Längere Akkulaufzeit | Bessere Fotos | Es funktioniert über wenige Zentimeter.
+Was bedeutet „die Cloud“ beim Cloud-Computing? | Server anderer Firmen, die man über das Internet nutzt | Wetterdaten | Drahtlose Netzwerke | Lokale Sicherungen | Deine Dateien liegen im Rechenzentrum eines anderen Unternehmens.
+Was ist ein Server? | Ein Computer, der anderen Dienste bereitstellt | Eine Kabelart | Ein Browser | Ein Bildschirm | Websites liegen auf Servern.
+Was ist die Latenz in einem Netzwerk? | Die Verzögerung, bis Daten ankommen | Die übertragene Datenmenge | Die Signalstärke | Die Zahl der Geräte | Sie wird in Millisekunden gemessen; je niedriger, desto besser.
+Was ist Bandbreite? | Wie viele Daten gleichzeitig übertragen werden können | Wie weit ein Signal reicht | Wie lang ein Kabel ist | Wie schnell eine CPU arbeitet | Sie wird oft mit Geschwindigkeit verwechselt, obwohl beides zusammenhängt.
+Was macht eine Firewall? | Sie filtert den Netzwerkverkehr | Sie kühlt den Computer | Sie sichert Dateien | Sie verhindert den Zutritt | Sie erlaubt oder blockiert Verbindungen nach festen Regeln.
+Wie hieß der erste weit verbreitete grafische Webbrowser? | Mosaic | Netscape Navigator | Internet Explorer | Opera | Mosaic machte das Web 1993 populär und führte zu Netscape.
+Wem wird die Erfindung des World Wide Web zugeschrieben? | Tim Berners-Lee | Vint Cerf | Alan Turing | Bill Gates | Er schlug es 1989 vor, als er am CERN arbeitete.
+Wer wird oft als Vater der Informatik bezeichnet? | Alan Turing | Charles Babbage | John von Neumann | Claude Shannon | Seine Arbeit zur Berechenbarkeit ist die Grundlage des Fachs.
+Wer gilt als erste Programmiererin der Geschichte? | Ada Lovelace | Grace Hopper | Margaret Hamilton | Katherine Johnson | Sie schrieb einen Algorithmus für Babbages Analytical Engine.
+Welche frühe Maschine gilt als erster Entwurf eines mechanischen Universalrechners? | Die Analytical Engine | Der Abakus | Die Enigma | Die Turingmaschine | Babbage entwarf sie in den 1830er-Jahren, stellte sie aber nie fertig.
+Wofür wurde die Enigma verwendet? | Zum Verschlüsseln von Nachrichten im Krieg | Zum Rechnen | Als Telegrafenrelais | Für Radiosendungen | Dass sie geknackt wurde, verkürzte den Zweiten Weltkrieg.
+Was sind Trainingsdaten einer KI? | Beispiele, aus denen ein Modell lernt | Der Code des Modells | Die verwendete Hardware | Die erzeugte Ausgabe | Die Qualität der Daten prägt die Qualität des Modells.
+Was macht der Crawler einer Suchmaschine? | Er besucht und indexiert Webseiten | Er blockiert Werbung | Er verschlüsselt Daten | Er hostet Websites | Crawler folgen Links, um Seiten zu entdecken.
+Was bedeutet „Emoji“ auf Japanisch wörtlich? | Bildschriftzeichen | Fröhliches Gesicht | Kleines Symbol | Nachrichtenzeichen | „E“ bedeutet Bild und „moji“ Schriftzeichen.
+Wie nennt man das kleine Bild, das für eine App steht? | Icon | Avatar | Widget | Thumbnail | Ein Avatar steht dagegen für eine Person.
+Aus welchen Wörtern ist „Pixel“ gebildet? | Picture element | Pixel exchange layer | Point index | Primary element | Es bedeutet Bildelement; Bildschirme sind Raster aus Pixeln.
+Was bedeutet eine höhere Bildschirmauflösung? | Mehr Pixel | Einen größeren Bildschirm | Kräftigere Farben | Eine schnellere Bildwiederholung | Die Auflösung ist die Zahl der Pixel, nicht die Größe des Geräts.
+Was misst „fps“ bei Videospielen? | Frames per second | Files per session | Frequency per signal | Fast pixel shading | Das sind Bilder pro Sekunde: Je mehr, desto flüssiger wirkt das Bild.
+Wie nennt man ein Programm, das auf einem Server im Hintergrund läuft? | Daemon | Widget | Makro | Plugin | Der Name stammt aus der griechischen Mythologie, nicht vom Dämon.
+Wofür nutzt man eine Versionsverwaltung? | Um Änderungen an Dateien über die Zeit festzuhalten | Um nach Viren zu suchen | Um Daten zu komprimieren | Um Grafiken zu berechnen | Git ist das am weitesten verbreitete System.
+Was speichert ein QR-Code? | Daten wie eine Webadresse | Nur Zahlen | Nur Bilder | Elektrische Ladung | Das Muster enthält Daten, die eine Kamera lesen kann.
+Wozu dient ein Captcha? | Um Menschen von Bots zu unterscheiden | Um Anmeldungen zu beschleunigen | Um Passwörter zu speichern | Um Formulare zu verschlüsseln | Es ist ein Test, der Computer und Menschen auseinanderhält.
+Wie nennt man Software, die zwischen einem Gerät und dem Betriebssystem vermittelt? | Treiber | Browser | Compiler | Firewall | Drucker und Grafikkarten brauchen Treiber.
+Was bedeutet es, wenn ein Gerät einen Jailbreak hat oder gerootet ist? | Seine Software-Sperren wurden entfernt | Es ist kaputt | Es ist verschlüsselt | Es wurde zurückgesetzt | Das gibt tieferen Zugriff, als der Hersteller vorgesehen hat.
+Wie nennt man unerwünschte Massen-E-Mails? | Spam | Phish | Junkware | Flutpost | Der Name stammt aus einem Sketch von Monty Python.
+Was bezeichnet der Teil einer URL vor dem ersten Schrägstrich? | Die Domain | Die Datei | Die Protokollversion | Den Benutzer | Zum Beispiel example.com in https://example.com/page.
+Welche ist die Top-Level-Domain in der Adresse example.com? | .com | example | .example | com.example | Andere sind .org, .net und Länderkürzel wie .de.

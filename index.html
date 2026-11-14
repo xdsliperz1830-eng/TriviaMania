@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="description" content="Brain Blitz — a fast-paced HTML5 trivia game across 10 categories.">
+<meta name="description" content="Brain Blast — a fast-paced HTML5 trivia game across 10 categories.">
 <meta name="theme-color" content="#2F48C7">
-<title>Brain Blitz</title>
+<title>Brain Blast</title>
 
 <!-- Added to a home screen, the launcher needs real artwork or the OS falls
      back to the first letter of the title. iOS reads apple-touch-icon and
@@ -15,8 +15,8 @@
 <link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="application-name" content="Brain Blitz">
-<meta name="apple-mobile-web-app-title" content="Brain Blitz">
+<meta name="application-name" content="Brain Blast">
+<meta name="apple-mobile-web-app-title" content="Brain Blast">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <!-- The layout already pads for env(safe-area-inset-*), so the game can run
@@ -30,7 +30,7 @@
 
 <style>
 /* ============================================================
-   BRAIN BLITZ — Design tokens
+   BRAIN BLAST — Design tokens
    ============================================================ */
 :root{
   --navy:#0F172A;
@@ -168,7 +168,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 4px 20px rgba(139,92,246,.55));animation:shine 7s linear infinite;}
 @keyframes shine{to{background-position:220% center}}
-.logo .blitz{display:block;}
+.logo .blast{display:block;}
 .tagline{margin:10px 0 0;color:var(--muted);font-size:clamp(.9rem,3.6vw,1.05rem);font-weight:600;}
 .brain .ico{width:1.45em;height:1.45em;vertical-align:0;display:block}
 .brain{font-size:2.6rem;display:inline-block;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(34,211,238,.6));}
@@ -317,8 +317,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   20%{opacity:1;transform:translate(-50%,-14px) scale(1.12)}
   100%{opacity:0;transform:translate(-50%,-76px) scale(.95)}}
 
-.particle{position:fixed;z-index:39;width:9px;height:9px;border-radius:2px;pointer-events:none;
-  animation:burst .9s ease-out forwards}
+.particle{position:fixed;left:0;top:0;z-index:39;width:10px;height:10px;border-radius:2px;pointer-events:none;opacity:0}
 @keyframes burst{0%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}
   100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.25)}}
 
@@ -392,7 +391,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   .screen{max-width:860px}
   .logo-wrap{display:flex;align-items:center;justify-content:center;gap:18px;padding:0}
   .logo{font-size:2.1rem;text-align:left}
-  .logo .blitz{display:inline;margin-left:.3em}
+  .logo .blast{display:inline;margin-left:.3em}
   .brain{font-size:1.8rem}
   .tagline{margin:4px 0 0;font-size:.8rem}
   .best-chip{margin-top:8px;padding:6px 14px;font-size:.8rem}
@@ -562,7 +561,7 @@ body{
     3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),
     2px 2px 0 var(--ink),-2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px -2px 0 var(--ink),
     0 7px 0 var(--ink);}
-.logo .blitz{color:var(--gold)}
+.logo .blast{color:var(--gold)}
 .brain{filter:drop-shadow(0 6px 0 rgba(4,3,53,.35))}
 .tagline{color:#E3E9FF;font-weight:800}
 
@@ -687,7 +686,7 @@ body{
 .logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0 0}
 .brain{font-size:2.1rem}
 .logo{font-size:clamp(1.75rem,9vw,2.8rem);letter-spacing:.5px;white-space:nowrap}
-.logo .blitz{display:inline;margin-left:.22em}
+.logo .blast{display:inline;margin-left:.22em}
 .tagline{margin:8px 0 0;font-size:.9rem;text-align:center}
 /* The round-length picker reads first, centred; "Choose a category" then sits
    directly above the grid it labels. column-reverse swaps the two without
@@ -931,6 +930,88 @@ body{
 @media (orientation:portrait) and (min-height:780px){
   .answers{max-height:388px;grid-auto-rows:minmax(64px,1fr)}
 }
+
+/* ============================================================
+   Animation costs (from tools/measure-fx.js)
+   ============================================================ */
+/* Progress slides by transform inside its track; see UI.setProgress. */
+.progress .fill{width:100%;transform:translateX(-100%);transition:transform .45s cubic-bezier(.2,.8,.25,1)}
+/* The background is its own layer, and holds still during a round. */
+#bg{transform:translateZ(0)}
+body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
+/* Block Blitz: pulses and warnings animate opacity on an overlay, not filter or box-shadow. */
+.bk-block.pick{animation:none}
+.bk-block::after{content:"";position:absolute;inset:-2px;border-radius:inherit;background:#fff;opacity:0;pointer-events:none}
+.bk-block.pick::after{animation:bkPickGlow .7s ease-in-out infinite}
+@keyframes bkPickGlow{0%,100%{opacity:0}50%{opacity:.3}}
+.bk-board::after{top:0;bottom:0;height:auto;inset:0;border-radius:15px;background:none;z-index:3;pointer-events:none;
+  box-shadow:inset 0 0 0 4px var(--red),inset 0 0 22px rgba(246,54,91,.55);opacity:0}
+.bk-board.danger{animation:none}
+.bk-board.danger::after{animation:bkDangerGlow 1s ease-in-out infinite}
+/* Picking a group dims the rest with one overlay; a filter on every other block
+   repainted dozens of elements at once. The picked group sits above it. */
+.bk-board.choosing .bk-block:not(.pick){filter:none}
+.bk-dim{position:absolute;inset:0;z-index:2;background:rgba(4,3,53,.5);opacity:0;pointer-events:none;transition:opacity .2s ease}
+.bk-board.choosing .bk-dim{opacity:1}
+.bk-block.pick{z-index:3}
+@keyframes bkDangerGlow{0%,100%{opacity:.15}50%{opacity:1}}
+.bk-rise-lab.urgent{animation:bkWarnFade .8s ease-in-out infinite}
+@keyframes bkWarnFade{50%{opacity:.55}}
+
+/* ============================================================
+   Game feel (transform and opacity only)
+   ============================================================ */
+.fx-banner{position:fixed;left:50%;top:38%;z-index:45;pointer-events:none;opacity:0;
+  display:flex;align-items:center;gap:.3em;padding:.25em .7em .25em .45em;border-radius:999px;
+  font-family:"Lilita One","Nunito",sans-serif;font-size:2rem;letter-spacing:.5px;white-space:nowrap;
+  color:#fff;background:linear-gradient(180deg,#FF6B85,var(--red));border:3px solid var(--ink);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.4),inset 0 -5px 0 rgba(120,0,30,.3),0 5px 0 var(--ink);
+  text-shadow:0 2px 0 rgba(4,3,53,.5);transform:translate(-50%,-50%)}
+.fx-banner .ico{width:1.3em;height:1.3em;vertical-align:0}
+.fx-flash{position:fixed;inset:0;z-index:44;pointer-events:none;opacity:0}
+/* Edge glows are radial gradients, not blurred box-shadows: a full-screen blur
+   was costly to rasterise, a gradient is cheap. */
+.fx-flash[data-kind="bad"]{background:radial-gradient(ellipse 75% 70% at 50% 50%,rgba(246,54,91,0) 60%,rgba(246,54,91,.7) 100%)}
+.fx-flash[data-kind="good"]{background:radial-gradient(ellipse 75% 70% at 50% 50%,rgba(254,196,28,0) 60%,rgba(254,196,28,.65) 100%)}
+/* the last three seconds: a red glow at the screen edges */
+#quiz::after{content:"";position:fixed;inset:0;z-index:43;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 80% 75% at 50% 50%,rgba(246,54,91,0) 62%,rgba(246,54,91,.5) 100%);transition:opacity .25s ease}
+#quiz.urgent::after{opacity:1;animation:urgentGlow .5s ease-in-out infinite alternate}
+@keyframes urgentGlow{from{opacity:.45}to{opacity:1}}
+.float-pts{display:flex;flex-direction:column;align-items:center;line-height:1}
+.float-pts .fast-tag{margin-top:2px;font-size:.62em;letter-spacing:1px;color:#fff;background:var(--red);
+  border:2px solid var(--ink);border-radius:999px;padding:1px 7px 0;text-shadow:none}
+@media (prefers-reduced-motion:reduce){
+  .fx-banner,.fx-flash,#quiz::after{display:none}
+}
+
+/* Translated labels run longer than "Score" and "Streak": less padding and
+   tracking so "Pergunta" and "Punkte" stay inside their boxes. */
+.hud-stat{padding-left:5px;padding-right:5px}
+.hud-stat .lab{letter-spacing:.5px;white-space:nowrap}
+@media (max-width:360px){
+  .hud-stat{padding-left:3px;padding-right:3px}
+  .hud-stat .lab{font-size:.5rem;letter-spacing:0}
+}
+@media (max-width:360px){ .new-tag{font-size:.5rem;padding:1px 4px;letter-spacing:0} }
+.cat .meta{min-width:0}
+.cat .nm{overflow-wrap:anywhere}
+.cat.long-name .nm{font-size:.82em;letter-spacing:-.3px}
+.lang-btn{font-family:"Lilita One","Nunito",sans-serif;font-size:.95rem;letter-spacing:.5px;color:var(--ink);line-height:1}
+.lang-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.lang-opt{min-height:52px;padding:8px 10px;border-radius:14px;cursor:pointer;
+  font-family:"Lilita One","Nunito",sans-serif;font-size:1.1rem;letter-spacing:.3px;color:var(--ink);
+  background:var(--paper);border:var(--edge);box-shadow:var(--bevel),var(--drop-sm)}
+.lang-opt:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.lang-opt[aria-pressed="true"]{background:var(--gold);box-shadow:var(--bevel-gold),var(--drop-sm)}
+.lang-opt:disabled{opacity:.6;cursor:default}
+#langModal .info-status:empty{display:none}
+
+/* The answer list scrolls, and a scroll area clips whatever pokes past its
+   edges: the wrong answer's shake (up to 8px) and the correct answer's pop
+   (about 7px) lost their outlines at the sides. 10px of padding, cancelled by
+   a negative margin so nothing moves, gives them room. */
+.q-area{padding-left:10px;padding-right:10px;margin-left:-10px;margin-right:-10px}
 </style>
 </head>
 <body>
@@ -942,33 +1023,34 @@ body{
 <div id="app">
 
   <!-- ============================ HOME ============================ -->
-  <section id="home" class="screen active" aria-label="Home" data-mode="quiz">
+  <section id="home" class="screen active" aria-label="Home" data-i18n-attr="aria-label=home" data-mode="quiz">
     <div class="home-top">
       <div class="best-chip" id="bestChip"><img class="ico" id="bestIco" src="assets/icons/trophy.png" alt="" draggable="false"> <span id="bestLabel">Best Score</span> <span id="bestScore">0</span></div>
       <div class="top-btns">
-        <button id="dailyBtn" class="icon-btn daily-btn" aria-label="Daily challenge" aria-haspopup="dialog" title="Daily challenge"><img class="ico" src="assets/icons/calendar.png" alt="" draggable="false"><span class="daily-dot" id="dailyDot" hidden></span></button>
-        <button id="musicBtn" class="icon-btn" aria-label="Background music" aria-pressed="true" title="Music on/off"><img class="ico" src="assets/icons/music-on.png" alt="" draggable="false"></button>
-        <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
+        <button id="langBtn" class="icon-btn lang-btn" aria-label="Language" aria-haspopup="dialog" title="Language" data-i18n-attr="aria-label=language,title=language"><span id="langCode">EN</span></button>
+        <button id="dailyBtn" class="icon-btn daily-btn" aria-label="Daily challenge" aria-haspopup="dialog" title="Daily challenge" data-i18n-attr="title=daily"><img class="ico" src="assets/icons/calendar.png" alt="" draggable="false"><span class="daily-dot" id="dailyDot" hidden></span></button>
+        <button id="musicBtn" class="icon-btn" aria-label="Background music" aria-pressed="true" title="Music on/off" data-i18n-attr="aria-label=musicAria,title=musicTitle"><img class="ico" src="assets/icons/music-on.png" alt="" draggable="false"></button>
+        <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off" data-i18n-attr="aria-label=soundAria,title=soundTitle"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
       </div>
     </div>
 
     <div class="logo-wrap">
       <span class="brain" aria-hidden="true"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"></span>
-      <h1 class="logo">BRAIN<span class="blitz">BLITZ</span></h1>
+      <h1 class="logo">BRAIN<span class="blast">BLAST</span></h1>
     </div>
-    <p class="tagline">How much do you really know?</p>
+    <p class="tagline" data-i18n="tagline">How much do you really know?</p>
 
-    <div class="mode-tabs" role="tablist" aria-label="Game mode">
-      <button class="mode-tab" role="tab" id="tabQuiz" data-mode="quiz" aria-controls="panelQuiz" aria-selected="true"><img class="ico" src="assets/icons/cat-general.png" alt="" draggable="false"><span>Quiz</span></button>
-      <button class="mode-tab" role="tab" id="tabBlocks" data-mode="blocks" aria-controls="panelBlocks" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><span>Block Blitz</span><span class="new-tag">NEW</span></button>
+    <div class="mode-tabs" role="tablist" aria-label="Game mode" data-i18n-attr="aria-label=modeAria">
+      <button class="mode-tab" role="tab" id="tabQuiz" data-mode="quiz" aria-controls="panelQuiz" aria-selected="true"><img class="ico" src="assets/icons/cat-general.png" alt="" draggable="false"><span data-i18n="tabQuiz">Quiz</span></button>
+      <button class="mode-tab" role="tab" id="tabBlocks" data-mode="blocks" aria-controls="panelBlocks" aria-selected="false" tabindex="-1"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><span>Block Blitz</span><span class="new-tag" data-i18n="newTag">NEW</span></button>
     </div>
 
     <div class="mode-panel" id="panelQuiz" role="tabpanel" aria-labelledby="tabQuiz">
       <div class="picker-row">
-        <p class="section-label">Choose a category</p>
+        <p class="section-label" data-i18n="chooseCat">Choose a category</p>
         <div class="len-row">
-          <span class="len-label">Questions</span>
-          <div class="len-pills" id="lenPills" role="group" aria-label="Questions per round"></div>
+          <span class="len-label" data-i18n="questions">Questions</span>
+          <div class="len-pills" id="lenPills" role="group" aria-label="Questions per round" data-i18n-attr="aria-label=lenAria"></div>
         </div>
       </div>
 
@@ -980,45 +1062,53 @@ body{
     <div class="mode-panel" id="panelBlocks" role="tabpanel" aria-labelledby="tabBlocks" hidden>
       <div class="panel-scroll scroll">
         <div class="card info-card">
-          <div class="info-head"><img class="ico info-ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><div><p class="info-kicker">Puzzle mode</p><h2 class="info-title">Block Blitz</h2></div></div>
+          <div class="info-head"><img class="ico info-ico" src="assets/icons/lucky-block.png" alt="" draggable="false"><div><p class="info-kicker" data-i18n="puzzleMode">Puzzle mode</p><h2 class="info-title">Block Blitz</h2></div></div>
           <ul class="info-how">
-            <li><img class="ico" src="assets/icons/cat-science.png" alt="" draggable="false"><span>Tap a group of matching blocks to get a question from its category.</span></li>
-            <li><img class="ico" src="assets/icons/check.png" alt="" draggable="false"><span>Answer right to blast the group. Bigger groups score far more.</span></li>
-            <li><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"><span>Wrong answers push up a new row. Don't let the blocks reach the top!</span></li>
-            <li><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span>A streak of 5 earns a bomb, and a Lucky Block blasts a whole colour.</span></li>
+            <li><img class="ico" src="assets/icons/cat-science.png" alt="" draggable="false"><span data-i18n="how1">Tap a group of matching blocks to get a question from its category.</span></li>
+            <li><img class="ico" src="assets/icons/check.png" alt="" draggable="false"><span data-i18n="how2">Answer right to blast the group. Bigger groups score far more.</span></li>
+            <li><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"><span data-i18n="how3">Wrong answers push up a new row. Don't let the blocks reach the top!</span></li>
+            <li><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span data-i18n="how4">A streak of 5 earns a bomb, and a Lucky Block blasts a whole colour.</span></li>
           </ul>
         </div>
       </div>
     </div>
 
     <div class="home-foot">
-      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="pl pl-quiz">PLAY <span id="playCat">Mixed</span></span><span class="pl pl-blocks">PLAY BLOCK BLITZ</span></button>
+      <button id="playBtn" class="btn btn-primary"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="pl pl-quiz" id="playQuizLabel">PLAY <span id="playCat">Mixed</span></span><span class="pl pl-blocks" data-i18n="playBlocks">PLAY BLOCK BLITZ</span></button>
       <p class="hint" id="playHint">10 questions · 15 seconds each · answer fast for bonus points</p>
     </div>
       <div class="daily-modal" id="dailyModal" role="dialog" aria-modal="true" aria-labelledby="dailyTitle" hidden>
       <div class="card info-card daily-card">
-        <button class="icon-btn daily-close" id="dailyClose" aria-label="Close" title="Close"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
-        <div class="info-head"><img class="ico info-ico" src="assets/icons/calendar.png" alt="" draggable="false"><div><p class="info-kicker" id="dailyDate">Today</p><h2 class="info-title" id="dailyTitle">Daily Challenge</h2></div></div>
-        <p class="info-sub">The same ten questions for every player today, one from each category. One scored try a day, so make it count.</p>
+        <button class="icon-btn daily-close" id="dailyClose" aria-label="Close" title="Close" data-i18n-attr="aria-label=close,title=close"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+        <div class="info-head"><img class="ico info-ico" src="assets/icons/calendar.png" alt="" draggable="false"><div><p class="info-kicker" id="dailyDate">Today</p><h2 class="info-title" id="dailyTitle" data-i18n="dailyHeading">Daily Challenge</h2></div></div>
+        <p class="info-sub" data-i18n="dailySub">The same ten questions for every player today, one from each category. One scored try a day, so make it count.</p>
         <div class="stat-grid info-stats">
-          <div class="stat"><span class="v" id="dailyStreak">0</span><span class="l">Day streak</span></div>
-          <div class="stat"><span class="v" id="dailyLongest">0</span><span class="l">Longest</span></div>
-          <div class="stat"><span class="v" id="dailyToday">–</span><span class="l">Today</span></div>
+          <div class="stat"><span class="v" id="dailyStreak">0</span><span class="l" data-i18n="dayStreak">Day streak</span></div>
+          <div class="stat"><span class="v" id="dailyLongest">0</span><span class="l" data-i18n="longest">Longest</span></div>
+          <div class="stat"><span class="v" id="dailyToday">–</span><span class="l" data-i18n="today">Today</span></div>
         </div>
         <p class="info-status" id="dailyStatus"></p>
         <button class="btn btn-primary daily-play" id="dailyPlay"><svg class="play-ico" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2 11 7 1.5 12.8z" stroke="#040335" stroke-width="1.6" stroke-linejoin="round"/></svg><span id="dailyPlayLabel">PLAY TODAY'S 10</span></button>
       </div>
     </div>
+    <div class="daily-modal" id="langModal" role="dialog" aria-modal="true" aria-labelledby="langTitle" hidden>
+      <div class="card info-card daily-card">
+        <button class="icon-btn daily-close" id="langClose" aria-label="Close" title="Close" data-i18n-attr="aria-label=close,title=close"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+        <div class="info-head"><div><h2 class="info-title" id="langTitle" data-i18n="language">Language</h2></div></div>
+        <div class="lang-list" id="langList"><!-- built by JS --></div>
+        <p class="info-status" id="langStatus" role="status"></p>
+      </div>
+    </div>
   </section>
 
   <!-- ============================ QUIZ ============================ -->
-  <section id="quiz" class="screen" aria-label="Quiz">
+  <section id="quiz" class="screen" aria-label="Quiz" data-i18n-attr="aria-label=tabQuiz">
     <div class="hud">
-      <div class="hud-stat"><span class="lab">Score</span><span class="val" id="scoreVal">0</span></div>
-      <div class="hud-stat"><span class="lab">Question</span><span class="val" id="qNum">1/10</span></div>
-      <div class="hud-stat" id="streakBox"><span class="lab">Streak</span><span class="val"><img class="ico" src="assets/icons/fire.png" alt="" draggable="false"><span id="streakVal">0</span></span></div>
-      <button id="muteBtn2" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
-      <button id="quitBtn" class="icon-btn" aria-label="Quit to home" title="Quit"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+      <div class="hud-stat"><span class="lab" data-i18n="score">Score</span><span class="val" id="scoreVal">0</span></div>
+      <div class="hud-stat"><span class="lab" data-i18n="question">Question</span><span class="val" id="qNum">1/10</span></div>
+      <div class="hud-stat" id="streakBox"><span class="lab" data-i18n="streak">Streak</span><span class="val"><img class="ico" src="assets/icons/fire.png" alt="" draggable="false"><span id="streakVal">0</span></span></div>
+      <button id="muteBtn2" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off" data-i18n-attr="aria-label=soundAria,title=soundTitle"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
+      <button id="quitBtn" class="icon-btn" aria-label="Quit to home" title="Quit" data-i18n-attr="aria-label=quitAria,title=quit"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
     </div>
 
     <div class="progress-row">
@@ -1039,7 +1129,7 @@ body{
         <p class="q-text" id="qText">Question</p>
       </div>
 
-      <div class="answers" id="answers" role="group" aria-label="Answer choices"></div>
+      <div class="answers" id="answers" role="group" aria-label="Answer choices" data-i18n-attr="aria-label=answersAria"></div>
 
       <div class="feedback" id="feedback" role="status" aria-live="polite">
         <div class="fb-head"><span id="fbTitle">Correct!</span><span class="fb-pts" id="fbPts"></span></div>
@@ -1048,37 +1138,37 @@ body{
     </div>
 
     <div class="quiz-foot">
-      <p class="q-hint" id="qHint"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"> Faster answers earn more bonus points</p>
+      <p class="q-hint" id="qHint"><img class="ico" src="assets/icons/logo-bolt.png" alt="" draggable="false"> <span data-i18n="hintFast">Faster answers earn more bonus points</span></p>
       <button id="nextBtn" class="btn btn-primary">NEXT QUESTION →</button>
     </div>
   </section>
 
   <!-- ============================ RESULTS ============================ -->
-  <section id="results" class="screen" aria-label="Results">
+  <section id="results" class="screen" aria-label="Results" data-i18n-attr="aria-label=results">
     <div class="res-scroll scroll">
       <div class="res-hero card">
         <span class="res-emoji" id="resEmoji"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"></span>
         <h2 class="res-title" id="resTitle">Quiz Complete!</h2>
         <p class="res-msg" id="resMsg">Nice work.</p>
-        <div><span class="res-score" id="resScore">0</span><span class="res-score-lab">Total Points</span></div>
+        <div><span class="res-score" id="resScore">0</span><span class="res-score-lab" data-i18n="totalPoints">Total Points</span></div>
         <p class="res-daily" id="resDaily" hidden></p>
-        <div class="res-new-best" id="resNewBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> NEW BEST SCORE!</div>
+        <div class="res-new-best" id="resNewBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> <span data-i18n="newBest">NEW BEST SCORE!</span></div>
       </div>
 
       <div class="stat-grid">
-        <div class="stat" id="statCorrect"><span class="v" id="statCorrectV">0/10</span><span class="l">Correct</span></div>
-        <div class="stat" id="statAcc"><span class="v" id="statAccV">0%</span><span class="l">Accuracy</span></div>
-        <div class="stat" id="statStreak"><span class="v" id="statStreakV">0</span><span class="l">Best Streak</span></div>
+        <div class="stat" id="statCorrect"><span class="v" id="statCorrectV">0/10</span><span class="l" data-i18n="correctLab">Correct</span></div>
+        <div class="stat" id="statAcc"><span class="v" id="statAccV">0%</span><span class="l" data-i18n="accuracy">Accuracy</span></div>
+        <div class="stat" id="statStreak"><span class="v" id="statStreakV">0</span><span class="l" data-i18n="bestStreak">Best Streak</span></div>
       </div>
 
       <div class="review card">
-        <h3>Round Recap</h3>
+        <h3 data-i18n="recap">Round Recap</h3>
         <div id="reviewList"></div>
       </div>
     </div>
 
     <div class="res-foot">
-      <button id="homeBtn" class="btn btn-ghost">Home</button>
+      <button id="homeBtn" class="btn btn-ghost" data-i18n="home">Home</button>
       <button id="againBtn" class="btn btn-primary">Play Again</button>
     </div>
   </section>
@@ -1086,19 +1176,19 @@ body{
   <!-- ========================= BLOCK BLITZ ========================= -->
   <section id="blocks" class="screen" aria-label="Block Blitz">
     <div class="hud">
-      <div class="hud-stat"><span class="lab">Score</span><span class="val" id="bkScore">0</span></div>
-      <div class="hud-stat"><span class="lab">Best</span><span class="val" id="bkBest">0</span></div>
-      <div class="hud-stat" id="bkStreakBox"><span class="lab">Streak</span><span class="val"><img class="ico" src="assets/icons/fire.png" alt="" draggable="false"><span id="bkStreak">0</span></span></div>
-      <button id="bkQuit" class="icon-btn" aria-label="Quit to home" title="Quit"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+      <div class="hud-stat"><span class="lab" data-i18n="score">Score</span><span class="val" id="bkScore">0</span></div>
+      <div class="hud-stat"><span class="lab" data-i18n="bestShort">Best</span><span class="val" id="bkBest">0</span></div>
+      <div class="hud-stat" id="bkStreakBox"><span class="lab" data-i18n="streak">Streak</span><span class="val"><img class="ico" src="assets/icons/fire.png" alt="" draggable="false"><span id="bkStreak">0</span></span></div>
+      <button id="bkQuit" class="icon-btn" aria-label="Quit to home" title="Quit" data-i18n-attr="aria-label=quitAria,title=quit"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
     </div>
 
     <div class="bk-rise">
       <span class="bk-rise-lab" id="bkRiseLab">New row in</span><span class="bk-pips" id="bkPips"></span>
-      <button class="bk-power" id="bkBomb" aria-label="Bomb: blast a whole row" title="Bomb (B): blast a whole row" disabled><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span id="bkBombs">0</span></button>
+      <button class="bk-power" id="bkBomb" aria-label="Bomb: blast a whole row" title="Bomb (B): blast a whole row" data-i18n-attr="aria-label=bombAria,title=bombTitle" disabled><img class="ico" src="assets/icons/bomb.png" alt="" draggable="false"><span id="bkBombs">0</span></button>
     </div>
 
     <div class="bk-wrap" id="bkWrap">
-      <div class="bk-board" id="bkBoard" aria-label="Block board"></div>
+      <div class="bk-board" id="bkBoard" aria-label="Block board" data-i18n-attr="aria-label=boardAria"></div>
     </div>
     <p class="bk-hint" id="bkHint">Tap a group of blocks, then answer its question to blast them.</p>
 
@@ -1110,7 +1200,7 @@ body{
         </div>
         <div class="bk-timer"><div class="bk-timer-fill" id="bkTimer"></div></div>
         <p class="q-text" id="bkQ">Question</p>
-        <div class="bk-answers" id="bkAnswers" role="group" aria-label="Answer choices"></div>
+        <div class="bk-answers" id="bkAnswers" role="group" aria-label="Answer choices" data-i18n-attr="aria-label=answersAria"></div>
         <p class="bk-fb" id="bkFb" role="status" aria-live="polite"></p>
       </div>
     </div>
@@ -1118,17 +1208,17 @@ body{
     <div class="bk-over" id="bkOver" role="dialog" aria-modal="true" aria-labelledby="bkOverTitle">
       <div class="card bk-over-card">
         <span class="res-emoji"><img class="ico" src="assets/icons/lucky-block.png" alt="" draggable="false"></span>
-        <h2 class="res-title" id="bkOverTitle">The blocks reached the top!</h2>
-        <div><span class="res-score" id="bkOverScore">0</span><span class="res-score-lab">Total Points</span></div>
-        <div class="res-new-best" id="bkOverBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> NEW BEST SCORE!</div>
+        <h2 class="res-title" id="bkOverTitle" data-i18n="bkOver">The blocks reached the top!</h2>
+        <div><span class="res-score" id="bkOverScore">0</span><span class="res-score-lab" data-i18n="totalPoints">Total Points</span></div>
+        <div class="res-new-best" id="bkOverBest"><img class="ico" src="assets/icons/trophy.png" alt="" draggable="false"> <span data-i18n="newBest">NEW BEST SCORE!</span></div>
         <div class="stat-grid">
-          <div class="stat"><span class="v" id="bkOverBlasted">0</span><span class="l">Blocks</span></div>
-          <div class="stat"><span class="v" id="bkOverCorrect">0</span><span class="l">Correct</span></div>
-          <div class="stat"><span class="v" id="bkOverStreak">0</span><span class="l">Best Streak</span></div>
+          <div class="stat"><span class="v" id="bkOverBlasted">0</span><span class="l" data-i18n="blocksLab">Blocks</span></div>
+          <div class="stat"><span class="v" id="bkOverCorrect">0</span><span class="l" data-i18n="correctLab">Correct</span></div>
+          <div class="stat"><span class="v" id="bkOverStreak">0</span><span class="l" data-i18n="bestStreak">Best Streak</span></div>
         </div>
         <div class="res-foot">
-          <button id="bkHome" class="btn btn-ghost">Home</button>
-          <button id="bkAgain" class="btn btn-primary">Play Again</button>
+          <button id="bkHome" class="btn btn-ghost" data-i18n="home">Home</button>
+          <button id="bkAgain" class="btn btn-primary" data-i18n="again">Play Again</button>
         </div>
       </div>
     </div>
@@ -1138,7 +1228,7 @@ body{
 <script>
 "use strict";
 /* ================================================================
-   BRAIN BLITZ
+   BRAIN BLAST
    1. DATA      — categories + question bank
    2. AUDIO     — Web Audio API sound engine
    4. STATE     — game state + helpers
@@ -3100,6 +3190,15 @@ const Platform = (() => {
 
     logError() { if (inPlayables) guard(() => sdk.health.logError()); },
 
+    /** The player's language as a BCP-47 tag: YouTube's inside a Playable, the browser's otherwise. Never rejects. */
+    language() {
+      const nav = (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+      if (!inPlayables || !sdk.system || typeof sdk.system.getLanguage !== "function") return Promise.resolve(nav);
+      return withTimeout(Promise.resolve(guard(() => sdk.system.getLanguage(), nav)), 1500)
+        .then((tag) => tag || nav)
+        .catch(() => nav);
+    },
+
     /** Resolves with the saved object, or null. Never rejects. */
     load() {
       if (!inPlayables) return Promise.resolve(null);
@@ -3424,6 +3523,169 @@ const Music = (() => {
 })();
 
 /* ================================================================
+   3c. LANGUAGE
+   ----------------------------------------------------------------
+   English lives in this file. Each other language is one file,
+   lang/<code>.js, built by tools/make-lang.js from the plain-text sources
+   in lang/src/. It is fetched only when that language is chosen, as a
+   script tag, which also works from file:// and inside a Playable bundle.
+
+   A language file holds the interface text, the category names and all the
+   questions in the same order as QUESTIONS, so a question keeps its id, its
+   place in the daily challenge and its "seen" history in every language.
+   ================================================================ */
+const LANGS = { en: "English", es: "Español", pt: "Português", de: "Deutsch" };
+const LOCALES = { en: "en", es: "es", pt: "pt-BR", de: "de" };
+
+const STR_EN = {
+  home: "Home", results: "Results", language: "Language", close: "Close",
+  langLoading: "Loading…", langFail: "That language could not be loaded. Check your connection and try again.",
+  tagline: "How much do you really know?",
+  best: "Best Score", bestShort: "Best",
+  bestTitleBlocks: "Best Block Blitz score", bestTitleQuiz: "Best score for a {n}-question round",
+  daily: "Daily challenge", dailyAriaDone: "Daily challenge (done today)", dailyAriaTodo: "Daily challenge (not played yet)",
+  musicAria: "Background music", musicTitle: "Music on/off",
+  soundAria: "Mute or unmute sound", soundTitle: "Sound on/off",
+  modeAria: "Game mode", tabQuiz: "Quiz", newTag: "NEW",
+  chooseCat: "Choose a category", questions: "Questions",
+  lenAria: "Questions per round", lenPillAria: "{n} questions per round",
+  catAll: "{n} questions", catSeen: "all {n} seen", catNew: "{f} new of {n}",
+  mixedName: "Mixed Blast", mixedShort: "Mixed",
+  playQuiz: "PLAY {cat}", playBlocks: "PLAY BLOCK BLITZ",
+  hintQuiz: "{n} questions · {s} seconds each · answer fast for bonus points",
+  hintBlocks: "Answer right to blast blocks before they stack to the top",
+  puzzleMode: "Puzzle mode",
+  how1: "Tap a group of matching blocks to get a question from its category.",
+  how2: "Answer right to blast the group. Bigger groups score far more.",
+  how3: "Wrong answers push up a new row. Don't let the blocks reach the top!",
+  how4: "A streak of 5 earns a bomb, and a Lucky Block blasts a whole colour.",
+  dailyHeading: "Daily Challenge",
+  dailySub: "The same ten questions for every player today, one from each category. One scored try a day, so make it count.",
+  dayStreak: "Day streak", longest: "Longest", today: "Today",
+  dailyDone: "Done for today: {c}/10 correct. A new challenge starts at midnight.",
+  dailyKeep: "Play today to keep your {n}-day streak going!",
+  dailyNot: "Not played yet today.",
+  dailyPlay: "PLAY TODAY'S 10", dailyPlayed: "DONE FOR TODAY",
+  score: "Score", question: "Question", streak: "Streak",
+  quitAria: "Quit to home", quit: "Quit", answersAria: "Answer choices",
+  correct: "Correct!", timeUp: "Time's up!", notQuite: "Not quite",
+  inARow: "{n} in a row!", pts: "+{n} pts",
+  hintFast: "Faster answers earn more bonus points",
+  next: "NEXT QUESTION →", seeResults: "SEE RESULTS →", fast: "FAST!",
+  ptsBase: "100 base", ptsSpeed: "{n} speed", ptsStreak: "{n} streak",
+  answerIs: "The answer is {a}.",
+  combo3: "On fire!", combo5: "Blazing!", combo7: "Unstoppable!", combo10: "Legendary!",
+  tier100: "Flawless Blast!", tier100m: "A perfect round. You did not miss a single question.",
+  tier80: "Brilliant!", tier80m: "Outstanding knowledge — you are in the top tier.",
+  tier60: "Well Played!", tier60m: "Solid round. A little more speed and you'll be unstoppable.",
+  tier40: "Getting There!", tier40m: "Halfway there. One more round should push you higher.",
+  tier20: "Keep Training!", tier20m: "Every round teaches you something new. Try again!",
+  tier0: "Fresh Start", tier0m: "Everyone starts somewhere. Give it another blast!",
+  totalPoints: "Total Points", newBest: "NEW BEST SCORE!",
+  correctLab: "Correct", accuracy: "Accuracy", bestStreak: "Best Streak",
+  recap: "Round Recap", again: "Play Again", playQuizBtn: "Play a Quiz",
+  dailyRes: "Daily challenge done · {n}-day streak!", dailyRes_1: "Daily challenge done · 1-day streak",
+  newRowIn: "New row in", rowNext: "Row coming next!",
+  bombAria: "Bomb: blast a whole row", bombTitle: "Bomb (B): blast a whole row", boardAria: "Block board",
+  bkHint: "Tap a group of blocks, then answer its question to blast them.",
+  bkArm: "Bomb ready: tap any block to blast its whole row.",
+  boom: "Boom! +{n}", lucky: "Lucky", luckyBang: "Lucky!",
+  worth: "Blast {n} · +{p}", bombEarned: "Bomb earned!", itIs: "It's {a}.",
+  megaBlast: "Mega blast!", hugeBlast: "Huge blast!", cleared: "Board cleared! +{n}",
+  bkOver: "The blocks reached the top!", blocksLab: "Blocks",
+  blockAria: "{name} block, column {c}, row {r}"
+};
+
+const I18n = (() => {
+  const packs = {};      // code -> { ui, cats, q } once lang/<code>.js has run
+  const loading = {};    // code -> Promise, so two taps share one download
+  const EN_Q = QUESTIONS.map((q) => [q.q, q.a[0], q.a[1], q.a[2], q.a[3], q.e]);
+  const EN_CATS = {};
+  Object.keys(CATEGORIES).forEach((k) => { EN_CATS[k] = CATEGORIES[k].name; });
+  let current = "en", ui = STR_EN;
+
+  /** Language files call this with their contents. A file that doesn't fit the question bank is ignored. */
+  window.BB_LANG = (code, pack) => {
+    if (LANGS[code] && pack && pack.ui && pack.cats && Array.isArray(pack.q) && pack.q.length === QUESTIONS.length) {
+      packs[code] = pack;
+    }
+  };
+
+  function t(key, vars) {
+    let s = ui[key];
+    if (s == null) s = STR_EN[key];
+    if (s == null) return key;
+    return vars ? s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m)) : s;
+  }
+
+  /** Like t(), but uses the "<key>_1" text when the count is exactly one, if there is one. */
+  function tn(key, n, vars) {
+    const one = key + "_1";
+    const v = Object.assign({ n: n }, vars);
+    return t(n === 1 && (ui[one] != null || STR_EN[one] != null) ? one : key, v);
+  }
+
+  /** "pt-BR" -> "pt"; anything unsupported -> "en". */
+  function pick(tag) {
+    const code = String(tag || "").toLowerCase().split(/[-_]/)[0];
+    return LANGS[code] ? code : "en";
+  }
+
+  function load(code) {
+    if (code === "en" || packs[code]) return Promise.resolve(true);
+    if (!LANGS[code]) return Promise.resolve(false);
+    if (!loading[code]) {
+      loading[code] = new Promise((resolve) => {
+        const el = document.createElement("script");
+        const done = (ok) => { clearTimeout(timer); delete loading[code]; resolve(ok && !!packs[code]); };
+        const timer = setTimeout(() => done(false), 8000);
+        el.src = "lang/" + code + ".js";
+        el.onload = () => done(true);
+        el.onerror = () => { el.remove(); done(false); };
+        document.head.appendChild(el);
+      });
+    }
+    return loading[code];
+  }
+
+  /** Switch the question bank, the category names and the text table. The pack must be loaded. */
+  function apply(code) {
+    const pack = code === "en" ? null : packs[code];
+    if (code !== "en" && !pack) return false;
+    current = code;
+    ui = pack ? pack.ui : STR_EN;
+    const rows = pack ? pack.q : EN_Q;
+    QUESTIONS.forEach((q, i) => {
+      const r = rows[i];
+      q.q = r[0]; q.a = [r[1], r[2], r[3], r[4]]; q.e = r[5];
+    });
+    Object.keys(CATEGORIES).forEach((k) => { CATEGORIES[k].name = (pack && pack.cats[k]) || EN_CATS[k]; });
+    document.documentElement.lang = LOCALES[code];
+    return true;
+  }
+
+  /** Put the current language into every element marked data-i18n or data-i18n-attr. */
+  function paint() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-attr]").forEach((el) => {
+      el.dataset.i18nAttr.split(",").forEach((pair) => {
+        const at = pair.indexOf("=");
+        el.setAttribute(pair.slice(0, at), t(pair.slice(at + 1)));
+      });
+    });
+  }
+
+  return {
+    t, tn, pick, paint,
+    code: () => current,
+    locale: () => LOCALES[current],
+    /** Load if needed, then switch. Resolves false, changing nothing, if the file can't be had. */
+    use(code) { return load(code).then((ok) => (ok ? apply(code) : false)); }
+  };
+})();
+const t = I18n.t;
+
+/* ================================================================
    4. STATE
    ================================================================ */
 const ROUND_LENGTHS = [5, 10, 20, 30];   // questions per round the player can pick
@@ -3465,6 +3727,8 @@ const state = {
    after every answer.
    ------------------------------------------------------------------------ */
 const SAVE_KEY = "brainblitz.save";     // single blob, mirrors the cloud payload
+// Storage keys and the daily seed keep the game's original name (Brain Blitz):
+// renaming them would wipe players' saved progress and change today's daily.
 const SAVE_DEBOUNCE_MS = 800;
 
 const progress = {
@@ -3473,6 +3737,7 @@ const progress = {
   muted: false,
   music: true,     // background music; on until the player turns it off
   mode: "quiz",    // last home tab: "quiz" | "blocks"
+  lang: "",        // chosen language code; empty until the player picks one, so the device's is used
   daily: null,     // { date, score, correct } for the last daily challenge played
   days: null,      // { last, count, best }: the run of consecutive days with a daily played
   length: 10       // DEFAULT_ROUND_SIZE, restated so this stays declaration-order safe
@@ -3528,6 +3793,7 @@ function applyProgress(data) {
   if (typeof data.muted === "boolean") progress.muted = data.muted;
   if (typeof data.music === "boolean") progress.music = data.music;
   if (["quiz", "blocks"].indexOf(data.mode) !== -1) progress.mode = data.mode;
+  if (typeof data.lang === "string" && LANGS[data.lang]) progress.lang = data.lang;
   const d = data.daily;
   if (d && typeof d.date === "string" && typeof d.score === "number") {
     progress.daily = { date: d.date, score: d.score, correct: Number(d.correct) || 0 };
@@ -3551,7 +3817,7 @@ function hydrateProgress() {
 
 function snapshotProgress() {
   return { seen: progress.seen, best: progress.best, muted: progress.muted, music: progress.music,
-           length: progress.length, mode: progress.mode, daily: progress.daily, days: progress.days };
+           length: progress.length, mode: progress.mode, lang: progress.lang, daily: progress.daily, days: progress.days };
 }
 
 /** Write through to this device now, and to the cloud on a debounce. */
@@ -3776,9 +4042,14 @@ function recordDaily(key, score, correct) {
    ================================================================ */
 const LETTERS = ["A", "B", "C", "D"];
 
+/** The player asked their device for less motion: the game-feel effects stand down. */
+const reducedMotion = () => !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
 const UI = {
   showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+    // The drifting background is decoration: hold it still while a round is on.
+    document.body.classList.toggle("playing", id === "quiz" || id === "blocks");
   },
 
   buildCategoryGrid() {
@@ -3790,9 +4061,9 @@ const UI = {
     // before the rotation starts mixing in questions from earlier rounds.
     const label = (pool) => {
       const fresh = freshCount(pool, seen);
-      if (fresh === pool.length) return pool.length + " questions";
-      if (fresh === 0) return "all " + pool.length + " seen";
-      return fresh + " new of " + pool.length;
+      if (fresh === pool.length) return t("catAll", { n: pool.length });
+      if (fresh === 0) return t("catSeen", { n: pool.length });
+      return t("catNew", { f: fresh, n: pool.length });
     };
 
     const makeBtn = (key, iconName, name, count, wide) => {
@@ -3804,12 +4075,14 @@ const UI = {
         '<span class="emoji" aria-hidden="true">' + icon(iconName) + '</span>' +
         '<span class="meta"><span class="nm"></span><span class="ct"></span></span>';
       b.querySelector(".nm").textContent = name;
+      // One long word ("Allgemeinwissen") can't wrap, so it gets slightly smaller type instead.
+      if (/\S{12,}/.test(name)) b.classList.add("long-name");
       b.querySelector(".ct").textContent = count;
       b.addEventListener("click", () => UI.selectCategory(key));
       return b;
     };
 
-    grid.appendChild(makeBtn("mixed", "cat-mixed", "Mixed Blitz", label(QUESTIONS), true));
+    grid.appendChild(makeBtn("mixed", "cat-mixed", t("mixedName"), label(QUESTIONS), true));
     Object.keys(CATEGORIES).forEach(key => {
       const c = CATEGORIES[key];
       grid.appendChild(makeBtn(key, c.icon, c.name, label(questionsIn(key))));
@@ -3825,7 +4098,7 @@ const UI = {
       b.dataset.len = n;
       b.textContent = n;
       b.setAttribute("aria-pressed", n === state.roundSize ? "true" : "false");
-      b.setAttribute("aria-label", n + " questions per round");
+      b.setAttribute("aria-label", t("lenPillAria", { n: n }));
       b.addEventListener("click", () => UI.selectLength(n));
       wrap.appendChild(b);
     });
@@ -3849,13 +4122,12 @@ const UI = {
   /** Keep the line under the Play button in step with the chosen mode and length. */
   updatePlayHint() {
     if ($("home").dataset.mode === "blocks") {
-      $("playHint").textContent = "Answer right to blast blocks before they stack to the top";
+      $("playHint").textContent = t("hintBlocks");
       return;
     }
     const pool = state.category === "mixed" ? QUESTIONS.length : questionsIn(state.category).length;
     const n = Math.min(state.roundSize, pool);
-    $("playHint").textContent =
-      n + " questions · " + TIME_LIMIT + " seconds each · answer fast for bonus points";
+    $("playHint").textContent = t("hintQuiz", { n: n, s: TIME_LIMIT });
   },
 
   selectCategory(key) {
@@ -3867,20 +4139,79 @@ const UI = {
       el.classList.toggle("selected", on);
       el.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    $("playCat").textContent = key === "mixed" ? "Mixed" : CATEGORIES[key].name;
+    UI.renderPlayLabel();
     UI.updatePlayHint();
   },
+
+  /** "PLAY <category>". The word order differs by language, so the label is built from a template. */
+  renderPlayLabel() {
+    const parts = t("playQuiz").split("{cat}");
+    const label = $("playQuizLabel");
+    const cat = document.createElement("span");
+    cat.id = "playCat";
+    cat.textContent = state.category === "mixed" ? t("mixedShort") : CATEGORIES[state.category].name;
+    label.textContent = "";
+    label.append(parts[0], cat, parts[1] || "");
+  },
+
+  /** Repaint every piece of text after the language changes (and once at start-up). */
+  applyLanguage() {
+    I18n.paint();
+    $("langCode").textContent = I18n.code().toUpperCase();
+    UI.buildCategoryGrid();
+    UI.buildLengthPills();
+    UI.renderPlayLabel();
+    UI.refreshBest();
+    UI.renderDaily();
+    UI.updatePlayHint();
+    UI.buildLangList();
+    $("nextBtn").textContent = t("next");
+    $("againBtn").textContent = t("again");
+    $("bkHint").textContent = t("bkHint");
+    $("bkRiseLab").textContent = t("newRowIn");
+  },
+
+  buildLangList() {
+    const list = $("langList");
+    list.innerHTML = "";
+    Object.keys(LANGS).forEach((code) => {
+      const b = document.createElement("button");
+      b.className = "lang-opt";
+      b.dataset.lang = code;
+      b.lang = LOCALES[code];
+      b.textContent = LANGS[code];
+      b.setAttribute("aria-pressed", code === I18n.code() ? "true" : "false");
+      b.addEventListener("click", () => setLanguage(code));
+      list.appendChild(b);
+    });
+  },
+
+  openLang() {
+    Sound.init();
+    Sound.click();
+    $("langStatus").textContent = "";
+    $("langModal").hidden = false;
+    ($("langList").querySelector('[aria-pressed="true"]') || $("langClose")).focus();
+  },
+
+  closeLang() {
+    if ($("langModal").hidden) return;
+    $("langModal").hidden = true;
+    $("langBtn").focus();
+  },
+
+  isLangOpen: () => !$("langModal").hidden,
 
   /** The chip shows what matters for the selected mode. */
   refreshBest() {
     const mode = $("home").dataset.mode;
-    let ico = "trophy", label = "Best Score", value, title;
+    let ico = "trophy", label = t("best"), value, title;
     if (mode === "blocks") {
-      label = "Best"; value = parseInt(progress.best.blocks, 10) || 0;
-      title = "Best Block Blitz score";
+      label = t("bestShort"); value = parseInt(progress.best.blocks, 10) || 0;
+      title = t("bestTitleBlocks");
     } else {
       value = loadBest(state.roundSize);
-      title = "Best score for a " + state.roundSize + "-question round";
+      title = t("bestTitleQuiz", { n: state.roundSize });
     }
     $("bestIco").src = ICON_DIR + ico + ".png";
     $("bestLabel").textContent = label;
@@ -3912,19 +4243,19 @@ const UI = {
 
   renderDaily() {
     const today = dateKey(), played = dailyPlayed(today);
-    $("dailyDate").textContent = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+    $("dailyDate").textContent = new Date().toLocaleDateString(I18n.locale(), { weekday: "long", day: "numeric", month: "long" });
     $("dailyStreak").textContent = dayStreakNow();
     $("dailyLongest").textContent = progress.days ? progress.days.best : 0;
     $("dailyToday").textContent = played ? progress.daily.score : "–";
     const status = $("dailyStatus");
     status.textContent = played
-      ? "Done for today: " + progress.daily.correct + "/10 correct. A new challenge starts at midnight."
-      : (dayStreakNow() > 0 ? "Play today to keep your " + dayStreakNow() + "-day streak going!" : "Not played yet today.");
+      ? t("dailyDone", { c: progress.daily.correct })
+      : (dayStreakNow() > 0 ? I18n.tn("dailyKeep", dayStreakNow()) : t("dailyNot"));
     status.classList.toggle("done", played);
-    $("dailyPlayLabel").textContent = played ? "DONE FOR TODAY" : "PLAY TODAY'S 10";
+    $("dailyPlayLabel").textContent = played ? t("dailyPlayed") : t("dailyPlay");
     $("dailyPlay").disabled = played;
     $("dailyDot").hidden = played;   // the top-bar calendar shows a dot until today's is played
-    $("dailyBtn").setAttribute("aria-label", played ? "Daily challenge (done today)" : "Daily challenge (not played yet)");
+    $("dailyBtn").setAttribute("aria-label", played ? t("dailyAriaDone") : t("dailyAriaTodo"));
   },
 
   openDaily() {
@@ -3979,24 +4310,112 @@ const UI = {
     $("streakVal").textContent = state.streak;
     $("streakBox").classList.toggle("hot", state.streak >= 3);
     const answered = state.index + (state.locked ? 1 : 0);
-    $("progFill").style.width = (answered / state.round.length * 100) + "%";
+    UI.setProgress(answered / state.round.length);
   },
 
-  /** Animate the score counter from its displayed value to the real one. */
+  /** Progress slides with a transform (compositor only); width would relayout every frame of the transition. */
+  setProgress(frac) {
+    const fill = $("progFill");
+    fill.style.transform = "translateX(" + ((frac - 1) * 100) + "%)";
+    fill.dataset.progress = (frac * 100) + "%";
+  },
+
+  /** Show the new score at once and bump it. Counting it up wrote text (a layout) every frame. */
   animateScore() {
-    cancelAnimationFrame(state.scoreRafId);
-    const from = state.displayedScore, to = state.score, span = 520;
-    if (from === to) { $("scoreVal").textContent = to; return; }
-    const t0 = performance.now();
-    const step = (now) => {
-      const p = Math.min(1, (now - t0) / span);
-      const eased = 1 - Math.pow(1 - p, 3);
-      state.displayedScore = Math.round(from + (to - from) * eased);
-      $("scoreVal").textContent = state.displayedScore;
-      if (p < 1) state.scoreRafId = requestAnimationFrame(step);
-      else state.displayedScore = to;
-    };
-    state.scoreRafId = requestAnimationFrame(step);
+    const el = $("scoreVal");
+    el.textContent = state.score;
+    state.displayedScore = state.score;
+    UI.bump(el, 1.35);
+  },
+
+  /* ---- game feel -------------------------------------------------------
+     Every effect here moves only transform and opacity, reuses one element
+     where it can, floats over the screen instead of resizing anything, and
+     cancels its previous run before starting again. */
+
+  /** Slide-and-fade an element in. */
+  enter(el, opts) {
+    if (!el || !el.animate) return;
+    if (reducedMotion()) return;
+    const o = opts || {};
+    if (el._enter) el._enter.cancel();
+    el._enter = el.animate([
+      { transform: "translateY(" + (o.y == null ? 14 : o.y) + "px) scale(" + (o.scale || 0.97) + ")", opacity: 0 },
+      { transform: "none", opacity: 1 }
+    ], { duration: o.duration || 280, delay: o.delay || 0, easing: "cubic-bezier(.2,.9,.3,1.15)", fill: "backwards" });
+  },
+
+  /** A big banner across the middle ("On fire!"), one reused element. */
+  banner(text, icon) {
+    if (reducedMotion()) return;
+    let b = UI._banner;
+    if (!b) {
+      b = UI._banner = document.createElement("div");
+      b.className = "fx-banner";
+      b.setAttribute("aria-hidden", "true");
+      document.body.appendChild(b);
+    }
+    b.innerHTML = (icon ? '<img class="ico" src="' + ICON_DIR + icon + '.png" alt="">' : "") + "<span></span>";
+    b.lastChild.textContent = text;
+    if (!b.animate) return;
+    if (b._anim) b._anim.cancel();
+    b._anim = b.animate([
+      { transform: "translate(-50%,-50%) scale(.4) rotate(-8deg)", opacity: 0 },
+      { transform: "translate(-50%,-50%) scale(1.12) rotate(-4deg)", opacity: 1, offset: 0.22 },
+      { transform: "translate(-50%,-50%) scale(1) rotate(-4deg)", opacity: 1, offset: 0.34 },
+      { transform: "translate(-50%,-50%) scale(1) rotate(-4deg)", opacity: 1, offset: 0.78 },
+      { transform: "translate(-50%,-62%) scale(.96) rotate(-4deg)", opacity: 0 }
+    ], { duration: 1100, easing: "ease-out", fill: "both" });
+  },
+
+  /** A coloured flash around the screen edges ("bad" red, "good" gold), one reused element. */
+  flash(kind) {
+    if (reducedMotion()) return;
+    let f = UI._flash;
+    if (!f) {
+      f = UI._flash = document.createElement("div");
+      f.className = "fx-flash";
+      f.setAttribute("aria-hidden", "true");
+      document.body.appendChild(f);
+    }
+    f.dataset.kind = kind;
+    if (!f.animate) return;
+    if (f._anim) f._anim.cancel();
+    f._anim = f.animate([{ opacity: 0 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }],
+                        { duration: kind === "bad" ? 480 : 380, easing: "ease-out" });
+  },
+
+  /** A short shake on a transform. */
+  shake(el, px) {
+    if (!el || !el.animate) return;
+    if (reducedMotion()) return;
+    const d = px || 6;
+    el.animate([
+      { transform: "translateX(0)" }, { transform: "translateX(" + -d + "px)" }, { transform: "translateX(" + d + "px)" },
+      { transform: "translateX(" + (-d / 2) + "px)" }, { transform: "translateX(0)" }
+    ], { duration: 260, easing: "ease-out" });
+  },
+
+  /** Vibration on phones that support it (Android). Silent when the game is muted. */
+  haptic(pattern) {
+    if (!navigator.vibrate || !Sound.isAudible()) return;
+    try { navigator.vibrate(pattern); } catch (e) { /* not allowed here; never mind */ }
+  },
+
+  /** Create the reused effect elements up front, so the first combo doesn't pay to build them. */
+  warmFx() {
+    if (!UI._banner) { UI.banner(" "); if (UI._banner._anim) UI._banner._anim.cancel(); }
+    if (!UI._flash) { UI.flash("good"); if (UI._flash._anim) UI._flash._anim.cancel(); }
+    if (!UI._particles) { UI.burst({ left: -50, top: -50, width: 0, height: 0 }); UI._particles.forEach((p) => p._anim && p._anim.cancel()); }
+  },
+
+  /** A quick scale pop on a transform; cancels any bump still running on the element. */
+  bump(el, scale) {
+    if (!el.animate || reducedMotion()) return;
+    if (el._bump) el._bump.cancel();
+    el._bump = el.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(" + (scale || 1.2) + ")" }, { transform: "scale(1)" }],
+      { duration: 320, easing: "cubic-bezier(.2,1.4,.4,1)" });
   },
 
   renderQuestion() {
@@ -4020,6 +4439,7 @@ const UI = {
     });
 
     $("qArea").scrollTop = 0;
+    UI.enter(document.querySelector("#quiz .q-card"), { y: 18 });
     $("feedback").className = "feedback";
     $("qHint").classList.remove("hide");
     $("nextBtn").classList.remove("show");
@@ -4027,14 +4447,26 @@ const UI = {
     UI.setTimerDisplay(TIME_LIMIT);
   },
 
+  /**
+   * Runs every frame while a question is open, so it only writes what changed:
+   * the ring each frame (a paint, no layout), the number once a second, and the
+   * colour classes at the 5 s and 3 s marks. Writing the text every frame
+   * forced a layout per frame.
+   */
   setTimerDisplay(secs) {
     const clamped = Math.max(0, Math.min(TIME_LIMIT, secs));
     const ratio = clamped / TIME_LIMIT;
     $("timerBar").style.strokeDashoffset = (RING_LEN * (1 - ratio)).toFixed(2);
-    $("timerNum").textContent = Math.ceil(clamped);
-    const el = $("timerEl");
-    el.classList.toggle("warn", clamped <= 5 && clamped > 3);
-    el.classList.toggle("danger", clamped <= 3);
+    const whole = Math.ceil(clamped);
+    if (whole !== UI._timerWhole) { UI._timerWhole = whole; $("timerNum").textContent = whole; }
+    const zone = clamped <= 3 ? "danger" : clamped <= 5 ? "warn" : "";
+    if (zone !== UI._timerZone) {
+      UI._timerZone = zone;
+      const el = $("timerEl");
+      el.classList.toggle("warn", zone === "warn");
+      el.classList.toggle("danger", zone === "danger");
+      $("quiz").classList.toggle("urgent", zone === "danger" && !state.locked);
+    }
   },
 
   revealAnswers(chosenIdx, correctIdx) {
@@ -4060,11 +4492,11 @@ const UI = {
     const hot = kind === "correct" && state.streak >= 3;
     setIconText($("fbTitle"),
       hot ? "fire" : kind === "correct" ? "check" : kind === "timeout" ? "clock" : "cross",
-      hot ? state.streak + " in a row!" : kind === "correct" ? "Correct!"
-      : kind === "timeout" ? "Time's up!" : "Not quite");
-    $("fbPts").textContent = points > 0 ? "+" + points + " pts" : "";
+      hot ? t("inARow", { n: state.streak }) : kind === "correct" ? t("correct")
+      : kind === "timeout" ? t("timeUp") : t("notQuite"));
+    $("fbPts").textContent = points > 0 ? t("pts", { n: points }) : "";
     $("fbExp").textContent = explanation;
-    $("nextBtn").textContent = state.index === state.round.length - 1 ? "SEE RESULTS →" : "NEXT QUESTION →";
+    $("nextBtn").textContent = state.index === state.round.length - 1 ? t("seeResults") : t("next");
     $("nextBtn").classList.add("show");
 
     // On short screens the explanation can sit below the fold. Scroll it into view,
@@ -4089,35 +4521,57 @@ const UI = {
     }
   },
 
-  floatPoints(points, el) {
-    const rect = el.getBoundingClientRect();
+  /** `at` is an element or an already-measured DOMRect. */
+  floatPoints(points, at, fast) {
+    const rect = at.getBoundingClientRect ? at.getBoundingClientRect() : at;
     const node = document.createElement("div");
-    node.className = "float-pts";
+    node.className = "float-pts" + (fast ? " fast" : "");
     node.textContent = "+" + points;
+    if (fast) {
+      const tag = document.createElement("span");
+      tag.className = "fast-tag";
+      tag.textContent = t("fast");
+      node.appendChild(tag);
+    }
     node.style.left = (rect.left + rect.width / 2) + "px";
     node.style.top = (rect.top + rect.height / 2) + "px";
     document.body.appendChild(node);
     setTimeout(() => node.remove(), 1000);
   },
 
-  burst(el) {
-    const rect = el.getBoundingClientRect();
-    const colors = ["#8B5CF6", "#22D3EE", "#FACC15", "#22C55E", "#F8FAFC"];
-    for (let i = 0; i < 16; i++) {
-      const p = document.createElement("div");
-      p.className = "particle";
-      const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.4;
-      const dist = 60 + Math.random() * 90;
-      p.style.left = (rect.left + rect.width / 2) + "px";
-      p.style.top = (rect.top + rect.height / 2) + "px";
-      p.style.background = colors[i % colors.length];
-      p.style.setProperty("--dx", Math.cos(angle) * dist + "px");
-      p.style.setProperty("--dy", Math.sin(angle) * dist + "px");
-      p.style.setProperty("--rot", Math.round(Math.random() * 540 - 270) + "deg");
-      p.style.animationDelay = (i * 8) + "ms";
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 1100);
+  /**
+   * Confetti from the middle of an element. Twelve particles are made once and
+   * reused, moved only by transform, and any burst still running is cancelled
+   * before the next, so a quick run of answers never piles up layers.
+   */
+  burst(at, count) {
+    if (reducedMotion()) return;
+    const rect = at.getBoundingClientRect ? at.getBoundingClientRect() : at;
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    if (!UI._particles) {
+      UI._particles = [];
+      const colors = ["#FEC41C", "#F6365B", "#3285FE", "#47C64D", "#FFFFFF", "#E25BD8"];
+      for (let i = 0; i < 12; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.background = colors[i % colors.length];
+        document.body.appendChild(p);
+        UI._particles.push(p);
+      }
     }
+    const n = Math.min(count || 12, UI._particles.length);
+    UI._particles.forEach((p, i) => {
+      if (p._anim) p._anim.cancel();
+      if (i >= n || !p.animate) return;
+      const angle = (Math.PI * 2 * i) / n + Math.random() * 0.5;
+      const dist = 60 + Math.random() * 80;
+      const dx = Math.cos(angle) * dist, dy = Math.sin(angle) * dist - 20;
+      const rot = Math.round(Math.random() * 540 - 270);
+      p._anim = p.animate([
+        { transform: "translate(" + cx + "px," + cy + "px) rotate(0deg) scale(1)", opacity: 1 },
+        { transform: "translate(" + (cx + dx) + "px," + (cy + dy + 40) + "px) rotate(" + rot + "deg) scale(.3)", opacity: 0 }
+      ], { duration: 850, delay: i * 10, easing: "cubic-bezier(.15,.7,.3,1)", fill: "backwards" });
+    });
   },
 
   renderResults(newBest) {
@@ -4125,12 +4579,12 @@ const UI = {
     const acc = Math.round((state.correctCount / total) * 100);
 
     const tiers = [
-      { min: 100, icon: "trophy", title: "Flawless Blitz!", msg: "A perfect round. You did not miss a single question." },
-      { min: 80,  icon: "tier-crown", title: "Brilliant!",      msg: "Outstanding knowledge — you are in the top tier." },
-      { min: 60,  icon: "tier-star", title: "Well Played!",    msg: "Solid round. A little more speed and you'll be unstoppable." },
-      { min: 40,  icon: "tier-up", title: "Getting There!",  msg: "Halfway there. One more round should push you higher." },
-      { min: 20,  icon: "tier-book", title: "Keep Training!",  msg: "Every round teaches you something new. Try again!" },
-      { min: 0,   icon: "tier-clover", title: "Fresh Start",     msg: "Everyone starts somewhere. Give it another blitz!" }
+      { min: 100, icon: "trophy", title: t("tier100"), msg: t("tier100m") },
+      { min: 80,  icon: "tier-crown", title: t("tier80"), msg: t("tier80m") },
+      { min: 60,  icon: "tier-star", title: t("tier60"), msg: t("tier60m") },
+      { min: 40,  icon: "tier-up", title: t("tier40"), msg: t("tier40m") },
+      { min: 20,  icon: "tier-book", title: t("tier20"), msg: t("tier20m") },
+      { min: 0,   icon: "tier-clover", title: t("tier0"), msg: t("tier0m") }
     ];
     const tier = tiers.find(t => acc >= t.min);
 
@@ -4146,9 +4600,9 @@ const UI = {
     daily.hidden = !state.daily;
     if (state.daily) {
       const n = dayStreakNow();
-      daily.textContent = "Daily challenge done · " + n + "-day streak" + (n > 1 ? "!" : "");
+      daily.textContent = I18n.tn("dailyRes", n);
     }
-    $("againBtn").textContent = state.daily ? "Play a Quiz" : "Play Again";
+    $("againBtn").textContent = state.daily ? t("playQuizBtn") : t("again");
 
     const list = $("reviewList");
     list.innerHTML = "";
@@ -4161,8 +4615,25 @@ const UI = {
       list.appendChild(row);
     });
 
+    // The reveal: icon pops, the score lands, then the stats and the recap cascade in.
+    const icoEl = $("resEmoji");
+    if (icoEl.animate) {
+      icoEl.animate([{ transform: "scale(.2) rotate(-25deg)", opacity: 0 }, { transform: "scale(1.2) rotate(6deg)", opacity: 1, offset: .6 },
+                     { transform: "none", opacity: 1 }], { duration: 520, easing: "ease-out", fill: "backwards" });
+    }
+    UI.enter($("resTitle"), { delay: 120 });
+    UI.enter($("resMsg"), { delay: 170 });
+    const scoreEl = $("resScore");
+    if (scoreEl.animate) {
+      scoreEl.animate([{ transform: "scale(1.8)", opacity: 0 }, { transform: "scale(.94)", opacity: 1, offset: .7 }, { transform: "none", opacity: 1 }],
+                      { duration: 420, delay: 240, easing: "cubic-bezier(.3,1.3,.5,1)", fill: "backwards" });
+    }
+    document.querySelectorAll("#results .stat").forEach((el, i) => UI.enter(el, { delay: 420 + i * 70 }));
+    // Only the first ten recap rows animate, so a 30-question round doesn't start 30 animations at once.
+    document.querySelectorAll("#reviewList .rev-row").forEach((el, i) => { if (i < 10) UI.enter(el, { delay: 560 + i * 45, y: 8 }); });
+
     if (newBest || acc >= 80) {
-      setTimeout(() => UI.burst($("resScore")), 340);
+      setTimeout(() => { UI.burst(scoreEl); UI.haptic([20, 40, 20]); }, 560);
     }
   }
 };
@@ -4206,7 +4677,7 @@ const Game = {
     state.locked = false;
 
     $("scoreVal").textContent = "0";
-    $("progFill").style.width = "0%";
+    UI.setProgress(0);
     UI.showScreen("quiz");
     Game.showCurrent();
   },
@@ -4257,6 +4728,7 @@ const Game = {
     if (state.locked) return;               // one answer per question, ever
     state.locked = true;
     Game.stopTimer();
+    $("quiz").classList.remove("urgent");
     Sound.init();
 
     const q = state.round[state.index];
@@ -4275,21 +4747,32 @@ const Game = {
       state.score += points;
 
       Sound.correct(state.streak);
-      UI.revealAnswers(idx, q.correctIndex);
+      // Read the button's position once, before any class changes: reading it
+      // after them forced a fresh layout for each effect.
       const btn = document.querySelector('#answers .ans[data-idx="' + idx + '"]');
-      if (btn) { UI.floatPoints(points, btn); UI.burst(btn); }
+      const rect = btn ? btn.getBoundingClientRect() : null;
+      UI.revealAnswers(idx, q.correctIndex);
+      const fast = TIME_LIMIT - timeLeft <= 3;
+      if (rect) { UI.floatPoints(points, rect, fast); UI.burst(rect); }
       UI.animateScore();
+      UI.bump($("streakBox"), 1.12);
+      UI.haptic(12);
+      const combo = [3, 5, 7, 10].indexOf(state.streak) !== -1 ? t("combo" + state.streak)
+                  : (state.streak > 10 && state.streak % 5 === 0 ? t("inARow", { n: state.streak }) : "");
+      if (combo) { UI.banner(combo, "fire"); UI.flash("good"); UI.haptic([15, 40, 15]); }
 
-      const parts = ["100 base"];
-      if (speedBonus > 0) parts.push(speedBonus + " speed");
-      if (streakBonus > 0) parts.push(streakBonus + " streak");
+      const parts = [t("ptsBase")];
+      if (speedBonus > 0) parts.push(t("ptsSpeed", { n: speedBonus }));
+      if (streakBonus > 0) parts.push(t("ptsStreak", { n: streakBonus }));
       UI.showFeedback("correct", points, parts.join(" · ") + " — " + q.explanation);
     } else {
       state.streak = 0;
       Sound.wrong();
       UI.revealAnswers(idx, q.correctIndex);
+      UI.flash("bad");
+      UI.haptic([30, 50, 30]);
       const correctText = q.options[q.correctIndex].text;
-      UI.showFeedback("wrong", 0, "The answer is " + correctText + ". " + q.explanation);
+      UI.showFeedback("wrong", 0, t("answerIs", { a: correctText }) + " " + q.explanation);
     }
 
     state.results.push({ question: q.text, correct: isCorrect });
@@ -4306,9 +4789,13 @@ const Game = {
     state.streak = 0;
     state.timeLeft = 0;
     UI.setTimerDisplay(0);
+    $("quiz").classList.remove("urgent");
     Sound.timeout();
     UI.revealAnswers(-1, q.correctIndex);
-    UI.showFeedback("timeout", 0, "The answer is " + q.options[q.correctIndex].text + ". " + q.explanation);
+    UI.flash("bad");
+    UI.shake(document.querySelector("#quiz .q-card"), 5);
+    UI.haptic(60);
+    UI.showFeedback("timeout", 0, t("answerIs", { a: q.options[q.correctIndex].text }) + " " + q.explanation);
     state.results.push({ question: q.text, correct: false });
     UI.renderHud();
   },
@@ -4326,7 +4813,7 @@ const Game = {
     Game.stopTimer();
     state.roundActive = false;
     state.locked = true;
-    $("progFill").style.width = "100%";
+    UI.setProgress(1);
 
     let newBest;
     if (state.daily) {
@@ -4339,7 +4826,8 @@ const Game = {
     }
 
     Music.setMode("home");
-    UI.refreshHome();
+    // The home grid is rebuilt when the player goes back to it (quitToHome),
+    // not here: rebuilding it while the results screen opens cost a long frame.
     UI.renderResults(newBest);
     UI.showScreen("results");
     Sound.finish(state.correctCount >= state.round.length / 2);
@@ -4362,6 +4850,7 @@ const Game = {
 
   quitToHome() {
     Game.stopTimer();
+    $("quiz").classList.remove("urgent");
     cancelAnimationFrame(state.scoreRafId);
     state.roundActive = false;
     state.locked = true;
@@ -4441,7 +4930,7 @@ const Blocks = (() => {
     return cats[Math.floor(Math.random() * cats.length)];
   }
 
-  const nameOf = (cat) => (cat === LUCKY ? "Lucky" : CATEGORIES[cat].name);
+  const nameOf = (cat) => (cat === LUCKY ? t("lucky") : CATEGORIES[cat].name);
 
   function makeBlock(cat, col, row) {
     const el = document.createElement("button");
@@ -4462,7 +4951,7 @@ const Blocks = (() => {
     block.el.style.transform =
       "translate(" + (block.col * cell + 2) + "px," + ((ROWS - 1 - block.row) * cell + 2) + "px)";
     block.el.setAttribute("aria-label",
-      nameOf(block.cat) + " block, column " + (block.col + 1) + ", row " + (block.row + 1));
+      t("blockAria", { name: nameOf(block.cat), c: block.col + 1, r: block.row + 1 }));
     if (instant) { void block.el.offsetWidth; block.el.style.transition = ""; }
   }
 
@@ -4521,7 +5010,7 @@ const Blocks = (() => {
     }
     const soon = !over && sinceRise >= riseEvery - 1;
     pips.classList.toggle("urgent", soon);
-    $("bkRiseLab").textContent = soon ? "Row coming next!" : "New row in";
+    $("bkRiseLab").textContent = soon ? t("rowNext") : t("newRowIn");
     $("bkRiseLab").classList.toggle("urgent", soon);
     board().classList.toggle("rise-soon", soon);
     board().classList.toggle("danger", topFull());
@@ -4559,8 +5048,7 @@ const Blocks = (() => {
     Sound.init();
     arming = !arming;
     board().classList.toggle("arming", arming);
-    $("bkHint").textContent = arming ? "Bomb ready: tap any block to blast its whole row."
-                                     : "Tap a group of blocks, then answer its question to blast them.";
+    $("bkHint").textContent = arming ? t("bkArm") : t("bkHint");
     Sound.click();
     renderHud();
   }
@@ -4574,7 +5062,7 @@ const Blocks = (() => {
     const points = blocks.length * BOMB_POINTS;
     score += points;
     picked = { cat: null, blocks };
-    $("bkHint").textContent = "Boom! +" + points;
+    $("bkHint").textContent = t("boom", { n: points });
     Sound.wrong();   // the low sweep doubles as an explosion
     renderHud();
     blast(points);
@@ -4591,7 +5079,7 @@ const Blocks = (() => {
     q = { cat, text: raw.q, explanation: raw.e, options, correctIndex: options.findIndex((o) => o.correct) };
 
     setIconText($("bkBadge"), CATEGORIES[cat].icon, CATEGORIES[cat].name);
-    $("bkWorth").textContent = (picked && picked.lucky ? "Lucky! " : "") + "Blast " + n + " · +" + worth(n, streak + 1);
+    $("bkWorth").textContent = (picked && picked.lucky ? t("luckyBang") + " " : "") + t("worth", { n: n, p: worth(n, streak + 1) });
     $("bkQ").textContent = q.text;
     $("bkFb").textContent = "";
     $("bkFb").className = "bk-fb";
@@ -4652,10 +5140,10 @@ const Blocks = (() => {
       const points = worth(picked.blocks.length, streak);
       score += points;
       fb.className = "bk-fb good";
-      fb.textContent = (streak >= 3 ? streak + " in a row! " : "Correct! ") + "+" + points;
+      fb.textContent = (streak >= 3 ? t("inARow", { n: streak }) : t("correct")) + " +" + points;
       if (streak % BOMB_EVERY === 0 && bombs < MAX_BOMBS) {
         bombs++;
-        fb.textContent += " · Bomb earned!";
+        fb.textContent += " · " + t("bombEarned");
       }
       Sound.correct(streak);
       // Every 8 correct answers the automatic rise comes one answer sooner, down to every 2.
@@ -4665,7 +5153,7 @@ const Blocks = (() => {
     } else {
       streak = 0;
       fb.className = "bk-fb bad";
-      fb.textContent = (idx === -1 ? "Time's up! " : "Not quite. ") + "It's " + q.options[q.correctIndex].text + ".";
+      fb.textContent = (idx === -1 ? t("timeUp") + " " : t("notQuite") + ". ") + t("itIs", { a: q.options[q.correctIndex].text });
       idx === -1 ? Sound.timeout() : Sound.wrong();
       renderHud();
       later(() => {
@@ -4694,9 +5182,14 @@ const Blocks = (() => {
     busy = true;
     const blocks = picked.blocks;
     picked = null;
-    const mid = blocks[Math.floor(blocks.length / 2)].el;
-    UI.floatPoints(points, mid);
-    UI.burst(mid);
+    const midRect = blocks[Math.floor(blocks.length / 2)].el.getBoundingClientRect();
+    UI.floatPoints(points, midRect);
+    UI.burst(midRect, Math.min(12, 4 + blocks.length));
+    UI.haptic(blocks.length >= 8 ? [20, 30, 25] : 15);
+    if (blocks.length >= 8) {
+      UI.banner(blocks.length >= 14 ? t("megaBlast") : t("hugeBlast"), "bomb");
+      UI.shake($("bkWrap"), 7);
+    }
     blocks.forEach((b) => {
       b.el.classList.remove("pick");
       b.el.classList.add("pop");
@@ -4711,7 +5204,7 @@ const Blocks = (() => {
         eachBlock(() => { empty = false; });
         if (empty) {
           score += CLEAR_BONUS;
-          $("bkHint").textContent = "Board cleared! +" + CLEAR_BONUS;
+          $("bkHint").textContent = t("cleared", { n: CLEAR_BONUS });
           Sound.finish(true);
           for (let i = 0; i < 3; i++) addRow();
         }
@@ -4759,6 +5252,11 @@ const Blocks = (() => {
     busy = true;
     if (!addRow()) { gameOver(); return; }
     Sound.tick();
+    UI.haptic(25);
+    if (board().animate) {
+      board().animate([{ transform: "translateY(0)" }, { transform: "translateY(-4px)" }, { transform: "translateY(0)" }],
+                      { duration: 260, easing: "ease-out" });
+    }
     renderHud();
     later(() => { busy = false; renderHud(); }, 320);
   }
@@ -4785,6 +5283,8 @@ const Blocks = (() => {
     $("bkOverStreak").textContent = bestStreak;
     $("bkOverBest").classList.toggle("show", newBest);
     $("bkOver").classList.add("show");
+    UI.enter(document.querySelector(".bk-over-card"), { y: 30, scale: 0.9, duration: 380 });
+    UI.haptic([40, 60, 40]);
     Sound.finish(score > 0);
     renderHud();
   }
@@ -4794,11 +5294,20 @@ const Blocks = (() => {
     const active = document.activeElement && document.activeElement._block;
     let { col, row } = active && active.el.isConnected ? active : cursor;
     if (!active || !active.el.isConnected) {
-      // Resume where the player left off, or the nearest block below it.
+      // Resume where the player left off: the nearest column that still has
+      // blocks, at that height or the top of the column. A blast or bomb can
+      // empty the column the player was on, and arrows then did nothing.
       col = Math.min(col, COLS - 1);
       row = Math.min(row, ROWS - 1);
-      while (row > 0 && !grid[col][row]) row--;
-      if (grid[col][row]) { grid[col][row].el.focus(); return; }
+      for (let k = 0; k < COLS; k++) {
+        for (const c of k ? [col - k, col + k] : [col]) {
+          if (c < 0 || c >= COLS) continue;
+          let r = row;
+          while (r > 0 && !grid[c][r]) r--;
+          if (grid[c][r]) { grid[c][r].el.focus(); return; }
+        }
+      }
+      return;
     }
     if (dr !== 0) {
       const r = row + dr;
@@ -4820,7 +5329,7 @@ const Blocks = (() => {
     Music.start();
     Music.setMode("quiz");
     cats = shuffle(Object.keys(CATEGORIES)).slice(0, CATS_PER_GAME);
-    board().innerHTML = "";
+    board().innerHTML = '<div class="bk-dim"></div>';   // one overlay dims the board while a group is picked
     grid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
     score = 0; streak = 0; bestStreak = 0; blasted = 0; correctCount = 0;
     riseEvery = FIRST_RISE_EVERY; sinceRise = 0;
@@ -4830,7 +5339,7 @@ const Blocks = (() => {
     best = parseInt(progress.best.blocks, 10) || 0;
     $("bkOver").classList.remove("show");
     closeSheet();
-    $("bkHint").textContent = "Tap a group of blocks, then answer its question to blast them.";
+    $("bkHint").textContent = t("bkHint");
     UI.showScreen("blocks");
     chooseRows();
     grid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
@@ -4892,6 +5401,10 @@ const Blocks = (() => {
         place(grid[c][r], true);
       }
       if (opts.sinceRise != null) { sinceRise = opts.sinceRise; renderHud(); }
+      if (opts.clearColumn != null) {
+        const c = opts.clearColumn;
+        for (let r = 0; r < ROWS; r++) if (grid[c][r]) { grid[c][r].el.remove(); grid[c][r] = null; }
+      }
     }
   };
 })();
@@ -4918,6 +5431,23 @@ function toggleMusic() {
   UI.updateMusicButton();
   Music.start();
   Sound.click();
+}
+
+/** Switch language from the picker. English is built in; the others download on first use. */
+function setLanguage(code) {
+  const status = $("langStatus");
+  const buttons = Array.from($("langList").children);
+  status.textContent = code === "en" || code === I18n.code() ? "" : t("langLoading");
+  buttons.forEach((b) => { b.disabled = true; });
+  return I18n.use(code).then((ok) => {
+    buttons.forEach((b) => { b.disabled = false; });
+    if (!ok) { status.textContent = t("langFail"); return false; }
+    progress.lang = code;
+    markProgressDirty();
+    UI.applyLanguage();
+    UI.closeLang();
+    return true;
+  });
 }
 
 function spawnSparks() {
@@ -4960,10 +5490,15 @@ async function init() {
   UI.updateMuteButtons();
   if (ROUND_LENGTHS.indexOf(progress.length) !== -1) state.roundSize = progress.length;
 
-  UI.buildCategoryGrid();
-  UI.buildLengthPills();
-  $("playCat").textContent = "Mixed";
+  // Language: ?lang= in the address wins, then the player's saved choice, then
+  // the device's (YouTube's, inside a Playable). A file that fails to load
+  // leaves the game in English.
+  const asked = (location.search.match(/[?&]lang=([A-Za-z-]+)/) || [])[1];
+  const lang = I18n.pick(asked || progress.lang || await Platform.language());
+  if (lang !== "en") await I18n.use(lang);
+
   UI.setMode(progress.mode, true);
+  UI.applyLanguage();
 
   // Pause and resume on YouTube's terms, reusing the countdown handling the
   // hidden-tab path already uses.
@@ -4972,6 +5507,8 @@ async function init() {
 
   // Interactive and waiting for the player.
   Platform.gameReady();
+  // Build the reused effect elements once the game is up, off the first answer's frame.
+  setTimeout(() => UI.warmFx(), 300);
 }
 
 function wireInput() {
@@ -4982,6 +5519,9 @@ function wireInput() {
   $("dailyPlay").addEventListener("click", () => { UI.closeDaily(); Game.start(true); });
   // A tap on the dimmed backdrop, outside the card, closes the dialog.
   $("dailyModal").addEventListener("click", (e) => { if (e.target === $("dailyModal")) UI.closeDaily(); });
+  $("langBtn").addEventListener("click", () => UI.openLang());
+  $("langClose").addEventListener("click", () => UI.closeLang());
+  $("langModal").addEventListener("click", (e) => { if (e.target === $("langModal")) UI.closeLang(); });
   document.querySelectorAll(".mode-tab").forEach((t) => {
     t.addEventListener("click", () => UI.setMode(t.dataset.mode));
     // Arrow keys move between tabs, as a tablist should.
@@ -5016,6 +5556,10 @@ function wireInput() {
 
   // Keyboard shortcuts: 1-4 / A-D to answer, Enter or Space to continue.
   document.addEventListener("keydown", (e) => {
+    if (UI.isLangOpen()) {
+      if (e.key === "Escape") { e.preventDefault(); UI.closeLang(); }
+      return;
+    }
     if (UI.isDailyOpen()) {
       // The dialog's own buttons handle Enter and Space; Escape closes it.
       if (e.key === "Escape") { e.preventDefault(); UI.closeDaily(); }
@@ -5050,6 +5594,25 @@ function wireInput() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+/* ---- debug hook --------------------------------------------------------
+   Only with ?debug in the URL, so players never have it. Triggers each
+   effect on its own so tools/measure-fx.js can time it in isolation (set the
+   state up first, then trigger inside the sampling window).
+   ------------------------------------------------------------------------ */
+if (/[?&]debug\b/.test(location.search)) {
+  window.__dbg = {
+    startQuiz() { if (!state.roundActive) Game.start(); },
+    correct() { Game.answer(state.round[state.index].correctIndex); },
+    wrong() { Game.answer((state.round[state.index].correctIndex + 1) % 4); },
+    next() { Game.next(); },
+    streak(n) { state.streak = n; },
+    results() { Game.end(); },
+    startBlocks() { Blocks.start(); },
+    pickBlocks() { document.querySelector("#bkBoard .bk-block").click(); },
+    blastBlocks() { const d = Blocks.debug(); if (d.open) document.querySelector('#bkAnswers .ans[data-idx="' + d.correctIndex + '"]').click(); }
+  };
+}
 </script>
 </body>
 </html>

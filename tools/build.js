@@ -14,7 +14,7 @@ const { execFileSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
-const ZIP = path.join(DIST, "brain-blitz-playable.zip");
+const ZIP = path.join(DIST, "brain-blast-playable.zip");
 
 const MiB = 1024 * 1024;
 const INITIAL_CAP = 30 * MiB;     // hard: the game will not launch above this
@@ -22,7 +22,9 @@ const RECOMMENDED = 15 * MiB;
 const BUNDLE_CAP = 250 * MiB;
 const FILE_CAP = 30 * MiB;        // per file inside the bundle
 
-const CONTENTS = ["index.html", "manifest.webmanifest", "icons", "assets"];
+const CONTENTS = ["index.html", "manifest.webmanifest", "icons", "assets", "lang"];
+// Only the built language files ship; lang/src/ holds the translators' sources.
+const SKIP = [path.join("lang", "src")];
 
 /** Every file under a bundle entry, so a directory is measured, not stat'd. */
 function filesUnder(entry) {
@@ -39,10 +41,15 @@ fs.mkdirSync(DIST, { recursive: true });
 for (const entry of CONTENTS) {
   const from = path.join(ROOT, entry);
   if (!fs.existsSync(from)) throw new Error(`missing ${entry}`);
-  fs.cpSync(from, path.join(DIST, entry), { recursive: true });
+  fs.cpSync(from, path.join(DIST, entry), {
+    recursive: true,
+    filter: (src) => !SKIP.some((skip) => path.relative(ROOT, src).startsWith(skip))
+  });
 }
 
 // index.html must sit at the archive root, so zip from inside dist/.
+// Language files must be current with their sources before they are packed.
+execFileSync(process.execPath, [path.join(__dirname, "make-lang.js"), "--check"], { stdio: "inherit" });
 execFileSync("zip", ["-q", "-X", "-r", ZIP, ...CONTENTS], { cwd: DIST });
 
 const zipSize = fs.statSync(ZIP).size;

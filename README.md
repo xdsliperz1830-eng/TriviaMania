@@ -1,4 +1,4 @@
-# Brain Blitz
+# Brain Blast
 
 A fast-paced HTML5 trivia game built for YouTube Playables. Everything — markup,
 styles, game logic, question bank and sound engine — lives in a single
@@ -64,7 +64,7 @@ sits beside the board instead of over it.
   the home screen. The choice is remembered between sessions.
 - 15 seconds per question, drawn from a bank of **900 questions** — 90 in each
   of the 10 categories.
-- Pick a single category or **Mixed Blitz**, which spreads the round evenly over
+- Pick a single category or **Mixed Blast**, which spreads the round evenly over
   the categories: 10 questions means one from each, 20 means two, and a length
   that does not divide evenly gives the remainder to whichever categories come
   up first in the shuffle.
@@ -72,7 +72,7 @@ sits beside the board instead of over it.
   yet, so playing the same category three times in a row at 10 questions gives
   30 different questions. Only once a category is used up does the cycle restart
   and mix in earlier questions. Progress is stored in `localStorage`, so it survives a
-  reload, and category play and Mixed Blitz share the same history.
+  reload, and category play and Mixed Blast share the same history.
 - Category cards show what is left — `90 questions`, then `80 new of 90`, then
   `all 90 seen`.
 - Answer choices are reshuffled every round, so the correct answer never sits
@@ -106,6 +106,44 @@ remembered. The speaker button (and YouTube's own audio setting) silences
 everything. The music pauses while the tab is hidden or YouTube pauses the
 game. On iPhone, the ring/silent switch also silences web audio.
 
+## Languages
+
+The game plays in English, Spanish, Brazilian Portuguese and German: the whole
+interface, the category names and all 900 questions with their explanations.
+
+- **Choosing a language.** The game starts in the device's language (YouTube's,
+  inside a Playable) and falls back to English. The button with the language
+  code on the home screen opens a picker, and the choice is remembered.
+  `?lang=de` in the address forces one, which is handy for testing.
+- **Where the text lives.** English is in `index.html`. Each other language is
+  one file, `lang/<code>.js`, about 155 KB, downloaded only when that language
+  is used. If it can't be loaded the game stays in English.
+- **Same questions everywhere.** A translation is tied to its question by
+  position, so a question keeps its id in every language. The daily challenge
+  is the same ten questions for everyone, and a player's history carries over
+  when they switch.
+- **Adapted, not just translated.** Film titles use their local names, numbers
+  use local formats (1.440, 3,14), and questions about English itself say so
+  ("In English, what is a group of crows called?").
+
+To edit or add a language, change the plain-text sources and rebuild:
+
+```bash
+npm run lang                          # lang/src/<code>/ -> lang/<code>.js
+node tools/make-lang.js --check       # check only
+node tools/make-lang.js --english out # the English bank in the same format
+```
+
+`lang/src/<code>/` holds `ui.json` (interface text and category names) and one
+file per category with a question per line:
+`question | correct answer | wrong | wrong | wrong | explanation`. The tool
+refuses a file with the wrong number of lines, a missing field, two identical
+answers, a number that differs from the English answer, or an interface text
+that lost a `{placeholder}`. A new language also needs an entry in `LANGS` and
+`LOCALES` in `index.html`. The translations were machine-written and checked
+by these rules and by play-testing, not by native speakers, so a review by one
+per language is worth doing before a wide release.
+
 ## Tests
 
 ```bash
@@ -115,11 +153,11 @@ npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
 ```
 
-Thirteen suites in `tests/` drive the real page in a headless browser: gameplay,
+Fourteen suites in `tests/` drive the real page in a headless browser: gameplay,
 question rotation, round length, geography balance, picker layout, an
 18-viewport layout sweep, regressions for previously fixed defects, the launcher
 icons and manifest, the background music, Block Blitz, the daily challenge (on a
-fixed clock), the YouTube Playables integration (against a mock `ytgame`,
+fixed clock), the languages, the YouTube Playables integration (against a mock `ytgame`,
 since YouTube is not reachable from a test runner), and performance against the
 published Playables limits under CPU throttling. They run in CI on every push
 and pull request.
@@ -127,10 +165,10 @@ and pull request.
 ## Building for submission
 
 ```bash
-npm run build      # -> dist/brain-blitz-playable.zip (545 KB)
+npm run build      # -> dist/brain-blast-playable.zip (728 KB)
 npm run art        # -> art/ store key art and listing tiles
 npm run icons      # -> icons/ launcher icons and favicons
-npm run questions  # -> dist/brain-blitz-questions.csv, the whole bank for review
+npm run questions  # -> dist/brain-blast-questions.csv, the whole bank for review
 ```
 
 The build checks the bundle against every Playables size cap, then launches the

@@ -1,0 +1,90 @@
+¿Qué significa «WWW»? | World Wide Web | Wide World Web | World Web Wire | Web Wide World | Tim Berners-Lee inventó la World Wide Web, la «red informática mundial», en 1989.
+¿Qué empresa creó el iPhone? | Apple | Samsung | Microsoft | Nokia | Apple lanzó el primer iPhone en 2007.
+¿Qué significa «CPU»? | Central Processing Unit | Computer Power Unit | Control Program Utility | Core Processing Underlay | La CPU, o unidad central de procesamiento, es el chip que ejecuta las instrucciones de la computadora.
+¿Cuántos bits tiene un byte? | 8 | 4 | 16 | 10 | Un byte son ocho bits, suficiente para 256 valores distintos.
+¿Qué empresa desarrolló el sistema operativo Windows? | Microsoft | Apple | IBM | Google | Microsoft lanzó la primera versión de Windows en 1985.
+¿Qué lenguaje se usa para dar estilo a las páginas web? | CSS | HTML | SQL | JSON | CSS se ocupa del diseño y el aspecto; HTML da la estructura.
+¿Qué significa «GPS»? | Global Positioning System | General Position Service | Geographic Point Sensor | Global Path Signal | El GPS, o sistema de posicionamiento global, usa una red de satélites para ubicarte.
+En «HTTPS», ¿qué significa la S? | Secure (seguro) | Standard (estándar) | Server (servidor) | Simple (sencillo) | La S indica que la conexión entre tú y el sitio está cifrada.
+¿Qué empresa desarrolla el sistema operativo Android? | Google | Apple | Samsung | Meta | Google compró Android en 2005 y sigue al frente de su desarrollo.
+¿Cómo se llaman las partes físicas de una computadora? | Hardware | Software | Firmware | Freeware | El hardware es lo que puedes tocar; el software es el código que funciona en él.
+¿Qué significa RAM? | Random Access Memory | Rapid Access Module | Read And Modify | Runtime Allocation Map | La RAM, o memoria de acceso aleatorio, es la memoria rápida y temporal con la que trabaja la computadora.
+¿Con qué símbolo empieza un hashtag? | # | @ | & | * | El símbolo # convierte una palabra en una etiqueta que se puede buscar.
+¿Qué significa USB? | Universal Serial Bus | United System Bus | Universal Storage Box | Unified Signal Buffer | El USB se volvió la forma estándar de conectar dispositivos a finales de los años 90.
+¿Quién fundó Microsoft junto con Paul Allen? | Bill Gates | Steve Jobs | Larry Page | Michael Dell | Gates y Allen fundaron Microsoft en 1975.
+¿Qué significa IA? | Inteligencia artificial | Ingreso automatizado | Interfaz avanzada | Informática aplicada | La IA describe programas que hacen tareas que requieren un razonamiento parecido al humano.
+¿Qué empresa fabrica la consola PlayStation? | Sony | Nintendo | Microsoft | Sega | Sony lanzó la primera PlayStation en 1994.
+¿Qué significa la «e» de e-mail? | Electrónico | Externo | Exprés | Encriptado | E-mail es la forma corta de «electronic mail», correo electrónico.
+En Windows, ¿qué atajo copia el texto seleccionado? | Ctrl + C | Ctrl + V | Ctrl + X | Ctrl + P | Ctrl + C copia, Ctrl + X corta y Ctrl + V pega.
+¿Cómo se llama el asistente de voz de Apple? | Siri | Alexa | Cortana | Bixby | Siri llegó con el iPhone 4S en 2011.
+¿Qué significa HTML? | HyperText Markup Language | High Transfer Machine Language | Hyperlink Text Mode Layout | Home Tool Markup Logic | HTML, o lenguaje de marcado de hipertexto, da la estructura de toda página web.
+¿Qué empresa creó TikTok? | ByteDance | Meta | Tencent | Snap | La empresa china ByteDance lanzó TikTok a nivel internacional en 2017.
+¿Qué aparato reparte la conexión a internet por tu casa? | El router | El monitor | El escáner | El cable del módem | El router dirige el tráfico entre tus dispositivos e internet.
+¿Qué significa PDF? | Portable Document Format | Printed Document File | Public Data Form | Page Display Framework | Un PDF, o formato de documento portátil, se ve igual en cualquier dispositivo; por eso se usa en formularios.
+¿Cómo se llama un programa dañino diseñado para perjudicar tu dispositivo? | Virus | Cookie | Cortafuegos | Controlador | Los virus son un tipo de malware, programas escritos para hacer daño.
+¿Qué le permite hacer el wifi a un dispositivo? | Conectarse a una red sin cables | Cargarse sin cable | Guardar archivos en línea | Funcionar más rápido | El wifi transmite los datos de la red por ondas de radio.
+¿Qué lenguaje de programación comparte nombre con un tipo de café? | Java | Python | Ruby | Swift | Java lleva el nombre de un café; por eso su logo es una taza humeante.
+¿Qué te da una URL? | La dirección de una página web | La velocidad de una conexión | El tamaño de un archivo | El nombre de un navegador | URL significa localizador uniforme de recursos: una dirección web.
+¿Qué fontanero de videojuegos fue creado por Nintendo? | Mario | Sonic | Crash | Rayman | Mario apareció por primera vez en Donkey Kong, en 1981.
+¿Qué significa LED? | Light Emitting Diode | Low Energy Display | Linear Electronic Device | Luminous Electric Dot | Los ledes, o diodos emisores de luz, se iluminan cuando pasa electricidad por ellos.
+¿Cuántos bytes tiene un kilobyte, tal como suelen contar las computadoras? | 1.024 | 1.000 | 512 | 2.048 | Las computadoras cuentan en potencias de dos, y un kilobyte es 2 elevado a 10.
+¿Qué suele controlar la temperatura de la CPU dentro de una computadora? | Un ventilador o disipador | La fuente de poder | El disco duro | El monitor | Sin refrigeración, los chips bajan su rendimiento o se apagan.
+¿Qué significa SSD? | Solid state drive | Single system disk | Secure storage device | Standard serial drive | La unidad de estado sólido no tiene partes móviles, a diferencia del disco duro.
+¿Qué significa HDD? | Hard disk drive | High density disk | Hybrid data drive | Hosted data domain | El disco duro guarda los datos de forma magnética en platos que giran.
+¿Qué significa GPU? | Graphics processing unit | General power unit | Global parsing unit | Grid protocol unit | La unidad de procesamiento gráfico maneja imágenes y, cada vez más, cálculo en paralelo.
+En informática, ¿qué significa SO? | Sistema operativo | Servicio online | Salida original | Soporte oficial | Windows, macOS, Linux y Android son sistemas operativos.
+¿Qué significa ISP? | Internet service provider | Internal system protocol | Integrated search platform | Internet security program | Es el proveedor de servicios de internet: la empresa que te conecta a la red.
+¿Qué significa VPN? | Virtual private network | Verified public node | Variable packet network | Virtual protocol number | Una red privada virtual envía tu tráfico por un túnel cifrado.
+En «dirección IP», ¿qué significa IP? | Internet protocol | Internal packet | Information point | Indexed path | Cada dispositivo de una red tiene una; significa protocolo de internet.
+¿Qué hace el DNS en internet? | Convierte nombres en direcciones | Cifra el tráfico | Guarda contraseñas | Comprime imágenes | Se suele describir como la guía telefónica de internet.
+¿Qué significa HTTP? | Hypertext transfer protocol | High tech transit process | Hosted text transfer program | Hyperlink text transport path | El protocolo de transferencia de hipertexto es la forma en que los navegadores piden páginas a los servidores.
+¿Cómo se llama el pequeño archivo de texto que un sitio web guarda en tu navegador? | Cookie | Caché | Migaja | Archivo token | Se usan para inicios de sesión y preferencias, entre otras cosas.
+¿Qué significa borrar la caché del navegador? | Eliminar las copias guardadas de archivos web | Eliminar tus contraseñas | Cerrar todas las pestañas | Reiniciar la conexión | La caché acelera las visitas repetidas al guardar archivos en tu equipo.
+¿Cómo se llama el malware diseñado para exigir un pago? | Ransomware | Adware | Spyware | Freeware | Normalmente cifra los archivos hasta que se paga un rescate.
+¿Cómo se llama el intento de engañarte por correo para que entregues tus contraseñas? | Phishing | Spoofing | Sniffing | Cracking | Los mensajes imitan un servicio en el que confías.
+¿Qué es la autenticación en dos pasos? | Pedir una segunda prueba además de la contraseña | Dos contraseñas | Una contraseña más larga | Un cambio de contraseña | Normalmente es un código del teléfono o de una aplicación.
+¿Qué hace el cifrado con los datos? | Los codifica para que solo la clave correcta pueda leerlos | Los comprime | Los borra | Los copia | El cifrado moderno es prácticamente imposible de romper adivinando.
+¿Qué es el software de código abierto? | Software cuyo código puede ver cualquiera | Software que siempre es gratis | Software sin licencia | Software sin actualizaciones | El código abierto trata del acceso al código fuente, no solo del precio.
+¿Qué sistema operativo usa el núcleo Linux y está en la mayoría de los teléfonos? | Android | iOS | Windows Phone | Symbian | Android funciona en la mayoría de los teléfonos inteligentes del mundo.
+¿Qué empresa hace el sistema operativo macOS? | Apple | Microsoft | Google | IBM | Funciona en las computadoras Mac.
+¿Qué lenguaje se usa sobre todo para hacer interactivas las páginas web? | JavaScript | HTML | CSS | SQL | HTML estructura, CSS da estilo y JavaScript da comportamiento.
+¿Para qué se usa SQL? | Para trabajar con bases de datos | Para dar estilo a páginas web | Para editar imágenes | Para comprimir archivos | Significa lenguaje de consulta estructurada.
+¿Qué es un bug en un programa? | Un error en el código | Un tipo de virus | Una falla del hardware | Una clave de seguridad | El término viene de los inicios de la informática; «bug» significa bicho.
+¿Cómo se llama el proceso de buscar y corregir errores en el código? | Depuración | Compilación | Despliegue | Refactorización | En inglés se dice «debugging», quitar los bichos.
+¿Qué hace un compilador? | Convierte el código fuente en código máquina | Busca errores | Guarda archivos | Diseña interfaces | Los lenguajes interpretados se ejecutan con un intérprete.
+¿En qué se basa el sistema de numeración binario? | En dos dígitos | En diez dígitos | En ocho dígitos | En dieciséis dígitos | En una computadora, todo se reduce a ceros y unos.
+¿Cuánto es el número binario 1010 en decimal? | 10 | 8 | 12 | 5 | Ocho más dos.
+¿Cuántos bytes tiene un megabyte, aproximadamente? | Un millón | Mil | Mil millones | Cien mil | Exactamente 1.048.576 si se cuenta en potencias de dos.
+¿Cómo se llama el primer programa que se ejecuta al encender una máquina? | El gestor de arranque | El controlador | El parche del núcleo | El instalador | En inglés es «bootloader», de la expresión «levantarse tirando de las propias botas».
+¿Qué pierde la RAM cuando se corta la energía? | Todo lo que tenía guardado | Nada | Solo los archivos abiertos | Solo los ajustes del sistema | Es una memoria volátil, a diferencia de un disco.
+¿Qué componente guarda los datos a largo plazo en un teléfono? | La memoria flash | La RAM | El procesador | El módem | La memoria flash conserva los datos sin energía.
+¿Qué mejora principalmente el USB-C frente a los conectores USB anteriores? | Es reversible y más rápido | Es más barato | Es más grande | Es inalámbrico | También puede transmitir video y bastante potencia.
+¿Por qué medio conecta dispositivos el Bluetooth? | Radio de corto alcance | Luz infrarroja | Ondas sonoras | Cables eléctricos | Lleva el nombre de un rey danés que unió tribus.
+¿Qué permite el NFC en un teléfono? | Pagar o compartir al acercarlo | Descargas más rápidas | Más duración de batería | Mejores fotos | Funciona a pocos centímetros de distancia.
+¿Qué significa «la nube» en la computación en la nube? | Servidores de otra empresa a los que se accede por internet | Datos del clima | Redes inalámbricas | Copias de seguridad locales | Tus archivos viven en el centro de datos de otra empresa.
+¿Qué es un servidor? | Una computadora que da servicios a otras | Un tipo de cable | Un navegador | Una pantalla | Los sitios web se alojan en servidores.
+¿Qué es la latencia en redes? | El retraso antes de que lleguen los datos | La cantidad de datos enviados | La fuerza de la señal | El número de dispositivos | Se mide en milisegundos; cuanto menos, mejor.
+¿Qué es el ancho de banda? | Cuántos datos se pueden transmitir a la vez | Hasta dónde llega una señal | Cuánto mide un cable | Qué tan rápido va una CPU | Se confunde a menudo con la velocidad, aunque están relacionados.
+¿Qué hace un cortafuegos? | Filtra el tráfico de red | Enfría la computadora | Hace copias de seguridad | Impide el acceso físico | Permite o bloquea conexiones según reglas.
+¿Cómo se llamaba el primer navegador web gráfico de uso masivo? | Mosaic | Netscape Navigator | Internet Explorer | Opera | Mosaic popularizó la web en 1993 y dio origen a Netscape.
+¿A quién se le atribuye la invención de la World Wide Web? | Tim Berners-Lee | Vint Cerf | Alan Turing | Bill Gates | La propuso en 1989, cuando trabajaba en el CERN.
+¿A quién se le suele llamar el padre de la informática? | Alan Turing | Charles Babbage | John von Neumann | Claude Shannon | Su trabajo sobre la computabilidad es la base de la disciplina.
+¿A quién se considera la primera persona programadora de la historia? | Ada Lovelace | Grace Hopper | Margaret Hamilton | Katherine Johnson | Escribió un algoritmo para la máquina analítica de Babbage.
+¿Qué máquina se considera el primer diseño de una computadora mecánica de uso general? | La máquina analítica | El ábaco | La Enigma | La máquina de Turing | Babbage la diseñó en la década de 1830, pero nunca la terminó.
+¿Para qué se usaba la máquina Enigma? | Para cifrar mensajes en la guerra | Para hacer cálculos | Para retransmitir telégrafos | Para emitir radio | Descifrarla acortó la Segunda Guerra Mundial.
+¿Qué son los datos de entrenamiento de una IA? | Ejemplos de los que aprende un modelo | El código del modelo | El hardware utilizado | El resultado que produce | La calidad de los datos determina la calidad del modelo.
+¿Qué hace el rastreador de un buscador? | Visita e indexa páginas web | Bloquea anuncios | Cifra el tráfico | Aloja sitios web | Los rastreadores siguen enlaces para descubrir páginas.
+¿Qué significa literalmente «emoji» en japonés? | Carácter de imagen | Cara feliz | Símbolo pequeño | Marca de mensaje | «E» significa imagen y «moji», carácter.
+¿Cómo se llama la pequeña imagen que representa una aplicación? | Ícono | Avatar | Widget | Miniatura | Un avatar, en cambio, representa a una persona.
+¿De qué palabras viene «píxel»? | Picture element | Pixel exchange layer | Point index | Primary element | Viene del inglés y significa elemento de imagen; las pantallas son cuadrículas de píxeles.
+¿Qué significa que una pantalla tenga mayor resolución? | Más píxeles | Una pantalla más grande | Colores más brillantes | Una actualización más rápida | La resolución es la cantidad de píxeles, no el tamaño físico.
+En los videojuegos, ¿qué mide «fps»? | Frames per second | Files per session | Frequency per signal | Fast pixel shading | Son los cuadros por segundo: cuantos más, más fluida se ve la imagen.
+¿Cómo se llama un programa que funciona en segundo plano en un servidor? | Daemon | Widget | Macro | Plugin | El nombre viene de la mitología griega, no del demonio.
+¿Para qué sirve el control de versiones? | Para registrar los cambios de los archivos en el tiempo | Para buscar virus | Para comprimir datos | Para generar gráficos | Git es el sistema más usado.
+¿Qué guarda un código QR? | Datos, como una dirección web | Solo números | Solo imágenes | Carga eléctrica | El patrón codifica datos que una cámara puede leer.
+¿Para qué sirve un captcha? | Para distinguir a los humanos de los bots | Para iniciar sesión más rápido | Para guardar contraseñas | Para cifrar formularios | Es una prueba para diferenciar computadoras de personas.
+¿Cómo se llama el software que hace de traductor entre un dispositivo y el sistema operativo? | Controlador | Navegador | Compilador | Cortafuegos | Las impresoras y las tarjetas gráficas necesitan controladores, o drivers.
+¿Qué significa que un dispositivo tenga jailbreak o esté rooteado? | Que se le quitaron las restricciones de software | Que está roto | Que está cifrado | Que se restauró de fábrica | Da un acceso más profundo del que quería el fabricante.
+¿Cómo se llama comúnmente el correo masivo no deseado? | Spam | Phish | Junkware | Correo inundación | El nombre viene de un sketch de los Monty Python.
+¿Qué identifica la parte de una URL que va antes de la primera barra? | El dominio | El archivo | La versión del protocolo | El usuario | Por ejemplo, example.com en https://example.com/page.
+¿Cuál es el dominio de nivel superior en la dirección example.com? | .com | example | .example | com.example | Otros son .org, .net y códigos de país como .mx o .es.
