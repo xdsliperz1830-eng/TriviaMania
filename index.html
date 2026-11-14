@@ -317,8 +317,7 @@ button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer
   20%{opacity:1;transform:translate(-50%,-14px) scale(1.12)}
   100%{opacity:0;transform:translate(-50%,-76px) scale(.95)}}
 
-.particle{position:fixed;z-index:39;width:9px;height:9px;border-radius:2px;pointer-events:none;
-  animation:burst .9s ease-out forwards}
+.particle{position:fixed;left:0;top:0;z-index:39;width:10px;height:10px;border-radius:2px;pointer-events:none;opacity:0}
 @keyframes burst{0%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}
   100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.25)}}
 
@@ -930,6 +929,60 @@ body{
 /* Tall portrait phones have room to spare: bigger answer buttons. */
 @media (orientation:portrait) and (min-height:780px){
   .answers{max-height:388px;grid-auto-rows:minmax(64px,1fr)}
+}
+
+/* ============================================================
+   Animation costs (from tools/measure-fx.js)
+   ============================================================ */
+/* Progress slides by transform inside its track; see UI.setProgress. */
+.progress .fill{width:100%;transform:translateX(-100%);transition:transform .45s cubic-bezier(.2,.8,.25,1)}
+/* The background is its own layer, and holds still during a round. */
+#bg{transform:translateZ(0)}
+body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
+/* Block Blitz: pulses and warnings animate opacity on an overlay, not filter or box-shadow. */
+.bk-block.pick{animation:none}
+.bk-block::after{content:"";position:absolute;inset:-2px;border-radius:inherit;background:#fff;opacity:0;pointer-events:none}
+.bk-block.pick::after{animation:bkPickGlow .7s ease-in-out infinite}
+@keyframes bkPickGlow{0%,100%{opacity:0}50%{opacity:.3}}
+.bk-board::after{top:0;bottom:0;height:auto;inset:0;border-radius:15px;background:none;z-index:3;pointer-events:none;
+  box-shadow:inset 0 0 0 4px var(--red),inset 0 0 22px rgba(246,54,91,.55);opacity:0}
+.bk-board.danger{animation:none}
+.bk-board.danger::after{animation:bkDangerGlow 1s ease-in-out infinite}
+/* Picking a group dims the rest with one overlay; a filter on every other block
+   repainted dozens of elements at once. The picked group sits above it. */
+.bk-board.choosing .bk-block:not(.pick){filter:none}
+.bk-dim{position:absolute;inset:0;z-index:2;background:rgba(4,3,53,.5);opacity:0;pointer-events:none;transition:opacity .2s ease}
+.bk-board.choosing .bk-dim{opacity:1}
+.bk-block.pick{z-index:3}
+@keyframes bkDangerGlow{0%,100%{opacity:.15}50%{opacity:1}}
+.bk-rise-lab.urgent{animation:bkWarnFade .8s ease-in-out infinite}
+@keyframes bkWarnFade{50%{opacity:.55}}
+
+/* ============================================================
+   Game feel (transform and opacity only)
+   ============================================================ */
+.fx-banner{position:fixed;left:50%;top:38%;z-index:45;pointer-events:none;opacity:0;
+  display:flex;align-items:center;gap:.3em;padding:.25em .7em .25em .45em;border-radius:999px;
+  font-family:"Lilita One","Nunito",sans-serif;font-size:2rem;letter-spacing:.5px;white-space:nowrap;
+  color:#fff;background:linear-gradient(180deg,#FF6B85,var(--red));border:3px solid var(--ink);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.4),inset 0 -5px 0 rgba(120,0,30,.3),0 5px 0 var(--ink);
+  text-shadow:0 2px 0 rgba(4,3,53,.5);transform:translate(-50%,-50%)}
+.fx-banner .ico{width:1.3em;height:1.3em;vertical-align:0}
+.fx-flash{position:fixed;inset:0;z-index:44;pointer-events:none;opacity:0}
+/* Edge glows are radial gradients, not blurred box-shadows: a full-screen blur
+   was costly to rasterise, a gradient is cheap. */
+.fx-flash[data-kind="bad"]{background:radial-gradient(ellipse 75% 70% at 50% 50%,rgba(246,54,91,0) 60%,rgba(246,54,91,.7) 100%)}
+.fx-flash[data-kind="good"]{background:radial-gradient(ellipse 75% 70% at 50% 50%,rgba(254,196,28,0) 60%,rgba(254,196,28,.65) 100%)}
+/* the last three seconds: a red glow at the screen edges */
+#quiz::after{content:"";position:fixed;inset:0;z-index:43;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 80% 75% at 50% 50%,rgba(246,54,91,0) 62%,rgba(246,54,91,.5) 100%);transition:opacity .25s ease}
+#quiz.urgent::after{opacity:1;animation:urgentGlow .5s ease-in-out infinite alternate}
+@keyframes urgentGlow{from{opacity:.45}to{opacity:1}}
+.float-pts{display:flex;flex-direction:column;align-items:center;line-height:1}
+.float-pts .fast-tag{margin-top:2px;font-size:.62em;letter-spacing:1px;color:#fff;background:var(--red);
+  border:2px solid var(--ink);border-radius:999px;padding:1px 7px 0;text-shadow:none}
+@media (prefers-reduced-motion:reduce){
+  .fx-banner,.fx-flash,#quiz::after{display:none}
 }
 </style>
 </head>
@@ -3776,9 +3829,14 @@ function recordDaily(key, score, correct) {
    ================================================================ */
 const LETTERS = ["A", "B", "C", "D"];
 
+/** The player asked their device for less motion: the game-feel effects stand down. */
+const reducedMotion = () => !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
 const UI = {
   showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+    // The drifting background is decoration: hold it still while a round is on.
+    document.body.classList.toggle("playing", id === "quiz" || id === "blocks");
   },
 
   buildCategoryGrid() {
@@ -3979,24 +4037,112 @@ const UI = {
     $("streakVal").textContent = state.streak;
     $("streakBox").classList.toggle("hot", state.streak >= 3);
     const answered = state.index + (state.locked ? 1 : 0);
-    $("progFill").style.width = (answered / state.round.length * 100) + "%";
+    UI.setProgress(answered / state.round.length);
   },
 
-  /** Animate the score counter from its displayed value to the real one. */
+  /** Progress slides with a transform (compositor only); width would relayout every frame of the transition. */
+  setProgress(frac) {
+    const fill = $("progFill");
+    fill.style.transform = "translateX(" + ((frac - 1) * 100) + "%)";
+    fill.dataset.progress = (frac * 100) + "%";
+  },
+
+  /** Show the new score at once and bump it. Counting it up wrote text (a layout) every frame. */
   animateScore() {
-    cancelAnimationFrame(state.scoreRafId);
-    const from = state.displayedScore, to = state.score, span = 520;
-    if (from === to) { $("scoreVal").textContent = to; return; }
-    const t0 = performance.now();
-    const step = (now) => {
-      const p = Math.min(1, (now - t0) / span);
-      const eased = 1 - Math.pow(1 - p, 3);
-      state.displayedScore = Math.round(from + (to - from) * eased);
-      $("scoreVal").textContent = state.displayedScore;
-      if (p < 1) state.scoreRafId = requestAnimationFrame(step);
-      else state.displayedScore = to;
-    };
-    state.scoreRafId = requestAnimationFrame(step);
+    const el = $("scoreVal");
+    el.textContent = state.score;
+    state.displayedScore = state.score;
+    UI.bump(el, 1.35);
+  },
+
+  /* ---- game feel -------------------------------------------------------
+     Every effect here moves only transform and opacity, reuses one element
+     where it can, floats over the screen instead of resizing anything, and
+     cancels its previous run before starting again. */
+
+  /** Slide-and-fade an element in. */
+  enter(el, opts) {
+    if (!el || !el.animate) return;
+    if (reducedMotion()) return;
+    const o = opts || {};
+    if (el._enter) el._enter.cancel();
+    el._enter = el.animate([
+      { transform: "translateY(" + (o.y == null ? 14 : o.y) + "px) scale(" + (o.scale || 0.97) + ")", opacity: 0 },
+      { transform: "none", opacity: 1 }
+    ], { duration: o.duration || 280, delay: o.delay || 0, easing: "cubic-bezier(.2,.9,.3,1.15)", fill: "backwards" });
+  },
+
+  /** A big banner across the middle ("On fire!"), one reused element. */
+  banner(text, icon) {
+    if (reducedMotion()) return;
+    let b = UI._banner;
+    if (!b) {
+      b = UI._banner = document.createElement("div");
+      b.className = "fx-banner";
+      b.setAttribute("aria-hidden", "true");
+      document.body.appendChild(b);
+    }
+    b.innerHTML = (icon ? '<img class="ico" src="' + ICON_DIR + icon + '.png" alt="">' : "") + "<span></span>";
+    b.lastChild.textContent = text;
+    if (!b.animate) return;
+    if (b._anim) b._anim.cancel();
+    b._anim = b.animate([
+      { transform: "translate(-50%,-50%) scale(.4) rotate(-8deg)", opacity: 0 },
+      { transform: "translate(-50%,-50%) scale(1.12) rotate(-4deg)", opacity: 1, offset: 0.22 },
+      { transform: "translate(-50%,-50%) scale(1) rotate(-4deg)", opacity: 1, offset: 0.34 },
+      { transform: "translate(-50%,-50%) scale(1) rotate(-4deg)", opacity: 1, offset: 0.78 },
+      { transform: "translate(-50%,-62%) scale(.96) rotate(-4deg)", opacity: 0 }
+    ], { duration: 1100, easing: "ease-out", fill: "both" });
+  },
+
+  /** A coloured flash around the screen edges ("bad" red, "good" gold), one reused element. */
+  flash(kind) {
+    if (reducedMotion()) return;
+    let f = UI._flash;
+    if (!f) {
+      f = UI._flash = document.createElement("div");
+      f.className = "fx-flash";
+      f.setAttribute("aria-hidden", "true");
+      document.body.appendChild(f);
+    }
+    f.dataset.kind = kind;
+    if (!f.animate) return;
+    if (f._anim) f._anim.cancel();
+    f._anim = f.animate([{ opacity: 0 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }],
+                        { duration: kind === "bad" ? 480 : 380, easing: "ease-out" });
+  },
+
+  /** A short shake on a transform. */
+  shake(el, px) {
+    if (!el || !el.animate) return;
+    if (reducedMotion()) return;
+    const d = px || 6;
+    el.animate([
+      { transform: "translateX(0)" }, { transform: "translateX(" + -d + "px)" }, { transform: "translateX(" + d + "px)" },
+      { transform: "translateX(" + (-d / 2) + "px)" }, { transform: "translateX(0)" }
+    ], { duration: 260, easing: "ease-out" });
+  },
+
+  /** Vibration on phones that support it (Android). Silent when the game is muted. */
+  haptic(pattern) {
+    if (!navigator.vibrate || !Sound.isAudible()) return;
+    try { navigator.vibrate(pattern); } catch (e) { /* not allowed here; never mind */ }
+  },
+
+  /** Create the reused effect elements up front, so the first combo doesn't pay to build them. */
+  warmFx() {
+    if (!UI._banner) { UI.banner(" "); if (UI._banner._anim) UI._banner._anim.cancel(); }
+    if (!UI._flash) { UI.flash("good"); if (UI._flash._anim) UI._flash._anim.cancel(); }
+    if (!UI._particles) { UI.burst({ left: -50, top: -50, width: 0, height: 0 }); UI._particles.forEach((p) => p._anim && p._anim.cancel()); }
+  },
+
+  /** A quick scale pop on a transform; cancels any bump still running on the element. */
+  bump(el, scale) {
+    if (!el.animate || reducedMotion()) return;
+    if (el._bump) el._bump.cancel();
+    el._bump = el.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(" + (scale || 1.2) + ")" }, { transform: "scale(1)" }],
+      { duration: 320, easing: "cubic-bezier(.2,1.4,.4,1)" });
   },
 
   renderQuestion() {
@@ -4020,6 +4166,7 @@ const UI = {
     });
 
     $("qArea").scrollTop = 0;
+    UI.enter(document.querySelector("#quiz .q-card"), { y: 18 });
     $("feedback").className = "feedback";
     $("qHint").classList.remove("hide");
     $("nextBtn").classList.remove("show");
@@ -4027,14 +4174,26 @@ const UI = {
     UI.setTimerDisplay(TIME_LIMIT);
   },
 
+  /**
+   * Runs every frame while a question is open, so it only writes what changed:
+   * the ring each frame (a paint, no layout), the number once a second, and the
+   * colour classes at the 5 s and 3 s marks. Writing the text every frame
+   * forced a layout per frame.
+   */
   setTimerDisplay(secs) {
     const clamped = Math.max(0, Math.min(TIME_LIMIT, secs));
     const ratio = clamped / TIME_LIMIT;
     $("timerBar").style.strokeDashoffset = (RING_LEN * (1 - ratio)).toFixed(2);
-    $("timerNum").textContent = Math.ceil(clamped);
-    const el = $("timerEl");
-    el.classList.toggle("warn", clamped <= 5 && clamped > 3);
-    el.classList.toggle("danger", clamped <= 3);
+    const whole = Math.ceil(clamped);
+    if (whole !== UI._timerWhole) { UI._timerWhole = whole; $("timerNum").textContent = whole; }
+    const zone = clamped <= 3 ? "danger" : clamped <= 5 ? "warn" : "";
+    if (zone !== UI._timerZone) {
+      UI._timerZone = zone;
+      const el = $("timerEl");
+      el.classList.toggle("warn", zone === "warn");
+      el.classList.toggle("danger", zone === "danger");
+      $("quiz").classList.toggle("urgent", zone === "danger" && !state.locked);
+    }
   },
 
   revealAnswers(chosenIdx, correctIdx) {
@@ -4089,35 +4248,57 @@ const UI = {
     }
   },
 
-  floatPoints(points, el) {
-    const rect = el.getBoundingClientRect();
+  /** `at` is an element or an already-measured DOMRect. */
+  floatPoints(points, at, fast) {
+    const rect = at.getBoundingClientRect ? at.getBoundingClientRect() : at;
     const node = document.createElement("div");
-    node.className = "float-pts";
+    node.className = "float-pts" + (fast ? " fast" : "");
     node.textContent = "+" + points;
+    if (fast) {
+      const tag = document.createElement("span");
+      tag.className = "fast-tag";
+      tag.textContent = "FAST!";
+      node.appendChild(tag);
+    }
     node.style.left = (rect.left + rect.width / 2) + "px";
     node.style.top = (rect.top + rect.height / 2) + "px";
     document.body.appendChild(node);
     setTimeout(() => node.remove(), 1000);
   },
 
-  burst(el) {
-    const rect = el.getBoundingClientRect();
-    const colors = ["#8B5CF6", "#22D3EE", "#FACC15", "#22C55E", "#F8FAFC"];
-    for (let i = 0; i < 16; i++) {
-      const p = document.createElement("div");
-      p.className = "particle";
-      const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.4;
-      const dist = 60 + Math.random() * 90;
-      p.style.left = (rect.left + rect.width / 2) + "px";
-      p.style.top = (rect.top + rect.height / 2) + "px";
-      p.style.background = colors[i % colors.length];
-      p.style.setProperty("--dx", Math.cos(angle) * dist + "px");
-      p.style.setProperty("--dy", Math.sin(angle) * dist + "px");
-      p.style.setProperty("--rot", Math.round(Math.random() * 540 - 270) + "deg");
-      p.style.animationDelay = (i * 8) + "ms";
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 1100);
+  /**
+   * Confetti from the middle of an element. Twelve particles are made once and
+   * reused, moved only by transform, and any burst still running is cancelled
+   * before the next, so a quick run of answers never piles up layers.
+   */
+  burst(at, count) {
+    if (reducedMotion()) return;
+    const rect = at.getBoundingClientRect ? at.getBoundingClientRect() : at;
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    if (!UI._particles) {
+      UI._particles = [];
+      const colors = ["#FEC41C", "#F6365B", "#3285FE", "#47C64D", "#FFFFFF", "#E25BD8"];
+      for (let i = 0; i < 12; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.background = colors[i % colors.length];
+        document.body.appendChild(p);
+        UI._particles.push(p);
+      }
     }
+    const n = Math.min(count || 12, UI._particles.length);
+    UI._particles.forEach((p, i) => {
+      if (p._anim) p._anim.cancel();
+      if (i >= n || !p.animate) return;
+      const angle = (Math.PI * 2 * i) / n + Math.random() * 0.5;
+      const dist = 60 + Math.random() * 80;
+      const dx = Math.cos(angle) * dist, dy = Math.sin(angle) * dist - 20;
+      const rot = Math.round(Math.random() * 540 - 270);
+      p._anim = p.animate([
+        { transform: "translate(" + cx + "px," + cy + "px) rotate(0deg) scale(1)", opacity: 1 },
+        { transform: "translate(" + (cx + dx) + "px," + (cy + dy + 40) + "px) rotate(" + rot + "deg) scale(.3)", opacity: 0 }
+      ], { duration: 850, delay: i * 10, easing: "cubic-bezier(.15,.7,.3,1)", fill: "backwards" });
+    });
   },
 
   renderResults(newBest) {
@@ -4161,8 +4342,25 @@ const UI = {
       list.appendChild(row);
     });
 
+    // The reveal: icon pops, the score lands, then the stats and the recap cascade in.
+    const icoEl = $("resEmoji");
+    if (icoEl.animate) {
+      icoEl.animate([{ transform: "scale(.2) rotate(-25deg)", opacity: 0 }, { transform: "scale(1.2) rotate(6deg)", opacity: 1, offset: .6 },
+                     { transform: "none", opacity: 1 }], { duration: 520, easing: "ease-out", fill: "backwards" });
+    }
+    UI.enter($("resTitle"), { delay: 120 });
+    UI.enter($("resMsg"), { delay: 170 });
+    const scoreEl = $("resScore");
+    if (scoreEl.animate) {
+      scoreEl.animate([{ transform: "scale(1.8)", opacity: 0 }, { transform: "scale(.94)", opacity: 1, offset: .7 }, { transform: "none", opacity: 1 }],
+                      { duration: 420, delay: 240, easing: "cubic-bezier(.3,1.3,.5,1)", fill: "backwards" });
+    }
+    document.querySelectorAll("#results .stat").forEach((el, i) => UI.enter(el, { delay: 420 + i * 70 }));
+    // Only the first ten recap rows animate, so a 30-question round doesn't start 30 animations at once.
+    document.querySelectorAll("#reviewList .rev-row").forEach((el, i) => { if (i < 10) UI.enter(el, { delay: 560 + i * 45, y: 8 }); });
+
     if (newBest || acc >= 80) {
-      setTimeout(() => UI.burst($("resScore")), 340);
+      setTimeout(() => { UI.burst(scoreEl); UI.haptic([20, 40, 20]); }, 560);
     }
   }
 };
@@ -4206,7 +4404,7 @@ const Game = {
     state.locked = false;
 
     $("scoreVal").textContent = "0";
-    $("progFill").style.width = "0%";
+    UI.setProgress(0);
     UI.showScreen("quiz");
     Game.showCurrent();
   },
@@ -4257,6 +4455,7 @@ const Game = {
     if (state.locked) return;               // one answer per question, ever
     state.locked = true;
     Game.stopTimer();
+    $("quiz").classList.remove("urgent");
     Sound.init();
 
     const q = state.round[state.index];
@@ -4275,10 +4474,19 @@ const Game = {
       state.score += points;
 
       Sound.correct(state.streak);
-      UI.revealAnswers(idx, q.correctIndex);
+      // Read the button's position once, before any class changes: reading it
+      // after them forced a fresh layout for each effect.
       const btn = document.querySelector('#answers .ans[data-idx="' + idx + '"]');
-      if (btn) { UI.floatPoints(points, btn); UI.burst(btn); }
+      const rect = btn ? btn.getBoundingClientRect() : null;
+      UI.revealAnswers(idx, q.correctIndex);
+      const fast = TIME_LIMIT - timeLeft <= 3;
+      if (rect) { UI.floatPoints(points, rect, fast); UI.burst(rect); }
       UI.animateScore();
+      UI.bump($("streakBox"), 1.12);
+      UI.haptic(12);
+      const combo = { 3: "On fire!", 5: "Blazing!", 7: "Unstoppable!", 10: "Legendary!" }[state.streak] ||
+                    (state.streak > 10 && state.streak % 5 === 0 ? state.streak + " in a row!" : "");
+      if (combo) { UI.banner(combo, "fire"); UI.flash("good"); UI.haptic([15, 40, 15]); }
 
       const parts = ["100 base"];
       if (speedBonus > 0) parts.push(speedBonus + " speed");
@@ -4288,6 +4496,8 @@ const Game = {
       state.streak = 0;
       Sound.wrong();
       UI.revealAnswers(idx, q.correctIndex);
+      UI.flash("bad");
+      UI.haptic([30, 50, 30]);
       const correctText = q.options[q.correctIndex].text;
       UI.showFeedback("wrong", 0, "The answer is " + correctText + ". " + q.explanation);
     }
@@ -4306,8 +4516,12 @@ const Game = {
     state.streak = 0;
     state.timeLeft = 0;
     UI.setTimerDisplay(0);
+    $("quiz").classList.remove("urgent");
     Sound.timeout();
     UI.revealAnswers(-1, q.correctIndex);
+    UI.flash("bad");
+    UI.shake(document.querySelector("#quiz .q-card"), 5);
+    UI.haptic(60);
     UI.showFeedback("timeout", 0, "The answer is " + q.options[q.correctIndex].text + ". " + q.explanation);
     state.results.push({ question: q.text, correct: false });
     UI.renderHud();
@@ -4326,7 +4540,7 @@ const Game = {
     Game.stopTimer();
     state.roundActive = false;
     state.locked = true;
-    $("progFill").style.width = "100%";
+    UI.setProgress(1);
 
     let newBest;
     if (state.daily) {
@@ -4339,7 +4553,8 @@ const Game = {
     }
 
     Music.setMode("home");
-    UI.refreshHome();
+    // The home grid is rebuilt when the player goes back to it (quitToHome),
+    // not here: rebuilding it while the results screen opens cost a long frame.
     UI.renderResults(newBest);
     UI.showScreen("results");
     Sound.finish(state.correctCount >= state.round.length / 2);
@@ -4362,6 +4577,7 @@ const Game = {
 
   quitToHome() {
     Game.stopTimer();
+    $("quiz").classList.remove("urgent");
     cancelAnimationFrame(state.scoreRafId);
     state.roundActive = false;
     state.locked = true;
@@ -4694,9 +4910,14 @@ const Blocks = (() => {
     busy = true;
     const blocks = picked.blocks;
     picked = null;
-    const mid = blocks[Math.floor(blocks.length / 2)].el;
-    UI.floatPoints(points, mid);
-    UI.burst(mid);
+    const midRect = blocks[Math.floor(blocks.length / 2)].el.getBoundingClientRect();
+    UI.floatPoints(points, midRect);
+    UI.burst(midRect, Math.min(12, 4 + blocks.length));
+    UI.haptic(blocks.length >= 8 ? [20, 30, 25] : 15);
+    if (blocks.length >= 8) {
+      UI.banner(blocks.length >= 14 ? "Mega blast!" : "Huge blast!", "bomb");
+      UI.shake($("bkWrap"), 7);
+    }
     blocks.forEach((b) => {
       b.el.classList.remove("pick");
       b.el.classList.add("pop");
@@ -4759,6 +4980,11 @@ const Blocks = (() => {
     busy = true;
     if (!addRow()) { gameOver(); return; }
     Sound.tick();
+    UI.haptic(25);
+    if (board().animate) {
+      board().animate([{ transform: "translateY(0)" }, { transform: "translateY(-4px)" }, { transform: "translateY(0)" }],
+                      { duration: 260, easing: "ease-out" });
+    }
     renderHud();
     later(() => { busy = false; renderHud(); }, 320);
   }
@@ -4785,6 +5011,8 @@ const Blocks = (() => {
     $("bkOverStreak").textContent = bestStreak;
     $("bkOverBest").classList.toggle("show", newBest);
     $("bkOver").classList.add("show");
+    UI.enter(document.querySelector(".bk-over-card"), { y: 30, scale: 0.9, duration: 380 });
+    UI.haptic([40, 60, 40]);
     Sound.finish(score > 0);
     renderHud();
   }
@@ -4820,7 +5048,7 @@ const Blocks = (() => {
     Music.start();
     Music.setMode("quiz");
     cats = shuffle(Object.keys(CATEGORIES)).slice(0, CATS_PER_GAME);
-    board().innerHTML = "";
+    board().innerHTML = '<div class="bk-dim"></div>';   // one overlay dims the board while a group is picked
     grid = Array.from({ length: COLS }, () => new Array(ROWS).fill(null));
     score = 0; streak = 0; bestStreak = 0; blasted = 0; correctCount = 0;
     riseEvery = FIRST_RISE_EVERY; sinceRise = 0;
@@ -4972,6 +5200,8 @@ async function init() {
 
   // Interactive and waiting for the player.
   Platform.gameReady();
+  // Build the reused effect elements once the game is up, off the first answer's frame.
+  setTimeout(() => UI.warmFx(), 300);
 }
 
 function wireInput() {
@@ -5050,6 +5280,25 @@ function wireInput() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+/* ---- debug hook --------------------------------------------------------
+   Only with ?debug in the URL, so players never have it. Triggers each
+   effect on its own so tools/measure-fx.js can time it in isolation (set the
+   state up first, then trigger inside the sampling window).
+   ------------------------------------------------------------------------ */
+if (/[?&]debug\b/.test(location.search)) {
+  window.__dbg = {
+    startQuiz() { if (!state.roundActive) Game.start(); },
+    correct() { Game.answer(state.round[state.index].correctIndex); },
+    wrong() { Game.answer((state.round[state.index].correctIndex + 1) % 4); },
+    next() { Game.next(); },
+    streak(n) { state.streak = n; },
+    results() { Game.end(); },
+    startBlocks() { Blocks.start(); },
+    pickBlocks() { document.querySelector("#bkBoard .bk-block").click(); },
+    blastBlocks() { const d = Blocks.debug(); if (d.open) document.querySelector('#bkAnswers .ans[data-idx="' + d.correctIndex + '"]').click(); }
+  };
+}
 </script>
 </body>
 </html>

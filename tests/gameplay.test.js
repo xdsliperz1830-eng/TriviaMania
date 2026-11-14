@@ -156,7 +156,7 @@ const ck = (condition, message) => suite.check(condition, message);
   const fresh = await page.evaluate(() => ({ s: state.score, i: state.index, c: state.correctCount, st: state.streak, r: state.results.length, bs: state.bestStreak, locked: state.locked }));
   ck(JSON.stringify(fresh) === JSON.stringify({ s:0, i:0, c:0, st:0, r:0, bs:0, locked:false }), 'restart resets all state: ' + JSON.stringify(fresh));
   ck((await page.locator('#scoreVal').innerText()) === '0', 'score display reset');
-  ck((await page.locator('#progFill').evaluate(e => e.style.width)) === '0%', 'progress bar reset');
+  ck((await page.locator('#progFill').evaluate(e => e.dataset.progress)) === '0%', 'progress bar reset');
 
   // ---- QUIT MID-GAME, THEN PLAY AGAIN FROM RESULTS ----
   await page.locator('#quitBtn').click();
@@ -182,12 +182,12 @@ const ck = (condition, message) => suite.check(condition, message);
   ck(posSpread >= 3, 'correct answer position is randomised (' + posSpread + ' distinct positions)');
 
   // ---- PROGRESS BAR ----
-  ck((await page.locator('#progFill').evaluate(e => e.style.width)) === '0%', 'progress 0% at question 1');
+  ck((await page.locator('#progFill').evaluate(e => e.dataset.progress)) === '0%', 'progress 0% at question 1');
   ci = await page.evaluate(() => state.round[state.index].correctIndex);
   await page.locator(`.ans[data-idx="${ci}"]`).click();
   await page.locator('#nextBtn').click();
   await page.waitForTimeout(200);
-  ck((await page.locator('#progFill').evaluate(e => e.style.width)) === '10%', 'progress 10% at question 2');
+  ck((await page.locator('#progFill').evaluate(e => e.dataset.progress)) === '10%', 'progress 10% at question 2');
 
   // ---- LANDSCAPE / DESKTOP LAYOUT ----
   await page.setViewportSize({ width: 800, height: 420 });
