@@ -8,7 +8,8 @@
     "build": "node tools/build.js",
     "art": "node tools/make-art.js",
     "icons": "node tools/make-icons.js",
-    "questions": "node tools/export-csv.js"
+    "questions": "node tools/export-csv.js",
+    "lang": "node tools/make-lang.js"
   },
   "devDependencies": {
     "playwright": "1.56.1"

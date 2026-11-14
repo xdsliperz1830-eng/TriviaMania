@@ -22,7 +22,9 @@ npm run build          # -> dist/brain-blast-playable.zip
 
 All the game code, data, styling, fonts and music are in `index.html` at the
 archive root (the fonts are embedded and the music is synthesised, so there are
-no media files). The bundle is **545 KB zipped**. The page itself is 385 KB.
+no media files). The bundle is **728 KB zipped**. The page itself is 419 KB.
+Spanish, Portuguese and German are three more files in `lang/`, about 155 KB
+each, and a player downloads only the one they use.
 The rest is the in-game icons in `assets/icons/` (about 100 KB of 128 px PNGs),
 plus the launcher icons and manifest, which ride along only so the page's
 `<head>` links resolve inside the player. The build fails rather than
@@ -31,9 +33,9 @@ built file and playing a round, so what you upload is what was tested.
 
 | Limit | Budget | Bundle |
 |---|---|---|
-| Initial payload | 30 MiB (15 MiB recommended) | 1.8% of the cap |
+| Initial payload | 30 MiB (15 MiB recommended) | 2.4% of the cap |
 | Total bundle | 250 MiB | negligible |
-| Per file | 30 MiB (512 KiB recommended) | 385 KB, the page |
+| Per file | 30 MiB (512 KiB recommended) | 419 KB, the page |
 
 ---
 
@@ -155,6 +157,14 @@ What could be checked without portal access, and the evidence for each.
 | Behaviour against YouTube's real runtime | ⚠️ | **unverifiable here** — mock only; test in the portal |
 | Metadata specs | ⚠️ | **[verify]** — pages unreachable |
 
+### Languages
+
+The game follows `ytgame.system.getLanguage()` and plays in English, Spanish,
+Brazilian Portuguese and German; any other language gets English. A player can
+change it from the home screen. The store title and descriptions above are
+English only **[verify]** whether the listing can be localised. The
+translations have not been reviewed by native speakers yet.
+
 ### Content notes
 
 900 questions, reviewed for a 13+ general audience:
@@ -188,7 +198,7 @@ answers below; adjust the ones about you.
 | Playable URL | https://xdsliperz1830-eng.github.io/TriviaMania/ |
 | Source | https://github.com/xdsliperz1830-eng/TriviaMania |
 | Engine / stack | Hand-written HTML, CSS and vanilla JavaScript. No engine, no framework, no build step. |
-| Bundle size | 545 KB zipped: one `index.html` (code, questions, embedded fonts, synthesised music) plus small icon PNGs |
+| Bundle size | 728 KB zipped: one `index.html` (code, English questions, embedded fonts, synthesised music), small icon PNGs and three language files |
 | Mobile support | Yes. Portrait and landscape, touch-first, verified at 18 viewport sizes from 320×568 to 1920×1080 |
 | Time to interactive | Under 750 ms, including at 6× CPU throttling |
 | Playables SDK | Already integrated: `firstFrameReady`/`gameReady`, `onPause`/`onResume`, `isAudioEnabled`/`onAudioEnabledChange`, `saveData`/`loadData`, `sendScore`, `logError` |
@@ -204,8 +214,9 @@ answers below; adjust the ones about you.
 > Brain Blast is a fast-fire trivia game: ten categories, fifteen seconds a
 > question, and more points the quicker you answer. Alongside the quiz there
 > is a daily challenge with a day streak, and Block Blitz, a puzzle mode where
-> right answers blast matching blocks. It is one 385 KB HTML file plus small
-> icons, with no engine, no network calls at runtime and no sign-in. It
+> right answers blast matching blocks. It plays in English, Spanish, Portuguese
+> and German. It is one 419 KB HTML file plus small
+> icons, with no engine, no network calls outside its own files and no sign-in. It
 > already integrates the Playables SDK for cloud saves, pause and resume,
 > audio state and score reporting. A bank of 900 questions rotates, so playing
 > again brings questions you have not seen rather than the same set

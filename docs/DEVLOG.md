@@ -3,6 +3,50 @@
 Decisions, measurements and what is deliberately not done yet, so the next
 session starts from facts instead of memory. Newest first.
 
+## Languages: Spanish, Portuguese, German
+
+### Decisions
+
+- **One file per language, loaded on demand.** Putting three more question
+  banks in `index.html` would add about 460 KB to every player's first load.
+  A language file is a script tag (`lang/<code>.js` calling `BB_LANG`), which
+  works from `file://`, GitHub Pages and a Playable bundle alike.
+- **Translations are matched by position, not by key.** The language file's
+  questions are in the same order as `QUESTIONS`. Question ids still come
+  from the English text and are computed before any language is applied, so
+  "seen" history, best scores and the daily challenge are language-independent.
+- **Switching language rewrites the bank in place** (`q`, `a`, `e` and the
+  category names), so the quiz, the daily and Block Blitz needed no changes
+  to how they read questions. English originals are kept to switch back.
+- **Language order:** `?lang=` in the address, then the saved choice, then
+  `ytgame.system.getLanguage()` in a Playable or `navigator.language`.
+- **Portuguese is Brazilian** and Spanish is neutral Latin American (film
+  titles and words like "computadora"), as the larger audiences.
+- **Questions about the English language** (plurals, collective nouns such as
+  "a murder of crows") are asked as questions about English, with the English
+  answers kept. A few were re-angled where that read badly: the baby swan
+  question asks its colour, "fortnight" became "two weeks".
+
+### Layout changes the longer text forced
+
+- Quiz top bar: less padding and letter-spacing on the labels, smaller still
+  under 360 px, so "Pregunta" and "Punkte" fit. Portuguese uses "Combo" for
+  the streak label because "Sequência" does not fit.
+- Category cards: a name with a 12+ letter word ("Allgemeinwissen",
+  "Wissenschaft") gets smaller type and may break rather than clip.
+- The Play label is built from a template (`PLAY {cat}`, `{cat} SPIELEN`)
+  because the word order differs.
+
+`tests/i18n.test.js` checks the fit at 320x568, 390x844 and 667x375 in all
+four languages, using the question with the longest answers.
+
+### Not done yet, on purpose
+
+- No native-speaker review. The checks catch structure, not tone or a
+  regional word choice.
+- The store listing text and key art are English only.
+- `<title>` and the manifest name stay "Brain Blast" in every language.
+
 ## Game feel and animation costs
 
 Reviewed against the `mobile-game-dev` playbook (`.claude/skills/`).
