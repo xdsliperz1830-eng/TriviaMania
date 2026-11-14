@@ -5022,11 +5022,20 @@ const Blocks = (() => {
     const active = document.activeElement && document.activeElement._block;
     let { col, row } = active && active.el.isConnected ? active : cursor;
     if (!active || !active.el.isConnected) {
-      // Resume where the player left off, or the nearest block below it.
+      // Resume where the player left off: the nearest column that still has
+      // blocks, at that height or the top of the column. A blast or bomb can
+      // empty the column the player was on, and arrows then did nothing.
       col = Math.min(col, COLS - 1);
       row = Math.min(row, ROWS - 1);
-      while (row > 0 && !grid[col][row]) row--;
-      if (grid[col][row]) { grid[col][row].el.focus(); return; }
+      for (let k = 0; k < COLS; k++) {
+        for (const c of k ? [col - k, col + k] : [col]) {
+          if (c < 0 || c >= COLS) continue;
+          let r = row;
+          while (r > 0 && !grid[c][r]) r--;
+          if (grid[c][r]) { grid[c][r].el.focus(); return; }
+        }
+      }
+      return;
     }
     if (dr !== 0) {
       const r = row + dr;
@@ -5120,6 +5129,10 @@ const Blocks = (() => {
         place(grid[c][r], true);
       }
       if (opts.sinceRise != null) { sinceRise = opts.sinceRise; renderHud(); }
+      if (opts.clearColumn != null) {
+        const c = opts.clearColumn;
+        for (let r = 0; r < ROWS; r++) if (grid[c][r]) { grid[c][r].el.remove(); grid[c][r] = null; }
+      }
     }
   };
 })();

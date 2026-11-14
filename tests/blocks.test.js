@@ -205,6 +205,18 @@ const ck = (condition, message) => suite.check(condition, message);
      "after quitting and reopening, the closed sheet is hidden even when the screen is taller than the page");
   await tall.close();
 
+  // Regression: the column the player was last on gets emptied (a bomb or a
+  // Lucky Block can do it); the arrow keys must still land on a block.
+  await page.evaluate(() => {
+    const first = document.querySelector("#bkBoard .bk-block");
+    first.focus();                       // remembers this block's column
+    first.blur();
+    Blocks.testSetup({ clearColumn: first._block.col });
+  });
+  await page.keyboard.press("ArrowUp");
+  ck(await page.evaluate(() => document.activeElement.classList.contains("bk-block")),
+     "the arrow keys still find a block when the last column was emptied");
+
   /* ---------------- landscape ---------------- */
   const land = suite.watch(await browser.newPage());
   await land.setViewportSize({ width: 844, height: 390 });
