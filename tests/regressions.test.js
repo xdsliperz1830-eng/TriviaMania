@@ -184,6 +184,43 @@ const seenCount = (page) => page.evaluate(() => progress.seen.length);
     await clipPage.close();
   }
 
+  /* ---------------------------------------------------------------------
+     Defect 3.5 — on laptops and monitors the category names broke inside
+     words ("Knowledg-e", "Technolog-y"): the four desktop columns were
+     148px wide and the names were allowed to break anywhere. And on a
+     laptop browser window (about 1366x657 once the toolbars are drawn)
+     the last row of categories sat below the fold.
+     --------------------------------------------------------------------- */
+  for (const lang of ["en", "es", "pt", "de"]) {
+    for (const [w, h] of [[932, 1306], [1024, 768], [1280, 600], [1366, 657], [1366, 768], [1920, 1080], [2560, 1440]]) {
+      const dp = suite.watch(await browser.newPage({ viewport: { width: w, height: h } }));
+      await dp.goto(GAME_URL + "?lang=" + lang);
+      await dp.waitForTimeout(400);
+      const r = await dp.evaluate(() => {
+        const probe = document.createElement("span");
+        probe.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;left:-9999px";
+        document.body.appendChild(probe);
+        const split = [];
+        document.querySelectorAll("#catGrid .cat .nm").forEach((n) => {
+          probe.style.font = getComputedStyle(n).font;
+          probe.style.letterSpacing = getComputedStyle(n).letterSpacing;
+          n.textContent.split(/\s+/).forEach((word) => {
+            probe.textContent = word;
+            if (probe.getBoundingClientRect().width > n.getBoundingClientRect().width + 1) split.push(word);
+          });
+        });
+        probe.remove();
+        const sc = document.querySelector(".cat-scroll").getBoundingClientRect();
+        const below = Array.from(document.querySelectorAll("#catGrid .cat")).filter((c) => c.getBoundingClientRect().bottom > sc.bottom + 1).length;
+        const play = document.getElementById("playBtn").getBoundingClientRect();
+        return { split, below, playOn: play.bottom <= innerHeight + 1 };
+      });
+      ck(r.split.length === 0, `3.5 ${lang} ${w}x${h}: no category name breaks inside a word (${r.split.join(", ") || "none"})`);
+      ck(r.below === 0 && r.playOn, `3.5 ${lang} ${w}x${h}: every category and the Play button are on screen without scrolling (${r.below} below)`);
+      await dp.close();
+    }
+  }
+
   await browser.close();
   suite.report();
 })();

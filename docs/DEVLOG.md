@@ -3,6 +3,35 @@
 Decisions, measurements and what is deliberately not done yet, so the next
 session starts from facts instead of memory. Newest first.
 
+## Laptops and monitors
+
+Reported from a monitor: category names broke inside words ("Knowledg-e",
+"Geograph-y", "Technolog-y").
+
+- **Cause.** The language work added `overflow-wrap:anywhere` to category
+  names so long German words could not overflow. On desktop the screen is
+  620px wide and the grid has four columns of 148px, too narrow for
+  "Knowledge" or "Technology", so they broke at any letter.
+- **Fix.** Screens are 760px wide on desktop (four columns of 183px). Names
+  now use `hyphens:auto` with `overflow-wrap:break-word`, so a word breaks
+  only when it cannot fit, and then at a real hyphenation point for the
+  page's language.
+- **Found while checking.** A laptop browser window is short: a 1366x768
+  laptop leaves about 657px. There, the last row of categories was below
+  the fold. On desktop windows up to 720px tall, the title now shares the
+  top row with the score and buttons, and the round-length pills share a
+  row with "Choose a category".
+- **Tall monitors.** Screens stop at 900px tall and sit in the middle,
+  instead of stretching with an empty band above the Play button.
+- **Mouse.** The language flags and Block Blitz blocks gained hover states;
+  everything else already had them.
+- `tests/regressions.test.js` 3.5 checks all four languages at seven desktop
+  sizes for names broken inside words and categories below the fold. It
+  fails 36 times on the previous version.
+- A walk through every screen (home, both tabs, both dialogs, quiz,
+  feedback, results, Block Blitz, its question) at 13 desktop sizes in
+  English and German found nothing else.
+
 ## Block Blitz: 10-second answers, auto-pick, idle motion
 
 ### What changed
