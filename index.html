@@ -1033,8 +1033,40 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 }
 @media (max-width:360px){ .new-tag{font-size:.5rem;padding:1px 4px;letter-spacing:0} }
 .cat .meta{min-width:0}
-.cat .nm{overflow-wrap:anywhere}
+/* A name breaks inside a word only as a last resort, and then at a proper
+   hyphenation point for the page's language. "overflow-wrap:anywhere" split
+   "Knowledg-e" and "Technolog-y" in the four-column desktop grid. */
+.cat .nm{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}
 .cat.long-name .nm{font-size:.82em;letter-spacing:-.3px}
+
+/* Laptops and monitors: a wider column. At 620px the four category cards
+   were 148px wide, too narrow for "General Knowledge" or "Technology". The
+   height condition keeps phones in landscape on their own layout. */
+@media (min-width:900px) and (min-height:561px){
+  .screen{max-width:760px}
+}
+/* A tall monitor window: the screens stop growing at 900px and sit in the
+   middle, rather than stretching and leaving a wide empty band between the
+   categories and the Play button. */
+@media (min-width:900px) and (min-height:960px){
+  #app{justify-content:center}
+  .screen{max-height:900px}
+}
+/* A laptop browser window is wide but short: a 1366x768 screen leaves about
+   657px once the browser's bars are drawn, and the last row of categories
+   fell below the fold. The width has room to spare, so the title shares the
+   top row with the best score and the buttons, and the round-length pills
+   share a row with "Choose a category", as on a phone held sideways. */
+@media (min-width:900px) and (min-height:561px) and (max-height:720px){
+  .home-top{position:absolute;top:0;left:0;right:0;z-index:3;pointer-events:none}
+  .home-top > *{pointer-events:auto}
+  .logo-wrap{padding:0;gap:12px}
+  .tagline{display:none}
+  .picker-row{flex-direction:row;align-items:center;flex-wrap:wrap;gap:2px 14px;margin:8px 4px 6px}
+  .picker-row .section-label{margin:0}
+  .len-row{justify-content:flex-end;flex:1 1 auto}
+  .mode-tabs{margin-top:10px}
+}
 .flag{display:block;width:26px;height:auto;border-radius:4px;border:2px solid var(--ink);box-sizing:content-box}
 .lang-btn #langCode{display:block}
 .lang-btn .flag{width:21px;border-width:1.5px;border-radius:3px}
@@ -1045,6 +1077,12 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
   font-family:"Lilita One","Nunito",sans-serif;font-size:1.1rem;letter-spacing:.3px;color:var(--ink);
   background:var(--paper);border:var(--edge);box-shadow:var(--bevel),var(--drop-sm)}
 .lang-opt:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.lang-opt:hover{background:var(--paper-2)}
+.lang-opt[aria-pressed="true"]:hover{background:var(--gold)}
+/* Mouse users: a block lightens under the pointer (the overlay, not a filter). */
+@media (hover:hover){
+  .bk-board:not(.choosing) .bk-block:not(.pick):not(.auto):hover::after{opacity:.2}
+}
 .lang-opt[aria-pressed="true"]{background:var(--gold);box-shadow:var(--bevel-gold),var(--drop-sm)}
 .lang-opt:disabled{opacity:.6;cursor:default}
 #langModal .info-status:empty{display:none}
