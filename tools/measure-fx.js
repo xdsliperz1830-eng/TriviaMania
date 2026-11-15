@@ -31,6 +31,7 @@ const SCENARIOS = [
   { name: "wrong answer",       setup: async (p) => { await p.evaluate(() => __dbg.startQuiz()); }, fire: "__dbg.wrong()" },
   { name: "next question",      setup: async (p) => { await p.evaluate(() => { __dbg.startQuiz(); __dbg.correct(); }); }, fire: "__dbg.next()" },
   { name: "results reveal",     setup: async (p) => { await p.evaluate(() => { __dbg.startQuiz(); __dbg.correct(); }); }, fire: "__dbg.results()" },
+  { name: "blocks: idle board", setup: async (p) => { await p.evaluate(() => __dbg.startBlocks()); }, fire: "" },
   { name: "blocks: pick group", setup: async (p) => { await p.evaluate(() => __dbg.startBlocks()); }, fire: "__dbg.pickBlocks()" },
   { name: "blocks: blast",      setup: async (p) => { await p.evaluate(() => { __dbg.startBlocks(); __dbg.pickBlocks(); }); }, fire: "__dbg.blastBlocks()" }
 ];

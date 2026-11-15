@@ -958,6 +958,44 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 .bk-rise-lab.urgent{animation:bkWarnFade .8s ease-in-out infinite}
 @keyframes bkWarnFade{50%{opacity:.55}}
 
+/* Idle life: while the board waits for a pick, every icon bobs and a glint
+   sweeps across each block. The delay comes from the block's diagonal
+   (--d, set in place()), so both travel up the board as a wave. The delays
+   are all negative: a positive one starts each block's animation at a
+   different moment, and every start cost a style recalculation. Only the
+   icon and a pseudo-element move, with transform and opacity, so the block's
+   own position transform and its tap area never change. */
+.bk-block{overflow:hidden}
+.bk-block .ico{animation:bkIdle 2.4s ease-in-out infinite;animation-delay:calc((var(--d,0) - 20) * .16s)}
+@keyframes bkIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-7%) scale(1.07)}}
+.bk-block::before{content:"";position:absolute;top:-20%;bottom:-20%;left:0;width:45%;z-index:1;pointer-events:none;
+  background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.55) 50%,rgba(255,255,255,0));
+  transform:translateX(-160%) skewX(-18deg);opacity:0;
+  animation:bkGlint 6s ease-in-out infinite;animation-delay:calc((var(--d,0) - 20) * .12s)}
+@keyframes bkGlint{0%{transform:translateX(-160%) skewX(-18deg);opacity:0}
+  2%{opacity:1}14%{transform:translateX(300%) skewX(-18deg);opacity:1}15%,100%{transform:translateX(300%) skewX(-18deg);opacity:0}}
+.bk-block.lucky .ico{animation-name:bkIdleLucky}
+@keyframes bkIdleLucky{0%,100%{transform:rotate(-6deg) scale(1)}50%{transform:rotate(6deg) scale(1.1)}}
+/* The motion runs only while the board is waiting for a pick (.live, set by
+   the auto-pick watcher). Measured at 4x CPU throttling: running, it costs
+   nothing on its own, but any per-frame loop (the question timer, a blast)
+   makes Chrome restyle every animated block each frame, 430 ms of work in
+   3 s. Paused, it costs nothing either way. */
+.bk-block .ico,.bk-block::before{animation-play-state:paused}
+.bk-board.live .bk-block .ico,.bk-board.live .bk-block::before{animation-play-state:running}
+/* The group about to be picked for a slow player: a wiggle and a glow. */
+.bk-block.auto{z-index:2}
+.bk-block.auto .ico{animation:bkAuto .45s ease-in-out infinite}
+@keyframes bkAuto{0%,100%{transform:rotate(-9deg) scale(1.08)}50%{transform:rotate(9deg) scale(1.16)}}
+.bk-block.auto::after{inset:0;background:none;box-shadow:inset 0 0 0 3px var(--gold),inset 0 0 10px rgba(254,196,28,.9);
+  animation:bkAutoRing .45s ease-in-out infinite}
+@keyframes bkAutoRing{0%,100%{opacity:.35}50%{opacity:1}}
+.bk-hint.auto{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){
+  .bk-block .ico,.bk-block::before,.bk-block.auto .ico{animation:none}
+  .bk-block::before{display:none}
+}
+
 /* ============================================================
    Game feel (transform and opacity only)
    ============================================================ */
@@ -3603,6 +3641,7 @@ const STR_EN = {
   bombAria: "Bomb: blast a whole row", bombTitle: "Bomb (B): blast a whole row", boardAria: "Block board",
   bkHint: "Tap a group of blocks, then answer its question to blast them.",
   bkArm: "Bomb ready: tap any block to blast its whole row.",
+  autoPick: "Auto-pick in {n}…",
   boom: "Boom! +{n}", lucky: "Lucky", luckyBang: "Lucky!",
   worth: "Blast {n} · +{p}", bombEarned: "Bomb earned!", itIs: "It's {a}.",
   megaBlast: "Mega blast!", hugeBlast: "Huge blast!", cleared: "Board cleared! +{n}",
@@ -4421,6 +4460,9 @@ const UI = {
 
   /** Create the reused effect elements up front, so the first combo doesn't pay to build them. */
   warmFx() {
+    // With reduced motion the effects never run, so there is nothing to build
+    // (and banner() and flash() return before creating their elements).
+    if (reducedMotion()) return;
     if (!UI._banner) { UI.banner(" "); if (UI._banner._anim) UI._banner._anim.cancel(); }
     if (!UI._flash) { UI.flash("good"); if (UI._flash._anim) UI._flash._anim.cancel(); }
     if (!UI._particles) { UI.burst({ left: -50, top: -50, width: 0, height: 0 }); UI._particles.forEach((p) => p._anim && p._anim.cancel()); }
@@ -4910,7 +4952,9 @@ const Blocks = (() => {
   const COLS = 7, START_ROWS = 5, CATS_PER_GAME = 5;
   const MIN_ROWS = 8, MAX_ROWS = 11;   // the board is as tall as the screen allows, within these
   let ROWS = 9;
-  const TIME = 15;                 // seconds per question, as in the quiz
+  const TIME = 10;                 // seconds per question: shorter than the quiz, to keep the board moving
+  const AUTO_PICK_MS = 5000;       // a group is picked for a player who waits this long
+  const AUTO_WARN_MS = 3000;       // and it starts wiggling, with a countdown, this long before
   const FIRST_RISE_EVERY = 4;      // answers between automatic rises at the start
   const CLEAR_BONUS = 500;
   const LUCKY = "lucky";           // the wild block's "category"
@@ -4928,6 +4972,8 @@ const Blocks = (() => {
   let q = null, locked = true, busy = false, over = true;
   let rafId = null, endsAt = 0, timeLeft = TIME, lastTick = null;
   let gen = 0;                     // bumped by start() and quit(), so delayed steps from an old game do nothing
+  let autoPickMs = AUTO_PICK_MS;   // tests can change it or turn it off (0)
+  let idleTimer = null, idleSince = null, autoBlocks = null, autoTarget = null, autoShown = null, paused = false;
 
   const board = () => $("bkBoard");
 
@@ -4967,6 +5013,7 @@ const Blocks = (() => {
     block.el.style.width = block.el.style.height = (cell - 4) + "px";
     block.el.style.transform =
       "translate(" + (block.col * cell + 2) + "px," + ((ROWS - 1 - block.row) * cell + 2) + "px)";
+    block.el.style.setProperty("--d", block.col + block.row);   // the idle wave's phase
     block.el.setAttribute("aria-label",
       t("blockAria", { name: nameOf(block.cat), c: block.col + 1, r: block.row + 1 }));
     if (instant) { void block.el.offsetWidth; block.el.style.transition = ""; }
@@ -5039,6 +5086,8 @@ const Blocks = (() => {
   /* ---------- turns ---------- */
   function tap(block) {
     if (busy || over || picked) return;
+    resetIdle();
+    setLive(false);
     Sound.init();
     if (arming) { bombRow(block.row); return; }
     let cat = block.cat, blocks;
@@ -5062,6 +5111,7 @@ const Blocks = (() => {
 
   function toggleBomb() {
     if (busy || over || picked || (!arming && bombs === 0)) return;
+    resetIdle();
     Sound.init();
     arming = !arming;
     board().classList.toggle("arming", arming);
@@ -5194,6 +5244,74 @@ const Blocks = (() => {
     picked = null;
   }
 
+  /* ---------- auto-pick ----------
+     A player who leaves the board waiting gets a group picked for them: after
+     two seconds one group starts to wiggle with a countdown under the board,
+     and at five seconds it is picked as if tapped. Polled every 100 ms rather
+     than chained off each state change, so no path into the waiting state can
+     forget to start it. Nothing is written until the countdown shows. */
+  function waiting() { return isActive() && !over && !busy && !picked && !paused; }
+
+  function resetIdle() {
+    idleSince = null;
+    if (autoBlocks) autoBlocks.forEach((b) => b.el.classList.remove("auto"));
+    autoBlocks = null; autoTarget = null;
+    if (autoShown !== null) {
+      autoShown = null;
+      $("bkHint").classList.remove("auto");
+      $("bkHint").textContent = arming ? t("bkArm") : t("bkHint");
+    }
+  }
+
+  /** The block the player was on (keyboard focus), else a random one; a Lucky Block only if nothing else is left. */
+  function autoChoice() {
+    const focused = document.activeElement && document.activeElement._block;
+    if (focused && focused.el.isConnected && focused.cat !== LUCKY) return focused;
+    const all = [];
+    eachBlock((b) => all.push(b));
+    const plain = all.filter((b) => b.cat !== LUCKY);
+    const pool = plain.length ? plain : all;
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  }
+
+  let live = false;
+  function setLive(on) { if (on !== live) { live = on; board().classList.toggle("live", on); } }
+
+  /* The motion starts 0.9 s into a wait, once a blast's falling blocks and
+     effects have settled: running alongside them doubled their restyle cost. */
+  let waitStart = null;
+  function idleTick() {
+    const now = performance.now();
+    const w = waiting();
+    if (w && waitStart === null) waitStart = now;
+    if (!w) waitStart = null;
+    setLive(w && now - waitStart >= 900);
+    if (!w || autoPickMs <= 0) { if (idleSince !== null) resetIdle(); return; }
+    if (idleSince === null) { idleSince = now; return; }
+    const left = autoPickMs - (now - idleSince);
+    if (left <= AUTO_WARN_MS && !autoTarget) {
+      autoTarget = autoChoice();
+      if (!autoTarget) return;
+      autoBlocks = autoTarget.cat === LUCKY ? [autoTarget] : groupAt(autoTarget);
+      autoBlocks.forEach((b) => b.el.classList.add("auto"));
+    }
+    if (autoTarget) {
+      const n = Math.max(1, Math.ceil(left / 1000));
+      if (n !== autoShown) {
+        autoShown = n;
+        $("bkHint").classList.add("auto");
+        $("bkHint").textContent = t("autoPick", { n: n });
+        if (left > 0) Sound.tick();
+      }
+    }
+    if (left <= 0 && autoTarget) {
+      const target = autoTarget;
+      if (arming) { arming = false; board().classList.remove("arming"); }
+      resetIdle();
+      tap(target);
+    }
+  }
+
   /* ---------- board changes ---------- */
   function blast(points) {
     busy = true;
@@ -5290,6 +5408,8 @@ const Blocks = (() => {
 
   function gameOver() {
     over = true; busy = false;
+    resetIdle();
+    setLive(false);
     cancelAnimationFrame(rafId);
     Music.setMode("home");
     const newBest = score > best;
@@ -5308,6 +5428,7 @@ const Blocks = (() => {
 
   /** Arrow-key navigation: step to the nearest block in that direction. */
   function moveFocus(dc, dr) {
+    resetIdle();
     const active = document.activeElement && document.activeElement._block;
     let { col, row } = active && active.el.isConnected ? active : cursor;
     if (!active || !active.el.isConnected) {
@@ -5353,6 +5474,7 @@ const Blocks = (() => {
     bombs = 0; arming = false; cursor = { col: 0, row: 0 };
     board().classList.remove("arming");
     picked = null; q = null; locked = true; busy = false; over = false;
+    paused = false; autoPickMs = AUTO_PICK_MS;
     best = parseInt(progress.best.blocks, 10) || 0;
     $("bkOver").classList.remove("show");
     closeSheet();
@@ -5365,11 +5487,17 @@ const Blocks = (() => {
     }
     layout();
     renderHud();
+    resetIdle();
+    clearInterval(idleTimer);
+    idleTimer = setInterval(idleTick, 100);
     Sound.start();
   }
 
   function quit() {
     gen++;
+    clearInterval(idleTimer); idleTimer = null;
+    resetIdle();
+    setLive(false);
     cancelAnimationFrame(rafId);
     locked = true; over = true; busy = false; arming = false;
     board().classList.remove("arming");
@@ -5401,15 +5529,25 @@ const Blocks = (() => {
       }
       // Enter or Space on a focused block clicks it natively, which picks its group.
     },
-    suspend() { if (isActive() && q && !locked) cancelAnimationFrame(rafId); },
-    wake() { if (isActive() && q && !locked) runTimer(); },
+    suspend() {
+      paused = true;
+      setLive(false);
+      if (isActive() && q && !locked) cancelAnimationFrame(rafId);
+    },
+    wake() {
+      paused = false;
+      resetIdle();                       // the wait starts over on return
+      if (isActive() && q && !locked) runTimer();
+    },
     /** For tests: a snapshot of the board, bottom row first. */
     debug: () => ({ cats, score, streak, riseEvery, sinceRise, over, busy, open: !!q, bombs, arming,
       lucky: picked ? !!picked.lucky : false, pickedCat: picked ? picked.cat : null,
       correctIndex: q ? q.correctIndex : -1, picked: picked ? picked.blocks.length : 0,
-      rows: ROWS, grid: grid.map((col) => col.map((b) => (b ? b.cat : null))) }),
+      rows: ROWS, grid: grid.map((col) => col.map((b) => (b ? b.cat : null))),
+      auto: autoBlocks ? autoBlocks.length : 0, autoPickMs, time: TIME }),
     /** For tests: put the board into a state that would otherwise take luck or a long streak. */
     testSetup(opts) {
+      if (opts.autoPick != null) { autoPickMs = opts.autoPick; resetIdle(); }
       if (opts.bombs != null) { bombs = opts.bombs; renderHud(); }
       if (opts.luckyAt) {
         const [c, r] = opts.luckyAt;

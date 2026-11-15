@@ -3,6 +3,49 @@
 Decisions, measurements and what is deliberately not done yet, so the next
 session starts from facts instead of memory. Newest first.
 
+## Block Blitz: 10-second answers, auto-pick, idle motion
+
+### What changed
+
+- Questions in Block Blitz give 10 seconds (the quiz keeps 15). The bar
+  warns at 5 and 3 seconds and ticks from 5, as before.
+- **Auto-pick.** After 5 seconds of waiting the game picks a group as if it
+  were tapped. At 2 seconds the group starts to wiggle with a gold ring and
+  the hint becomes a countdown. The focused block's group is preferred; a
+  Lucky Block is skipped unless it is all that is left. Arrow keys and arming
+  a bomb restart the wait; it never runs while a question is open, during a
+  blast or rise, after game over, or while the game is paused.
+  A 100 ms poll decides "waiting" from the game's own flags, rather than
+  each code path that ends a turn having to remember to start a timer.
+- **Idle motion.** Icons bob and a glint sweeps each block, phased by the
+  block's diagonal so both travel up the board. Only the icon and a
+  pseudo-element animate, with transform and opacity.
+
+### What it costs, and what was changed because of it
+
+Measured with `tools/measure-fx.js` and CDP metrics at 4x CPU throttling:
+
+- **Positive animation delays restyled the board.** Each block's glint
+  starting at its own moment cost a style recalculation per start (11 in
+  6 s, 57 ms). Negative delays put every block mid-cycle from the start: 0.
+- **Running animations cost nothing on their own, but a lot alongside any
+  per-frame loop.** With a requestAnimationFrame loop running (the question
+  timer, a blast's effects), Chrome restyled every animated block each frame:
+  180 recalculations and 400–530 ms of style work in 3 s. So the motion runs
+  only while the board is waiting (`.live`), and starts 0.9 s into a wait,
+  after a blast's falling blocks have settled.
+- **Switching the motion on or off** restyles the board once: 15–20 ms at
+  4x (about 5 ms unthrottled), occasionally more. It happens on a pick, in
+  the same frame as the dimming the pick already causes.
+- Idle board at 4x: 59–60 fps, one frame over 20 ms in 1.5 s (the switch on).
+
+### Also fixed
+
+- `UI.warmFx()` crashed with reduced motion on: `banner()` and `flash()`
+  return before creating their elements, and it then read `_anim` from
+  undefined. It now does nothing under reduced motion. Found by the new
+  reduced-motion check in `tests/blocks.test.js`.
+
 ## Languages: Spanish, Portuguese, German
 
 ### Decisions

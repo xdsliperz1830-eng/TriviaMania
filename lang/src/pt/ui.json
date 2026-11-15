@@ -55,6 +55,7 @@
     "boardAria": "Tabuleiro de blocos",
     "bkHint": "Toque em um grupo de blocos e responda à pergunta para estourá-los.",
     "bkArm": "Bomba pronta: toque em qualquer bloco para estourar a fileira inteira.",
+    "autoPick": "Escolha automática em {n}…",
     "boom": "Bum! +{n}", "lucky": "Da sorte", "luckyBang": "Sorte!",
     "worth": "Estoure {n} · +{p}", "bombEarned": "Você ganhou uma bomba!", "itIs": "Era {a}.",
     "megaBlast": "Megaexplosão!", "hugeBlast": "Baita explosão!", "cleared": "Tabuleiro limpo! +{n}",

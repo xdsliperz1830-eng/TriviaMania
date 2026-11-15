@@ -55,6 +55,7 @@
     "boardAria": "Spielfeld mit Blöcken",
     "bkHint": "Tippe auf eine Gruppe von Blöcken und beantworte die Frage, um sie zu sprengen.",
     "bkArm": "Bombe bereit: Tippe auf einen Block, um seine ganze Reihe zu sprengen.",
+    "autoPick": "Automatische Auswahl in {n}…",
     "boom": "Bumm! +{n}", "lucky": "Glücksblock", "luckyBang": "Glück!",
     "worth": "{n} sprengen · +{p}", "bombEarned": "Bombe verdient!", "itIs": "Richtig wäre: {a}.",
     "megaBlast": "Mega-Knall!", "hugeBlast": "Riesen-Knall!", "cleared": "Feld geräumt! +{n}",

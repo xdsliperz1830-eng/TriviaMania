@@ -55,6 +55,7 @@
     "boardAria": "Tablero de bloques",
     "bkHint": "Toca un grupo de bloques y responde su pregunta para reventarlos.",
     "bkArm": "Bomba lista: toca cualquier bloque para reventar toda su fila.",
+    "autoPick": "Selección automática en {n}…",
     "boom": "¡Bum! +{n}", "lucky": "De la suerte", "luckyBang": "¡Suerte!",
     "worth": "Revienta {n} · +{p}", "bombEarned": "¡Ganaste una bomba!", "itIs": "Era {a}.",
     "megaBlast": "¡Megaexplosión!", "hugeBlast": "¡Gran explosión!", "cleared": "¡Tablero limpio! +{n}",

@@ -45,6 +45,15 @@ its colour and icon. Each game uses five random categories.
 - Tap a block to pick its whole connected group, then answer a question from
   that category. A right answer blasts the group for size² × 10 points,
   multiplied by the answer streak (up to ×2), and the blocks above fall.
+  Block Blitz questions give 10 seconds, against the quiz's 15.
+- **Auto-pick:** a player who waits 5 seconds gets a group picked for them.
+  After 2 seconds the group starts to wiggle with a gold ring, and a countdown
+  shows under the board. It is the group under the keyboard focus if there is
+  one, otherwise a random group, never a Lucky Block unless nothing else is
+  left. Moving with the arrow keys or arming a bomb restarts the wait.
+- While the board waits, the icons bob and a glint sweeps across the blocks,
+  both as a wave travelling up the board. The motion stops while a question is
+  open, when the game is paused, and for players who ask for reduced motion.
 - A wrong answer or a timeout pushes a new row up from the bottom. A row also
   rises every few answers regardless: every 4 at first, one answer sooner for
   every 8 correct, down to every 2. The label and the board's edge warn one
