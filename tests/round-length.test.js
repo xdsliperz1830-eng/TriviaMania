@@ -40,7 +40,7 @@ const ck = (condition, message) => suite.check(condition, message);
   const ci = await p.evaluate(() => state.round[state.index].correctIndex);
   await p.locator(`.ans[data-idx="${ci}"]`).click();
   await p.waitForTimeout(200);
-  ck((await p.locator('#progFill').evaluate(e=>e.style.width)) === '5%', 'progress is 1/20 = 5%');
+  ck((await p.locator('#progFill').evaluate(e=>e.dataset.progress)) === '5%', 'progress is 1/20 = 5%');
 
   // ---- play a full 5-question round end to end ----
   await p.locator('#quitBtn').click(); await p.waitForTimeout(200);

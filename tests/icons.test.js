@@ -89,8 +89,8 @@ function describe(page, href) {
   t.check(rel("icon").some((l) => l.sizes === "32x32") && rel("icon").some((l) => l.sizes === "16x16"),
     "raster favicons cover 16 and 32 px");
 
-  t.check(head.metas["apple-mobile-web-app-title"] === "Brain Blitz",
-    'the home-screen label is set to "Brain Blitz", not the document title');
+  t.check(head.metas["apple-mobile-web-app-title"] === "Brain Blast",
+    'the home-screen label is set to "Brain Blast", not the document title');
   t.check(head.metas["apple-mobile-web-app-capable"] === "yes" &&
           head.metas["mobile-web-app-capable"] === "yes",
     "launching from the home screen opens standalone on both platforms");
@@ -110,7 +110,7 @@ function describe(page, href) {
     t.check(false, "the manifest is valid JSON: " + e.message);
   }
 
-  t.check(manifest.name === "Brain Blitz" && manifest.short_name === "Brain Blitz",
+  t.check(manifest.name === "Brain Blast" && manifest.short_name === "Brain Blast",
     "the manifest names the app on both the install prompt and the launcher");
   t.check(manifest.display === "standalone",
     "the manifest asks for a standalone window, not a browser tab");

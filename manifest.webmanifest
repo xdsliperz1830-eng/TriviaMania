@@ -1,6 +1,6 @@
 {
-  "name": "Brain Blitz",
-  "short_name": "Brain Blitz",
+  "name": "Brain Blast",
+  "short_name": "Brain Blast",
   "description": "A fast-paced trivia game across 10 categories. Beat the clock, build a streak.",
   "id": "brain-blitz",
   "start_url": ".",

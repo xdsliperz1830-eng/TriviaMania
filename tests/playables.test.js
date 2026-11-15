@@ -44,7 +44,11 @@ function mockSdk(options) {
         onResume(cb) { calls.push("onResume"); window.__sdk.handlers.resume = cb; },
         isAudioEnabled() { return opts.audioEnabled !== false; },
         onAudioEnabledChange(cb) { window.__sdk.handlers.audio = cb; return function () {}; },
-        getLanguage() { return Promise.resolve("en"); }
+        getLanguage() {
+          calls.push("getLanguage");
+          if (opts.hangLanguage) return new Promise(() => {});   // never settles
+          return Promise.resolve(opts.language || "en");
+        }
       },
       engagement: {
         sendScore(o) { calls.push("sendScore"); window.__sdk.scores.push(o); }
@@ -242,6 +246,22 @@ const calls = (page) => page.evaluate(() => window.__sdk.calls.slice());
   await page.locator("#playBtn").click();
   await page.waitForTimeout(300);
   ck(await page.locator("#quiz").isVisible(), "a round still starts with no SDK");
+  await page.close();
+
+  /* ---------------- language comes from YouTube ---------------- */
+  page = await openWith(browser, { inEnv: true, language: "pt-BR" });
+  ck(await page.evaluate(() => I18n.code()) === "pt", "inside YouTube, the game starts in YouTube's language (pt-BR -> pt)");
+  ck((await calls(page)).indexOf("gameReady") !== -1, "gameReady is still sent after a language file loads");
+  await page.close();
+
+  page = await openWith(browser, { inEnv: true, language: "pt-BR", savedBlob: JSON.stringify({ lang: "de" }) });
+  ck(await page.evaluate(() => I18n.code()) === "de", "a language the player chose earlier wins over YouTube's");
+  await page.close();
+
+  page = await openWith(browser, { inEnv: true, hangLanguage: true });
+  await page.waitForTimeout(1500);
+  ck(await page.evaluate(() => I18n.code()) === "en" && (await calls(page)).indexOf("gameReady") !== -1,
+    "a getLanguage that never answers does not stop the game from becoming ready");
   await page.close();
 
   await browser.close();

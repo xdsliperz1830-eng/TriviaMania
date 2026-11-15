@@ -1,4 +1,4 @@
-# Brain Blitz → YouTube Playable
+# Brain Blast (formerly Brain Blitz) → YouTube Playable
 
 A review of the game as it stands today, and the plan to get it certified as a
 YouTube Playable.
@@ -17,7 +17,7 @@ YouTube Playable.
 
 Measured against the published Playables limits:
 
-| Limit | Budget | Brain Blitz | Headroom |
+| Limit | Budget | Brain Blast | Headroom |
 |---|---|---|---|
 | Initial payload | 30 MiB (15 MiB recommended) | **114 KB** | 0.4% of the hard cap |
 | Total bundle | 250 MiB | 114 KB | negligible |
