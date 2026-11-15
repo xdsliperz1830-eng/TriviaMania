@@ -26,7 +26,8 @@ async function open(browser, opts = {}, url = GAME_URL) {
 const snapshot = (page) => page.evaluate(() => ({
   code: I18n.code(),
   htmlLang: document.documentElement.lang,
-  badge: document.getElementById("langCode").textContent,
+  badge: document.getElementById("langBtn").dataset.lang,
+  flagShown: !!document.querySelector("#langBtn svg.flag"),
   tagline: document.querySelector(".tagline").textContent,
   q0: QUESTIONS[0].q,
   cat: CATEGORIES.science.name,
@@ -45,7 +46,7 @@ const snapshot = (page) => page.evaluate(() => ({
   {
     const { ctx, page } = await open(browser, { locale: "en-US" });
     const s = await snapshot(page);
-    ck(s.code === "en" && s.htmlLang === "en" && s.badge === "EN", "an English device starts in English");
+    ck(s.code === "en" && s.htmlLang === "en" && s.badge === "en" && s.flagShown, "an English device starts in English");
     ck(s.tagline === "How much do you really know?" && s.q0 === "How many continents are there on Earth?", "English text and questions are untouched");
     ck(await page.evaluate(() => !document.querySelector('script[src^="lang/"]')), "English downloads no language file");
     await ctx.close();
@@ -53,7 +54,7 @@ const snapshot = (page) => page.evaluate(() => ({
   for (const [locale, code] of [["es-MX", "es"], ["pt-BR", "pt"], ["de-DE", "de"]]) {
     const { ctx, page } = await open(browser, { locale });
     const s = await snapshot(page);
-    ck(s.code === code && s.badge === code.toUpperCase(), `a ${locale} device starts in ${code}`);
+    ck(s.code === code && s.badge === code && s.flagShown, `a ${locale} device starts in ${code}`);
     ck(s.tagline === SAMPLE[code].tagline, `${code}: the home screen is translated`);
     ck(s.q0 === SAMPLE[code].q0 && s.cat === SAMPLE[code].cat, `${code}: questions and category names are translated`);
     ck(s.htmlLang.slice(0, 2) === code, `${code}: the page language is set for screen readers`);
@@ -114,7 +115,11 @@ const snapshot = (page) => page.evaluate(() => ({
     await page.locator("#langBtn").click();
     ck(await page.locator("#langModal").isVisible(), "the language button opens the picker");
     ck(await page.locator(".lang-opt").count() === 4, "the picker offers four languages");
-    ck(await page.locator('.lang-opt[aria-pressed="true"]').textContent() === "English", "the current language is marked");
+    ck(await page.locator(".lang-opt svg.flag").count() === 4 && (await page.locator("#langList").textContent()).trim() === "",
+      "each language is shown as a flag, with no written name");
+    ck((await page.locator(".lang-opt").evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")).join(","))) === "English,Español,Português,Deutsch",
+      "each flag keeps its language name for screen readers");
+    ck(await page.locator('.lang-opt[aria-pressed="true"]').getAttribute("aria-label") === "English", "the current language is marked");
     await page.locator('.lang-opt[data-lang="es"]').click();
     await page.waitForTimeout(500);
     let s = await snapshot(page);

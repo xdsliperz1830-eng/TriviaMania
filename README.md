@@ -112,8 +112,9 @@ The game plays in English, Spanish, Brazilian Portuguese and German: the whole
 interface, the category names and all 900 questions with their explanations.
 
 - **Choosing a language.** The game starts in the device's language (YouTube's,
-  inside a Playable) and falls back to English. The button with the language
-  code on the home screen opens a picker, and the choice is remembered.
+  inside a Playable) and falls back to English. The flag button on the
+  home screen opens a picker of flags (drawn as SVG, since flag emoji don't
+  render on Windows), and the choice is remembered.
   `?lang=de` in the address forces one, which is handy for testing.
 - **Where the text lives.** English is in `index.html`. Each other language is
   one file, `lang/<code>.js`, about 155 KB, downloaded only when that language

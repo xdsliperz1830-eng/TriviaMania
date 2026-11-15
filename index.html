@@ -997,7 +997,11 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 .cat .meta{min-width:0}
 .cat .nm{overflow-wrap:anywhere}
 .cat.long-name .nm{font-size:.82em;letter-spacing:-.3px}
-.lang-btn{font-family:"Lilita One","Nunito",sans-serif;font-size:.95rem;letter-spacing:.5px;color:var(--ink);line-height:1}
+.flag{display:block;width:26px;height:auto;border-radius:4px;border:2px solid var(--ink);box-sizing:content-box}
+.lang-btn #langCode{display:block}
+.lang-btn .flag{width:21px;border-width:1.5px;border-radius:3px}
+.lang-opt{display:flex;align-items:center;justify-content:center}
+.lang-opt .flag{width:60px;border-width:3px;border-radius:7px}
 .lang-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .lang-opt{min-height:52px;padding:8px 10px;border-radius:14px;cursor:pointer;
   font-family:"Lilita One","Nunito",sans-serif;font-size:1.1rem;letter-spacing:.3px;color:var(--ink);
@@ -1027,7 +1031,7 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
     <div class="home-top">
       <div class="best-chip" id="bestChip"><img class="ico" id="bestIco" src="assets/icons/trophy.png" alt="" draggable="false"> <span id="bestLabel">Best Score</span> <span id="bestScore">0</span></div>
       <div class="top-btns">
-        <button id="langBtn" class="icon-btn lang-btn" aria-label="Language" aria-haspopup="dialog" title="Language" data-i18n-attr="aria-label=language,title=language"><span id="langCode">EN</span></button>
+        <button id="langBtn" class="icon-btn lang-btn" aria-label="Language" aria-haspopup="dialog" title="Language" data-i18n-attr="aria-label=language,title=language"><span id="langCode"></span></button>
         <button id="dailyBtn" class="icon-btn daily-btn" aria-label="Daily challenge" aria-haspopup="dialog" title="Daily challenge" data-i18n-attr="title=daily"><img class="ico" src="assets/icons/calendar.png" alt="" draggable="false"><span class="daily-dot" id="dailyDot" hidden></span></button>
         <button id="musicBtn" class="icon-btn" aria-label="Background music" aria-pressed="true" title="Music on/off" data-i18n-attr="aria-label=musicAria,title=musicTitle"><img class="ico" src="assets/icons/music-on.png" alt="" draggable="false"></button>
         <button id="muteBtn" class="icon-btn" aria-label="Mute or unmute sound" title="Sound on/off" data-i18n-attr="aria-label=soundAria,title=soundTitle"><img class="ico" src="assets/icons/sound-on.png" alt="" draggable="false"></button>
@@ -3536,6 +3540,16 @@ const Music = (() => {
    ================================================================ */
 const LANGS = { en: "English", es: "Español", pt: "Português", de: "Deutsch" };
 const LOCALES = { en: "en", es: "es", pt: "pt-BR", de: "de" };
+/* Flags are drawn here as small SVGs rather than typed as emoji: flag emoji
+   don't render on Windows, and the game uses no emoji anywhere else. They are
+   simplified to read at 24px (no coat of arms, a few stars). */
+const FLAG_ART = {
+  en: '<rect width="30" height="20" fill="#fff"/><g fill="#C8102E"><rect width="30" height="2.9"/><rect y="5.7" width="30" height="2.9"/><rect y="11.4" width="30" height="2.9"/><rect y="17.1" width="30" height="2.9"/></g><rect width="13" height="11.4" fill="#1D3A8F"/><g fill="#fff"><circle cx="2.6" cy="2.6" r=".9"/><circle cx="6.5" cy="2.6" r=".9"/><circle cx="10.4" cy="2.6" r=".9"/><circle cx="4.5" cy="5.7" r=".9"/><circle cx="8.5" cy="5.7" r=".9"/><circle cx="2.6" cy="8.8" r=".9"/><circle cx="6.5" cy="8.8" r=".9"/><circle cx="10.4" cy="8.8" r=".9"/></g>',
+  es: '<rect width="30" height="20" fill="#C60B1E"/><rect y="5" width="30" height="10" fill="#FFC400"/>',
+  pt: '<rect width="30" height="20" fill="#009739"/><path d="M15 2.6 27 10 15 17.4 3 10z" fill="#FEDD00"/><circle cx="15" cy="10" r="4.3" fill="#012169"/><path d="M10.9 9.2c3-.9 6-.3 8.3 1.6" fill="none" stroke="#fff" stroke-width="1"/>',
+  de: '<rect width="30" height="20" fill="#111"/><rect y="6.67" width="30" height="6.67" fill="#DD0000"/><rect y="13.33" width="30" height="6.67" fill="#FFCE00"/>'
+};
+const flag = (code) => '<svg class="flag" viewBox="0 0 30 20" aria-hidden="true" focusable="false">' + FLAG_ART[code] + "</svg>";
 
 const STR_EN = {
   home: "Home", results: "Results", language: "Language", close: "Close",
@@ -4157,7 +4171,8 @@ const UI = {
   /** Repaint every piece of text after the language changes (and once at start-up). */
   applyLanguage() {
     I18n.paint();
-    $("langCode").textContent = I18n.code().toUpperCase();
+    $("langCode").innerHTML = flag(I18n.code());
+    $("langBtn").dataset.lang = I18n.code();
     UI.buildCategoryGrid();
     UI.buildLengthPills();
     UI.renderPlayLabel();
@@ -4179,7 +4194,9 @@ const UI = {
       b.className = "lang-opt";
       b.dataset.lang = code;
       b.lang = LOCALES[code];
-      b.textContent = LANGS[code];
+      b.innerHTML = flag(code);
+      b.setAttribute("aria-label", LANGS[code]);   // the name stays for screen readers and as a tooltip
+      b.title = LANGS[code];
       b.setAttribute("aria-pressed", code === I18n.code() ? "true" : "false");
       b.addEventListener("click", () => setLanguage(code));
       list.appendChild(b);
