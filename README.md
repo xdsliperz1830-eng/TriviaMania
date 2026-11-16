@@ -84,6 +84,10 @@ sits beside the board instead of over it.
   reload, and category play and Mixed Blast share the same history.
 - Category cards show what is left — `90 questions`, then `80 new of 90`, then
   `all 90 seen`.
+- Two locked **"???" Coming soon** cards tease new categories. They only fill
+  the empty cells at the end of the grid (two on a laptop's four columns,
+  none on a phone's two), so they never add a row. They are not buttons. When
+  an eleventh category arrives, the count of teasers adjusts by itself.
 - Answer choices are reshuffled every round, so the correct answer never sits
   in a predictable position.
 - **Best scores are kept per round length**, since a 30-question round scores

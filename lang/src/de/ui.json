@@ -15,6 +15,7 @@
     "lenAria": "Fragen pro Runde", "lenPillAria": "{n} Fragen pro Runde",
     "catAll": "{n} Fragen", "catSeen": "alle {n} gesehen", "catNew": "{f} neu von {n}",
     "mixedName": "Bunter Mix", "mixedShort": "Mix",
+    "comingSoon": "Demnächst",
     "playQuiz": "{cat} SPIELEN", "playBlocks": "BLOCK BLITZ SPIELEN",
     "hintQuiz": "{n} Fragen · je {s} Sekunden · schnelle Antworten bringen Bonuspunkte",
     "hintBlocks": "Antworte richtig und sprenge Blöcke, bevor sie oben ankommen",

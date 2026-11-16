@@ -221,6 +221,35 @@ const seenCount = (page) => page.evaluate(() => progress.seen.length);
     }
   }
 
+  /* ---------------------------------------------------------------------
+     "Coming soon" teasers: two locked "???" cards fill the empty cells at
+     the end of the category grid, and only there. They must not add a row
+     on a phone, take focus, or start anything when clicked.
+     --------------------------------------------------------------------- */
+  for (const [lang, w, h, want] of [["en", 1366, 657, 2], ["de", 1920, 1080, 2], ["es", 667, 375, 2], ["en", 390, 844, 0], ["pt", 320, 568, 0], ["en", 844, 390, 0]]) {
+    const tp = suite.watch(await browser.newPage({ viewport: { width: w, height: h } }));
+    await tp.goto(GAME_URL + "?lang=" + lang);
+    await tp.waitForTimeout(400);
+    const r = await tp.evaluate(() => {
+      const shown = Array.from(document.querySelectorAll("#catGrid .cat-soon")).filter((e) => !e.hidden);
+      const last = Array.from(document.querySelectorAll("#catGrid .cat")).pop().getBoundingClientRect();
+      return {
+        n: shown.length,
+        sameRow: shown.every((e) => Math.abs(e.getBoundingClientRect().top - last.top) < 2),
+        fits: shown.every((e) => e.querySelector(".ct").getBoundingClientRect().right <= e.getBoundingClientRect().right - 3),
+        quiet: shown.every((e) => e.getAttribute("aria-hidden") === "true" && e.tabIndex < 0 && e.querySelector(".nm").textContent === "???")
+      };
+    });
+    ck(r.n === want && r.sameRow, `teasers ${lang} ${w}x${h}: ${want} "???" cards fill the last row (${r.n} shown)`);
+    ck(r.fits && r.quiet, `teasers ${lang} ${w}x${h}: the "coming soon" label fits, and the cards are hidden from keyboard and screen readers`);
+    if (want) {
+      await tp.locator("#catGrid .cat-soon").first().click();
+      ck(await tp.evaluate(() => document.getElementById("home").classList.contains("active") && state.category === "mixed"),
+        `teasers ${lang} ${w}x${h}: clicking one does nothing`);
+    }
+    await tp.close();
+  }
+
   await browser.close();
   suite.report();
 })();
