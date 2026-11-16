@@ -1032,6 +1032,26 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
   .hud-stat .lab{font-size:.5rem;letter-spacing:0}
 }
 @media (max-width:360px){ .new-tag{font-size:.5rem;padding:1px 4px;letter-spacing:0} }
+/* "Coming soon" teasers: they only fill the gap at the end of the grid's
+   last row (UI.fitTeasers), so they never add a row of their own. Not
+   buttons, not focusable, hidden from screen readers. */
+.cat-soon{position:relative;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-md);
+  border:3px dashed rgba(4,3,53,.55);background:rgba(255,255,255,.14);color:#fff;cursor:default;user-select:none}
+.cat-soon[hidden]{display:none}
+.cat-soon .emoji{font-size:1.45rem;flex:0 0 auto;opacity:.55;filter:grayscale(1) brightness(1.6)}
+.cat-soon .emoji .ico{width:1.5em;height:1.5em;vertical-align:0;display:block}
+.cat-soon .meta{min-width:0}
+.cat-soon .nm{display:block;font-family:"Lilita One","Nunito",sans-serif;font-size:1.05rem;letter-spacing:2px;line-height:1.1;
+  color:rgba(255,255,255,.85)}
+.cat-soon .ct{display:inline-block;margin-top:4px;padding:1px 8px 0;border-radius:999px;font-size:.66rem;font-weight:900;
+  letter-spacing:.6px;text-transform:uppercase;color:var(--ink);background:var(--gold);border:2px solid var(--ink);white-space:nowrap}
+.cat-soon .ct{max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:top}
+/* Phones held sideways: the cards are narrow, so the teaser drops its icon
+   to give "Próximamente" room. */
+@media (orientation:landscape) and (max-height:560px){
+  .cat-soon{justify-content:center;text-align:center}
+  .cat-soon .emoji{display:none}
+}
 .cat .meta{min-width:0}
 /* A name breaks inside a word only as a last resort, and then at a proper
    hyphenation point for the page's language. "overflow-wrap:anywhere" split
@@ -3641,6 +3661,7 @@ const STR_EN = {
   lenAria: "Questions per round", lenPillAria: "{n} questions per round",
   catAll: "{n} questions", catSeen: "all {n} seen", catNew: "{f} new of {n}",
   mixedName: "Mixed Blast", mixedShort: "Mixed",
+  comingSoon: "Coming soon",
   playQuiz: "PLAY {cat}", playBlocks: "PLAY BLOCK BLITZ",
   hintQuiz: "{n} questions · {s} seconds each · answer fast for bonus points",
   hintBlocks: "Answer right to blast blocks before they stack to the top",
@@ -4178,6 +4199,28 @@ const UI = {
       const c = CATEGORIES[key];
       grid.appendChild(makeBtn(key, c.icon, c.name, label(questionsIn(key))));
     });
+    // Two locked "???" cards to tease new categories.
+    for (let i = 0; i < 2; i++) {
+      const d = document.createElement("div");
+      d.className = "cat-soon";
+      d.setAttribute("aria-hidden", "true");
+      d.innerHTML = '<span class="emoji">' + icon("cat-general") + '</span>' +
+        '<span class="meta"><span class="nm">???</span><span class="ct"></span></span>';
+      d.querySelector(".ct").textContent = t("comingSoon");
+      grid.appendChild(d);
+    }
+    UI.fitTeasers();
+  },
+
+  /** Show only as many teasers as there are empty cells in the grid's last row (none on a phone's two columns). */
+  fitTeasers() {
+    const grid = $("catGrid");
+    const teasers = grid.querySelectorAll(".cat-soon");
+    if (!teasers.length) return;
+    const cols = getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length;
+    const n = Object.keys(CATEGORIES).length;
+    const free = cols > 1 ? (cols - (n % cols)) % cols : 0;
+    teasers.forEach((el, i) => { el.hidden = i >= free; });
   },
 
   buildLengthPills() {
@@ -4323,6 +4366,7 @@ const UI = {
       t.tabIndex = on ? 0 : -1;
     });
     ["Quiz", "Blocks"].forEach((m) => { $("panel" + m).hidden = m.toLowerCase() !== mode; });
+    if (mode === "quiz") UI.fitTeasers();
     if (!quiet && progress.mode !== mode) {
       progress.mode = mode;
       markProgressDirty();
@@ -5740,7 +5784,7 @@ function wireInput() {
   $("bkHome").addEventListener("click", () => Blocks.quit());
   $("bkAgain").addEventListener("click", () => Blocks.start());
   $("bkBomb").addEventListener("click", () => Blocks.toggleBomb());
-  window.addEventListener("resize", () => { if (Blocks.isActive()) Blocks.layout(); });
+  window.addEventListener("resize", () => { if (Blocks.isActive()) Blocks.layout(); else UI.fitTeasers(); });
 
   // Unlock audio on the very first interaction, whatever it is, and start the
   // music there: browsers only allow sound to begin inside a gesture.

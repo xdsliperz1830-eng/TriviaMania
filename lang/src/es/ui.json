@@ -15,6 +15,7 @@
     "lenAria": "Preguntas por ronda", "lenPillAria": "{n} preguntas por ronda",
     "catAll": "{n} preguntas", "catSeen": "las {n} vistas", "catNew": "{f} nuevas de {n}",
     "mixedName": "Mezcla total", "mixedShort": "Mezcla",
+    "comingSoon": "Próximamente",
     "playQuiz": "JUGAR {cat}", "playBlocks": "JUGAR BLOCK BLITZ",
     "hintQuiz": "{n} preguntas · {s} segundos cada una · responde rápido y gana puntos extra",
     "hintBlocks": "Acierta para reventar bloques antes de que lleguen arriba",
