@@ -61,7 +61,16 @@
     "worth": "{n} sprengen · +{p}", "bombEarned": "Bombe verdient!", "itIs": "Richtig wäre: {a}.",
     "megaBlast": "Mega-Knall!", "hugeBlast": "Riesen-Knall!", "cleared": "Feld geräumt! +{n}",
     "bkOver": "Die Blöcke sind oben angekommen!", "blocksLab": "Blöcke",
-    "blockAria": "Block {name}, Spalte {c}, Reihe {r}"
+    "blockAria": "Block {name}, Spalte {c}, Reihe {r}",
+    "lbTitle": "Bestenliste",
+    "lbMonth": "Diesen Monat",
+    "lbEmpty": "Noch keine Ergebnisse. Mach den Anfang!",
+    "lbFail": "Die Bestenliste konnte nicht geladen werden. Versuch es noch einmal.",
+    "lbMe": "Du: Platz {r} · {s} Pkt.",
+    "lbUnranked": "Du bist noch nicht in dieser Liste.",
+    "lbLogin": "Melde dich bei Reddit an, um deine Punkte zu speichern und in die Bestenliste zu kommen.",
+    "lbLoginBtn": "ANMELDEN",
+    "netFail": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuch es noch einmal."
   },
   "cats": {
     "general": "Allgemeinwissen", "science": "Wissenschaft", "history": "Geschichte", "geo": "Geografie",

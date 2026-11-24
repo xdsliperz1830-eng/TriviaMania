@@ -153,8 +153,8 @@ const calls = (page) => page.evaluate(() => window.__sdk.calls.slice());
     score: state.score
   }));
   const savedOk = ck(after.saved.length > 0, "progress is saved to the cloud after a round");
-  ck(after.scores.length === 1 && after.scores[0] && after.scores[0].value === after.score,
-     `the score is reported as { value } (${JSON.stringify(after.scores[0])})`);
+  ck(after.scores.length === 0,
+     `a plain quiz round reports no score: only the Daily Challenge does (${after.scores.length} sent)`);
   if (savedOk) {
     const raw = after.saved[after.saved.length - 1];
     const payload = JSON.parse(raw);
@@ -168,6 +168,24 @@ const calls = (page) => page.evaluate(() => window.__sdk.calls.slice());
   /* ---------------- writes are debounced, not per answer ---------------- */
   const writeCount = after.calls.filter((x) => x === "saveData").length;
   ck(writeCount <= 3, `a five-question round does not write once per answer (${writeCount} writes)`);
+  await page.close();
+
+  /* ---------------- the Daily Challenge reports its score ---------------- */
+  page = await openWith(browser, { inEnv: true });
+  await page.evaluate(() => Game.start(true));
+  await page.waitForTimeout(250);
+  for (let i = 0; i < 24; i++) {
+    if (await page.locator("#results").isVisible()) break;
+    if (await page.evaluate(() => state.locked)) await page.locator("#nextBtn").click();
+    else {
+      const k = await page.evaluate(() => state.round[state.index].correctIndex);
+      await page.locator(`.ans[data-idx="${k}"]`).click();
+    }
+    await page.waitForTimeout(120);
+  }
+  const daily = await page.evaluate(() => ({ scores: window.__sdk.scores.slice(), score: state.score, daily: state.daily }));
+  ck(daily.daily && daily.scores.length === 1 && daily.scores[0] && daily.scores[0].value === daily.score,
+     `the Daily Challenge score is reported as { value } (${JSON.stringify(daily.scores[0])})`);
   await page.close();
 
   /* ---------------- pause and resume drive the countdown ---------------- */
