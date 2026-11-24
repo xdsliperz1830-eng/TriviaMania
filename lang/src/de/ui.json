@@ -70,7 +70,8 @@
     "lbUnranked": "Du bist noch nicht in dieser Liste.",
     "lbLogin": "Melde dich bei Reddit an, um deine Punkte zu speichern und in die Bestenliste zu kommen.",
     "lbLoginBtn": "ANMELDEN",
-    "netFail": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuch es noch einmal."
+    "netFail": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuch es noch einmal.",
+    "privacyOpts": "Datenschutzoptionen"
   },
   "cats": {
     "general": "Allgemeinwissen", "science": "Wissenschaft", "history": "Geschichte", "geo": "Geografie",

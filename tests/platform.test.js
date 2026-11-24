@@ -68,6 +68,7 @@ function mockPlatform() {
         });
       },
       login() { srv.logins++; },
+      ...(opts.adBreak ? { adBreak(kind) { srv.breaks = (srv.breaks || []).concat(kind); return later(true, 400); } } : {}),
       blitzScore(score) { srv.blitz.push(score); }
     };
   };
@@ -240,6 +241,30 @@ async function answer(page, right) {
   await page.locator("#quitBtn").click();
   await page.waitForTimeout(200);
   ck((await page.evaluate(() => progress.daily && progress.daily.date)) === "2031-03-14", "quitting a server daily keeps the day as played");
+  await page.close();
+
+  /* ---------------- ad breaks: only when leaving a finished round ---------------- */
+  page = await open(browser, { adBreak: true });
+  await page.evaluate(() => { state.roundSize = 5; Game.start(); });
+  await page.waitForTimeout(200);
+  for (let i = 0; i < 12 && !(await page.locator("#results").isVisible()); i++) {
+    if (await page.evaluate(() => state.locked)) await page.locator("#nextBtn").click();
+    else await answer(page, true);
+    await page.waitForTimeout(100);
+  }
+  ck(!(await page.evaluate(() => window.__srv.breaks)), "no ad break during a round or over its results");
+  await page.locator("#againBtn").click();
+  await page.locator("#againBtn").click({ force: true }).catch(() => {});
+  await page.waitForTimeout(150);
+  ck(!(await page.locator("#quiz").isVisible()), "Play again waits while the platform's ad break runs");
+  await page.waitForTimeout(500);
+  ck(await page.locator("#quiz").isVisible(), "then the new round starts");
+  ck(JSON.stringify(await page.evaluate(() => window.__srv.breaks)) === '["quiz"]', "one break per finished round, told which kind");
+  await page.evaluate(() => Game.quitToHome());
+  await page.evaluate(() => { Blocks.start(); });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => Blocks.quit());
+  ck(JSON.stringify(await page.evaluate(() => window.__srv.breaks)) === '["quiz"]', "quitting mid-game is not a round end: no break");
   await page.close();
 
   /* ---------------- logged out, and board failures ---------------- */

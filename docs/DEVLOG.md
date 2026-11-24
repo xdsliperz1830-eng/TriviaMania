@@ -3,6 +3,32 @@
 Decisions, measurements and what is deliberately not done yet, so the next
 session starts from facts instead of memory. Newest first.
 
+## Android version with ads between rounds
+
+`android/` wraps the game in Capacitor 8 (target SDK 36) with
+`@capacitor-community/admob` 8.3. The game gained one hook,
+`Platform.adBreak(kind)`, called by `leaveFinished()` at every exit from a
+finished round (Play again, Home, Escape/back on results, the Block Blitz
+game-over buttons and keys); the game waits for it with the music paused.
+Platforms without it are unaffected.
+
+- **Pacing**, in `android/src/pacing.js`: first ad after round 3 ever, then
+  every second round, at least 150 s apart, persisted across restarts. A
+  zero timestamp was first read as "no ad yet" (caught by the tests); the
+  pacer now counts ads instead.
+- **Ad length** can't be set by the game: AdMob's ad unit settings decide the
+  skip delay (5 s default, up to 12 s with high-engagement ads, up to 30 s if
+  non-skippable video is allowed).
+- **Consent** through Google's UMP form before any ad request; a Privacy
+  options link appears in the language dialog where it is required
+  (`Platform.privacyOptions`).
+- **Test ids** everywhere until the owner's AdMob ids exist;
+  `scripts/release.mjs` refuses a release with test ids or without the
+  upload key, and was exercised with a throwaway key (8.2 MB signed bundle).
+- **Not verified on a device**: no phone or emulator in the build container.
+  The APK was inspected (manifest, target SDK, AdMob app id, bundled files)
+  and the game was driven in Chromium with a fake ad service.
+
 ## Reddit version, server-scored daily, leaderboards
 
 The Reddit app lives in `reddit/` and is built from `index.html` by

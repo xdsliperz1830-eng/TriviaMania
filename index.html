@@ -1135,6 +1135,10 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 .lang-opt[aria-pressed="true"]{background:var(--gold);box-shadow:var(--bevel-gold),var(--drop-sm)}
 .lang-opt:disabled{opacity:.6;cursor:default}
 #langModal .info-status:empty{display:none}
+/* Only where ad consent applies (Platform.privacyOptions, the Android app in the EU and UK). */
+.privacy-link{display:block;margin:14px auto 0;padding:8px 12px;background:none;border:0;cursor:pointer;
+  font:inherit;font-weight:800;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.privacy-link[hidden]{display:none}
 
 /* The answer list scrolls, and a scroll area clips whatever pokes past its
    edges: the wrong answer's shake (up to 8px) and the correct answer's pop
@@ -1226,6 +1230,7 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
         <div class="info-head"><div><h2 class="info-title" id="langTitle" data-i18n="language">Language</h2></div></div>
         <div class="lang-list" id="langList"><!-- built by JS --></div>
         <p class="info-status" id="langStatus" role="status"></p>
+        <button class="privacy-link" id="privacyBtn" hidden data-i18n="privacyOpts">Privacy options</button>
       </div>
     </div>
     <div class="daily-modal" id="lbModal" role="dialog" aria-modal="true" aria-labelledby="lbTitle" hidden>
@@ -3288,6 +3293,12 @@ const QUESTIONS = [
      leaderboard(board)     -> { rows: [{rank, name, score, me}], me, prize, loggedIn }
      login()                ask the player to log in
      blitzScore(score)      a finished Block Blitz game
+     privacyOptions()       let the player review their ad consent (a link in
+                            the language dialog appears while this is defined)
+     adBreak(kind)          -> Promise; the player is leaving a finished round
+                            ("quiz", "daily" or "blocks"). The platform may show
+                            an ad here and resolves when it is gone; the game
+                            waits, with the music paused, then carries on.
    ================================================================ */
 const Platform = (typeof window !== "undefined" && window.BrainBlastPlatform) || (() => {
   const sdk = (typeof window !== "undefined" && window.ytgame) || null;
@@ -3768,7 +3779,8 @@ const STR_EN = {
   lbFail: "Couldn't load the leaderboard. Try again.",
   lbMe: "You: #{r} · {s} pts", lbUnranked: "You're not on this board yet.",
   lbLogin: "Log in to Reddit to save your scores and join the leaderboard.", lbLoginBtn: "LOG IN",
-  netFail: "Couldn't reach the server. Check your connection and try again."
+  netFail: "Couldn't reach the server. Check your connection and try again.",
+  privacyOpts: "Privacy options"
 };
 
 const I18n = (() => {
@@ -4405,6 +4417,7 @@ const UI = {
     Sound.init();
     Sound.click();
     $("langStatus").textContent = "";
+    $("privacyBtn").hidden = typeof Platform.privacyOptions !== "function";
     $("langModal").hidden = false;
     ($("langList").querySelector('[aria-pressed="true"]') || $("langClose")).focus();
   },
@@ -4918,6 +4931,24 @@ const UI = {
 /* ================================================================
    6. GAME FLOW
    ================================================================ */
+/* ---- ad breaks ----------------------------------------------------------
+   The only place an ad can appear: after a finished round, once the player
+   has seen the result and chooses what to do next (Play again, Home, or the
+   keys for them). Never mid-round, never over a score. Platforms without
+   Platform.adBreak (the web, YouTube, Reddit) go straight on.
+   ------------------------------------------------------------------------ */
+let adBreakBusy = false;
+function leaveFinished(kind, next) {
+  if (typeof Platform.adBreak !== "function") { next(); return; }
+  if (adBreakBusy) return;                         // a second tap while the ad loads
+  adBreakBusy = true;
+  Music.pause();
+  Promise.resolve()
+    .then(() => Platform.adBreak(kind))
+    .catch(() => {})                               // a failed ad never blocks the game
+    .then(() => { adBreakBusy = false; Music.resume(); next(); });
+}
+
 const Game = {
   /** Start a quiz round, or with daily === true today's daily challenge. */
   start(daily) {
@@ -5835,12 +5866,13 @@ const Blocks = (() => {
       const map = { "1": 0, "2": 1, "3": 2, "4": 3, "a": 0, "b": 1, "c": 2, "d": 3 };
       const arrows = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, 1], arrowdown: [0, -1] };
       if (k in map && q && !locked) { e.preventDefault(); answer(map[k]); }
-      else if ((e.key === "Enter" || e.key === " ") && over) { e.preventDefault(); start(); }
+      else if ((e.key === "Enter" || e.key === " ") && over) { e.preventDefault(); leaveFinished("blocks", start); }
       else if (k in arrows && !q && !over) { e.preventDefault(); moveFocus(arrows[k][0], arrows[k][1]); }
       else if (k === "b" && !q) { e.preventDefault(); toggleBomb(); }
       else if (e.key === "Escape") {
         e.preventDefault();
-        if (arming) toggleBomb(); else quit();
+        if (over) leaveFinished("blocks", quit);
+        else if (arming) toggleBomb(); else quit();
       }
       // Enter or Space on a focused block clicks it natively, which picks its group.
     },
@@ -6005,6 +6037,7 @@ function wireInput() {
   $("dailyModal").addEventListener("click", (e) => { if (e.target === $("dailyModal")) UI.closeDaily(); });
   $("langBtn").addEventListener("click", () => UI.openLang());
   $("langClose").addEventListener("click", () => UI.closeLang());
+  $("privacyBtn").addEventListener("click", () => { if (typeof Platform.privacyOptions === "function") Platform.privacyOptions(); });
   $("langModal").addEventListener("click", (e) => { if (e.target === $("langModal")) UI.closeLang(); });
   document.querySelectorAll(".mode-tab").forEach((t) => {
     t.addEventListener("click", () => UI.setMode(t.dataset.mode));
@@ -6021,15 +6054,16 @@ function wireInput() {
     });
   });
   $("nextBtn").addEventListener("click", () => Game.next());
-  $("againBtn").addEventListener("click", () => Game.start());
-  $("homeBtn").addEventListener("click", () => Game.quitToHome());
+  const finishedKind = () => (state.daily ? "daily" : "quiz");
+  $("againBtn").addEventListener("click", () => leaveFinished(finishedKind(), () => Game.start()));
+  $("homeBtn").addEventListener("click", () => leaveFinished(finishedKind(), () => Game.quitToHome()));
   $("quitBtn").addEventListener("click", () => Game.quitToHome());
   $("muteBtn").addEventListener("click", toggleMute);
   $("muteBtn2").addEventListener("click", toggleMute);
   $("musicBtn").addEventListener("click", toggleMusic);
   $("bkQuit").addEventListener("click", () => Blocks.quit());
-  $("bkHome").addEventListener("click", () => Blocks.quit());
-  $("bkAgain").addEventListener("click", () => Blocks.start());
+  $("bkHome").addEventListener("click", () => leaveFinished("blocks", () => Blocks.quit()));
+  $("bkAgain").addEventListener("click", () => leaveFinished("blocks", () => Blocks.start()));
   $("bkBomb").addEventListener("click", () => Blocks.toggleBomb());
   window.addEventListener("resize", () => { if (Blocks.isActive()) Blocks.layout(); else UI.fitTeasers(); });
 
@@ -6061,7 +6095,7 @@ function wireInput() {
       if ((e.key === "Enter" || e.key === " ") && $("home").classList.contains("active")) {
         e.preventDefault(); UI.playSelected();
       } else if (e.key === "Escape" && $("results").classList.contains("active")) {
-        e.preventDefault(); Game.quitToHome();
+        e.preventDefault(); leaveFinished(state.daily ? "daily" : "quiz", () => Game.quitToHome());
       }
       return;
     }

@@ -70,7 +70,8 @@
     "lbUnranked": "Você ainda não está nesta classificação.",
     "lbLogin": "Entre no Reddit para salvar suas pontuações e aparecer na classificação.",
     "lbLoginBtn": "ENTRAR",
-    "netFail": "Não foi possível conectar ao servidor. Verifique sua conexão e tente de novo."
+    "netFail": "Não foi possível conectar ao servidor. Verifique sua conexão e tente de novo.",
+    "privacyOpts": "Opções de privacidade"
   },
   "cats": {
     "general": "Cultura geral", "science": "Ciência", "history": "História", "geo": "Geografia",

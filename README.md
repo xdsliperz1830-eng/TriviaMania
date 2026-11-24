@@ -9,8 +9,10 @@ at runtime reads them.
 
 **Play:** open `index.html` in any modern browser.
 
-It runs in three places from the same file: as an ordinary web page, inside
-YouTube as a Playable, and on Reddit as a Devvit app (`reddit/`). The YouTube
+It runs in four places from the same file: as an ordinary web page, inside
+YouTube as a Playable, on Reddit as a Devvit app (`reddit/`), and on Android
+as a Capacitor app with AdMob ads between rounds (`android/`, see
+[`android/README.md`](android/README.md)). The YouTube
 Playables SDK is loaded first and wrapped in a `Platform` adapter; outside
 YouTube that request simply fails and the game runs standalone, saving progress
 to `localStorage` instead of the cloud. Another host can replace the adapter
@@ -183,8 +185,11 @@ fixed clock), the languages, the YouTube Playables integration (against a mock `
 since YouTube is not reachable from a test runner), the pluggable platform
 hooks (server-run daily, leaderboard, against a mock host), and performance
 against the published Playables limits under CPU throttling. They run in CI on
-every push and pull request, alongside the Reddit app's own tests
-(`npm test --prefix reddit`).
+every push and pull request, alongside the Reddit and Android apps' own tests
+(`npm test --prefix reddit`, `npm test --prefix android`); the Android job also
+builds a debug APK and keeps it on the run's page.
+
+The privacy policy for every version is `privacy.html`, published with the game.
 
 ## Building for submission
 

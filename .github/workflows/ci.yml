@@ -81,3 +81,55 @@ jobs:
 
       - name: Build and test the Reddit app
         run: npm test --prefix reddit
+
+  android:
+    # The Android version (android/): pacing and platform tests, the game in
+    # Chromium with a fake ad service, then a debug APK build, kept as a
+    # download on the run's page (it shows Google's test ads).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          npm ci --no-audit --no-fund --prefix android
+
+      - name: Install the Chromium browser Playwright drives
+        run: |
+          for attempt in 1 2 3; do
+            timeout 300 npx playwright install chromium && exit 0
+            echo "Browser download failed (attempt $attempt of 3); retrying in 15s"
+            sleep 15
+          done
+          exit 1
+
+      - name: Test the Android build
+        run: npm test --prefix android
+
+      - name: Install Android SDK platform 36
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" > /dev/null
+
+      - name: Build the debug APK
+        working-directory: android/app
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Keep the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: brain-blast-debug-apk
+          path: android/app/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
