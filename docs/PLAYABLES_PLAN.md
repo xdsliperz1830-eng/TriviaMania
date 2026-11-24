@@ -68,7 +68,7 @@ Required integrations:
 | Pause / resume | done — `system.onPause` / `system.onResume`, sharing the hidden-tab path |
 | Audio state | done — `system.isAudioEnabled()` + `system.onAudioEnabledChange()` |
 | Persistence | done — `game.saveData()` / `game.loadData()`, hydrate-once + debounced flush |
-| Score reporting | done — `engagement.sendScore({ value })` at round end |
+| Score reporting | done — `engagement.sendScore({ value })` at the end of each Daily Challenge only |
 | Error reporting | done — `health.logError()` on save/load failure |
 
 ### The adapter, as built

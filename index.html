@@ -682,7 +682,13 @@ body{
    gets its own row with nothing crowding it. */
 .home-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 0}
 .best-chip{margin:0;padding:6px 14px;font-size:.86rem}
-.top-btns{display:flex;gap:8px}
+.top-btns{display:flex;gap:8px;flex-shrink:0}
+/* The buttons keep their size and the chip gives way: on phones a five-digit
+   best used to push the last button off the screen. Below 400px the chip
+   drops its label (the trophy says it) and the number never wraps. */
+.best-chip{min-width:0;white-space:nowrap}
+#bestLabel{min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:399px){ #bestLabel{display:none} }
 .logo-wrap{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 0 0}
 .brain{font-size:2.1rem}
 .logo{font-size:clamp(1.75rem,9vw,2.8rem);letter-spacing:.5px;white-space:nowrap}
@@ -791,6 +797,29 @@ body{
 .daily-play{width:100%;margin-top:14px}
 .daily-play:disabled{filter:grayscale(.6);opacity:.75;cursor:default}
 .daily-play:disabled .play-ico{display:none}
+/* Leaderboard (only on platforms that have one: Platform.leaderboard) */
+/* There the Best chip opens it: no extra button for a top bar that is already full on small phones. */
+.best-chip.lb{cursor:pointer}
+.best-chip.lb::after{content:"";width:.42em;height:.42em;margin-left:-2px;border:solid var(--ink);border-width:0 .17em .17em 0;transform:rotate(-45deg)}
+.best-chip.lb:active{transform:translateY(2px)}
+.best-chip.lb:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.lb-tabs{display:flex;gap:6px;margin-top:12px}
+.lb-tab{flex:1 1 0;min-width:0;min-height:40px;padding:6px 8px;border-radius:12px;cursor:pointer;
+  font-family:"Lilita One","Nunito",sans-serif;font-size:.95rem;line-height:1.1;color:var(--ink);
+  background:var(--paper);border:var(--edge);box-shadow:var(--bevel),var(--drop-sm);overflow-wrap:break-word;hyphens:auto}
+.lb-tab[aria-pressed="true"]{background:var(--gold);box-shadow:var(--bevel-gold),var(--drop-sm)}
+.lb-prize{margin:12px 0 0;padding:8px 12px;border-radius:12px;background:var(--gold);color:var(--ink);
+  font-weight:800;font-size:.9rem;line-height:1.3;border:var(--edge)}
+.lb-prize[hidden],.lb-me[hidden],#lbLogin[hidden]{display:none}
+.lb-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lb-row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:12px;background:var(--paper-2);
+  color:var(--ink);font-weight:800}
+.lb-row.me{background:var(--gold)}
+.lb-rank{flex:0 0 2.2em;font-family:"Lilita One","Nunito",sans-serif}
+.lb-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-score{flex:0 0 auto;font-family:"Lilita One","Nunito",sans-serif}
+.lb-me{margin:10px 0 0;font-weight:800;text-align:center}
+#lbModal .info-status:empty{display:none}
 .mode-tab span{white-space:nowrap}
 @media (max-width:359px){
   /* narrow phones: the tab labels stay on one line, so the icons step aside */
@@ -1106,6 +1135,10 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
 .lang-opt[aria-pressed="true"]{background:var(--gold);box-shadow:var(--bevel-gold),var(--drop-sm)}
 .lang-opt:disabled{opacity:.6;cursor:default}
 #langModal .info-status:empty{display:none}
+/* Only where ad consent applies (Platform.privacyOptions, the Android app in the EU and UK). */
+.privacy-link{display:block;margin:14px auto 0;padding:8px 12px;background:none;border:0;cursor:pointer;
+  font:inherit;font-weight:800;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.privacy-link[hidden]{display:none}
 
 /* The answer list scrolls, and a scroll area clips whatever pokes past its
    edges: the wrong answer's shake (up to 8px) and the correct answer's pop
@@ -1197,6 +1230,23 @@ body.playing #bg .orb,body.playing #bg .spark{animation-play-state:paused}
         <div class="info-head"><div><h2 class="info-title" id="langTitle" data-i18n="language">Language</h2></div></div>
         <div class="lang-list" id="langList"><!-- built by JS --></div>
         <p class="info-status" id="langStatus" role="status"></p>
+        <button class="privacy-link" id="privacyBtn" hidden data-i18n="privacyOpts">Privacy options</button>
+      </div>
+    </div>
+    <div class="daily-modal" id="lbModal" role="dialog" aria-modal="true" aria-labelledby="lbTitle" hidden>
+      <div class="card info-card daily-card">
+        <button class="icon-btn daily-close" id="lbClose" aria-label="Close" title="Close" data-i18n-attr="aria-label=close,title=close"><img class="ico" src="assets/icons/cross.png" alt="" draggable="false"></button>
+        <div class="info-head"><img class="ico info-ico" src="assets/icons/trophy.png" alt="" draggable="false"><div><h2 class="info-title" id="lbTitle" data-i18n="lbTitle">Leaderboard</h2></div></div>
+        <div class="lb-tabs" role="group" aria-labelledby="lbTitle">
+          <button class="lb-tab" data-board="day" aria-pressed="true" data-i18n="today">Today</button>
+          <button class="lb-tab" data-board="month" aria-pressed="false" data-i18n="lbMonth">This month</button>
+          <button class="lb-tab" data-board="blitz" aria-pressed="false">Block Blitz</button>
+        </div>
+        <p class="lb-prize" id="lbPrize" hidden></p>
+        <ol class="lb-list" id="lbList"></ol>
+        <p class="lb-me" id="lbMe" hidden></p>
+        <p class="info-status" id="lbStatus" role="status"></p>
+        <button class="btn btn-primary daily-play" id="lbLogin" hidden><span data-i18n="lbLoginBtn">LOG IN</span></button>
       </div>
     </div>
   </section>
@@ -3231,8 +3281,26 @@ const QUESTIONS = [
      ytgame.system.isAudioEnabled() / onAudioEnabledChange(fn)
      ytgame.engagement.sendScore({ value }) — note the object argument
      ytgame.health.logError() / logWarning()
+
+   Another host can replace this object by defining window.BrainBlastPlatform
+   before this script runs (the Reddit version does). It must offer the same
+   methods; these are optional, and only used when present:
+     dailyDate()            today's Daily Challenge key ("YYYY-MM-DD"), when the
+                            day should turn over for everyone at once
+     daily.start(key)       -> { played: {score, correct} } or { count, item }
+     daily.next(key, i)     -> item i: { id, order }
+     daily.answer(key, i, pick) -> { total, ... }   pick = index into q.a, -1 = time up
+     leaderboard(board)     -> { rows: [{rank, name, score, me}], me, prize, loggedIn }
+     login()                ask the player to log in
+     blitzScore(score)      a finished Block Blitz game
+     privacyOptions()       let the player review their ad consent (a link in
+                            the language dialog appears while this is defined)
+     adBreak(kind)          -> Promise; the player is leaving a finished round
+                            ("quiz", "daily" or "blocks"). The platform may show
+                            an ad here and resolves when it is gone; the game
+                            waits, with the music paused, then carries on.
    ================================================================ */
-const Platform = (() => {
+const Platform = (typeof window !== "undefined" && window.BrainBlastPlatform) || (() => {
   const sdk = (typeof window !== "undefined" && window.ytgame) || null;
   const inPlayables = !!(sdk && sdk.IN_PLAYABLES_ENV);
 
@@ -3705,7 +3773,14 @@ const STR_EN = {
   worth: "Blast {n} · +{p}", bombEarned: "Bomb earned!", itIs: "It's {a}.",
   megaBlast: "Mega blast!", hugeBlast: "Huge blast!", cleared: "Board cleared! +{n}",
   bkOver: "The blocks reached the top!", blocksLab: "Blocks",
-  blockAria: "{name} block, column {c}, row {r}"
+  blockAria: "{name} block, column {c}, row {r}",
+  lbTitle: "Leaderboard", lbMonth: "This month",
+  lbEmpty: "No scores yet. Be the first!",
+  lbFail: "Couldn't load the leaderboard. Try again.",
+  lbMe: "You: #{r} · {s} pts", lbUnranked: "You're not on this board yet.",
+  lbLogin: "Log in to Reddit to save your scores and join the leaderboard.", lbLoginBtn: "LOG IN",
+  netFail: "Couldn't reach the server. Check your connection and try again.",
+  privacyOpts: "Privacy options"
 };
 
 const I18n = (() => {
@@ -3974,6 +4049,8 @@ function questionId(text) {
 }
 
 QUESTIONS.forEach(q => { q.id = questionId(q.q); });
+const QUESTION_BY_ID = {};
+QUESTIONS.forEach(q => { QUESTION_BY_ID[q.id] = q; });
 
 const BY_CATEGORY = QUESTIONS.reduce((map, q) => {
   (map[q.c] = map[q.c] || []).push(q);
@@ -4127,15 +4204,28 @@ function buildDailyRound(key) {
   });
 }
 
+/** Today's Daily Challenge: the platform's day when it has one (the same for everyone), else the player's. */
+function dailyKeyNow() {
+  return typeof Platform.dailyDate === "function" ? Platform.dailyDate() : dateKey();
+}
+
+/** A question the server handed out ({ id, order }) in the shape a round uses. */
+function serverQuestion(item) {
+  const q = item && QUESTION_BY_ID[item.id];
+  if (!q || !Array.isArray(item.order) || item.order.length !== q.a.length) throw new Error("unknown question");
+  const options = item.order.map((ai) => ({ text: q.a[ai], correct: ai === 0, ai }));
+  return { category: q.c, text: q.q, explanation: q.e, options, correctIndex: options.findIndex((o) => o.correct) };
+}
+
 function dailyPlayed(key) {
-  return !!(progress.daily && progress.daily.date === (key || dateKey()));
+  return !!(progress.daily && progress.daily.date === (key || dailyKeyNow()));
 }
 
 /** The current run of consecutive days; a missed day breaks it to 0. */
 function dayStreakNow() {
   const d = progress.days;
   if (!d || !d.last) return 0;
-  const today = dateKey();
+  const today = dailyKeyNow();
   return d.last === today || d.last === dayBefore(today) ? d.count : 0;
 }
 
@@ -4327,6 +4417,7 @@ const UI = {
     Sound.init();
     Sound.click();
     $("langStatus").textContent = "";
+    $("privacyBtn").hidden = typeof Platform.privacyOptions !== "function";
     $("langModal").hidden = false;
     ($("langList").querySelector('[aria-pressed="true"]') || $("langClose")).focus();
   },
@@ -4380,8 +4471,9 @@ const UI = {
   },
 
   renderDaily() {
-    const today = dateKey(), played = dailyPlayed(today);
-    $("dailyDate").textContent = new Date().toLocaleDateString(I18n.locale(), { weekday: "long", day: "numeric", month: "long" });
+    const today = dailyKeyNow(), played = dailyPlayed(today);
+    const [y, m, d] = today.split("-").map(Number);
+    $("dailyDate").textContent = new Date(y, m - 1, d).toLocaleDateString(I18n.locale(), { weekday: "long", day: "numeric", month: "long" });
     $("dailyStreak").textContent = dayStreakNow();
     $("dailyLongest").textContent = progress.days ? progress.days.best : 0;
     $("dailyToday").textContent = played ? progress.daily.score : "–";
@@ -4411,6 +4503,63 @@ const UI = {
   },
 
   isDailyOpen: () => !$("dailyModal").hidden,
+
+  /* ---- leaderboard (Platform.leaderboard) ---- */
+  lbBoard: "day",
+  lbTicket: 0,
+
+  openBoard() {
+    Sound.init();
+    Sound.click();
+    $("lbModal").hidden = false;
+    UI.showBoard(UI.lbBoard);
+    $("lbClose").focus();
+  },
+
+  closeBoard() {
+    if ($("lbModal").hidden) return;
+    $("lbModal").hidden = true;
+    $("bestChip").focus();
+  },
+
+  isBoardOpen: () => !$("lbModal").hidden,
+
+  async showBoard(board) {
+    UI.lbBoard = board;
+    document.querySelectorAll(".lb-tab").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.board === board)));
+    const list = $("lbList"), status = $("lbStatus"), me = $("lbMe"), prize = $("lbPrize");
+    list.textContent = "";
+    me.hidden = true; prize.hidden = true; $("lbLogin").hidden = true;
+    status.textContent = t("langLoading");
+    const ticket = ++UI.lbTicket;            // a slower reply for an earlier tab is dropped
+    let data = null;
+    try { data = await Platform.leaderboard(board); } catch (e) { data = null; }
+    if (ticket !== UI.lbTicket) return;
+    if (!data || !Array.isArray(data.rows)) { status.textContent = t("lbFail"); return; }
+    const frag = document.createDocumentFragment();
+    data.rows.forEach((r) => {
+      const li = document.createElement("li");
+      li.className = "lb-row" + (r.me ? " me" : "");
+      [["lb-rank", "#" + r.rank], ["lb-name", r.name], ["lb-score", r.score]].forEach(([cls, text]) => {
+        const span = document.createElement("span");
+        span.className = cls;
+        span.textContent = text;             // names come from players: text only, never markup
+        li.appendChild(span);
+      });
+      frag.appendChild(li);
+    });
+    list.appendChild(frag);
+    status.textContent = data.rows.length ? "" : t("lbEmpty");
+    if (board === "month" && data.prize) { prize.textContent = data.prize; prize.hidden = false; }
+    if (data.loggedIn === false) {
+      status.textContent = (status.textContent ? status.textContent + " " : "") + t("lbLogin");
+      if (typeof Platform.login === "function") $("lbLogin").hidden = false;
+    } else if (data.me && !data.rows.some((r) => r.me)) {
+      me.textContent = t("lbMe", { r: data.me.rank, s: data.me.score }); me.hidden = false;
+    } else if (!data.me) {
+      me.textContent = t("lbUnranked"); me.hidden = false;
+    }
+  },
 
   /** The shared Play button starts whichever mode is selected. */
   playSelected() {
@@ -4782,6 +4931,24 @@ const UI = {
 /* ================================================================
    6. GAME FLOW
    ================================================================ */
+/* ---- ad breaks ----------------------------------------------------------
+   The only place an ad can appear: after a finished round, once the player
+   has seen the result and chooses what to do next (Play again, Home, or the
+   keys for them). Never mid-round, never over a score. Platforms without
+   Platform.adBreak (the web, YouTube, Reddit) go straight on.
+   ------------------------------------------------------------------------ */
+let adBreakBusy = false;
+function leaveFinished(kind, next) {
+  if (typeof Platform.adBreak !== "function") { next(); return; }
+  if (adBreakBusy) return;                         // a second tap while the ad loads
+  adBreakBusy = true;
+  Music.pause();
+  Promise.resolve()
+    .then(() => Platform.adBreak(kind))
+    .catch(() => {})                               // a failed ad never blocks the game
+    .then(() => { adBreakBusy = false; Music.resume(); next(); });
+}
+
 const Game = {
   /** Start a quiz round, or with daily === true today's daily challenge. */
   start(daily) {
@@ -4792,15 +4959,11 @@ const Game = {
     if (state.roundActive) return;
     const isDaily = daily === true;
     if (isDaily && dailyPlayed()) return;          // one scored try a day
+    if (isDaily && Platform.daily) { Game.startServerDaily(); return; }
     state.roundActive = true;
     state.daily = isDaily;
-    state.dailyKey = isDaily ? dateKey() : null;   // fixed at the start, so a round across midnight counts for its own day
-
-    Sound.init();
-    Sound.start();
-    Music.start();
-    Music.setMode("quiz");
-    Game.stopTimer();
+    state.server = false;
+    state.dailyKey = isDaily ? dailyKeyNow() : null;   // fixed at the start, so a round across midnight counts for its own day
 
     if (isDaily) {
       state.round = buildDailyRound(state.dailyKey);
@@ -4808,6 +4971,96 @@ const Game = {
       state.round = buildRound(state.category, state.roundSize);
       state.roundSize = state.round.length;   // a short pool can cap the round
     }
+    Game.begin();
+  },
+
+  /* ---- server-run Daily Challenge -------------------------------------
+     On a platform with its own server (Platform.daily), the server picks
+     today's questions, hands each one out only when it is shown, and scores
+     every answer on its own clock, so a leaderboard total never comes from
+     the player's device. The game still shows points the moment an answer
+     lands, from its own clock, then sets the score to the server's total
+     when the reply arrives. */
+  async startServerDaily() {
+    state.roundActive = true;                      // the same double-tap guard as a normal round
+    Sound.init();
+    if ($("dailyModal").hidden) UI.openDaily();
+    const key = dailyKeyNow();
+    $("dailyPlay").disabled = true;
+    $("dailyPlayLabel").textContent = t("langLoading");
+    let res = null, first = null;
+    try {
+      res = await Platform.daily.start(key);
+      if (res && !res.played) first = serverQuestion(res.item);
+    } catch (e) { res = null; }
+    if (res && res.played) {                       // already played today, on another device
+      state.roundActive = false;
+      recordDaily(key, Number(res.played.score) || 0, Number(res.played.correct) || 0);
+      UI.refreshHome();
+      return;
+    }
+    if (!first) {
+      state.roundActive = false;
+      UI.renderDaily();
+      $("dailyStatus").textContent = t("netFail");
+      return;
+    }
+    UI.closeDaily();
+    state.daily = true;
+    state.server = true;
+    state.dailyKey = key;
+    state.pending = null;
+    state.round = new Array(Number(res.count) || 10).fill(null);
+    state.round[0] = first;
+    Game.begin();
+  },
+
+  /** Send an answer (pick = index into q.a, -1 for time up) and take the server's total. */
+  report(pick) {
+    const i = state.index, key = state.dailyKey;
+    state.pending = Promise.resolve()
+      .then(() => Platform.daily.answer(key, i, pick))
+      .then((r) => {
+        if (r && typeof r.total === "number" && state.server && state.dailyKey === key && r.total !== state.score) {
+          state.score = r.total;
+          UI.animateScore();
+        }
+      })
+      .catch(() => {});      // the server keeps its own record; a lost reply only skips the correction
+  },
+
+  /** Next on a server round: wait for the last answer's reply, then fetch the next question. */
+  async nextServer() {
+    if (state.fetching) return;
+    Sound.init();
+    Sound.click();
+    const key = state.dailyKey, i = state.index + 1;
+    state.fetching = true;
+    $("nextBtn").disabled = true;
+    try {
+      await state.pending;
+      if (i >= state.round.length) { Game.end(); return; }
+      const item = await Platform.daily.next(key, i);
+      if (!state.roundActive || state.dailyKey !== key || state.index !== i - 1) return;   // quit meanwhile
+      state.round[i] = serverQuestion(item);
+      state.index = i;
+      Game.showCurrent();
+    } catch (e) {
+      $("fbExp").textContent = t("netFail");     // Next stays, so tapping it again retries
+    } finally {
+      state.fetching = false;
+      $("nextBtn").disabled = false;
+    }
+  },
+
+  /** Everything a round needs once state.round is built. */
+  begin() {
+    Sound.init();
+    Sound.start();
+    Music.start();
+    Music.setMode("quiz");
+    Game.stopTimer();
+
     state.index = 0;
     state.score = 0;
     state.displayedScore = 0;
@@ -4919,6 +5172,7 @@ const Game = {
     state.results.push({ question: q.text, correct: isCorrect });
     UI.setTimerDisplay(timeLeft);
     UI.renderHud();
+    if (state.server) Game.report(q.options[idx] ? q.options[idx].ai : -1);
   },
 
   timeUp() {
@@ -4939,10 +5193,12 @@ const Game = {
     UI.showFeedback("timeout", 0, t("answerIs", { a: q.options[q.correctIndex].text }) + " " + q.explanation);
     state.results.push({ question: q.text, correct: false });
     UI.renderHud();
+    if (state.server) Game.report(-1);
   },
 
   next() {
     if (!state.locked) return;              // only advance from a resolved question
+    if (state.server) { Game.nextServer(); return; }
     Sound.init();
     Sound.click();
     if (state.index >= state.round.length - 1) { Game.end(); return; }
@@ -4973,7 +5229,11 @@ const Game = {
     UI.showScreen("results");
     Sound.finish(state.correctCount >= state.round.length / 2);
 
-    Platform.sendScore(state.score);
+    // Only the Daily Challenge is reported: it is the one round that is the
+    // same for everyone and can be played once a day, so the score YouTube
+    // shows ("highest score") means the same thing for every player. Quiz
+    // rounds of different lengths and Block Blitz are on other scales.
+    if (state.daily) Platform.sendScore(state.score);
     flushProgress();          // a finished round is a natural checkpoint
   },
 
@@ -4990,6 +5250,9 @@ const Game = {
   },
 
   quitToHome() {
+    // A server daily counts from its first question, so leaving keeps what was scored.
+    if (state.server && state.roundActive) recordDaily(state.dailyKey, state.score, state.correctCount);
+    state.server = false;
     Game.stopTimer();
     $("quiz").classList.remove("urgent");
     cancelAnimationFrame(state.scoreRafId);
@@ -5496,6 +5759,7 @@ const Blocks = (() => {
     Music.setMode("home");
     const newBest = score > best;
     if (newBest) { best = score; progress.best.blocks = score; markProgressDirty(); flushProgress(); }
+    if (typeof Platform.blitzScore === "function") { try { Platform.blitzScore(score); } catch (e) {} }
     $("bkOverScore").textContent = score;
     $("bkOverBlasted").textContent = blasted;
     $("bkOverCorrect").textContent = correctCount;
@@ -5602,12 +5866,13 @@ const Blocks = (() => {
       const map = { "1": 0, "2": 1, "3": 2, "4": 3, "a": 0, "b": 1, "c": 2, "d": 3 };
       const arrows = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, 1], arrowdown: [0, -1] };
       if (k in map && q && !locked) { e.preventDefault(); answer(map[k]); }
-      else if ((e.key === "Enter" || e.key === " ") && over) { e.preventDefault(); start(); }
+      else if ((e.key === "Enter" || e.key === " ") && over) { e.preventDefault(); leaveFinished("blocks", start); }
       else if (k in arrows && !q && !over) { e.preventDefault(); moveFocus(arrows[k][0], arrows[k][1]); }
       else if (k === "b" && !q) { e.preventDefault(); toggleBomb(); }
       else if (e.key === "Escape") {
         e.preventDefault();
-        if (arming) toggleBomb(); else quit();
+        if (over) leaveFinished("blocks", quit);
+        else if (arming) toggleBomb(); else quit();
       }
       // Enter or Space on a focused block clicks it natively, which picks its group.
     },
@@ -5736,6 +6001,14 @@ async function init() {
 
   UI.setMode(progress.mode, true);
   UI.applyLanguage();
+  if (typeof Platform.leaderboard === "function") {
+    const chip = $("bestChip");
+    chip.classList.add("lb");
+    chip.setAttribute("role", "button");
+    chip.setAttribute("tabindex", "0");
+    chip.setAttribute("aria-haspopup", "dialog");
+    chip.title = t("lbTitle");
+  }
 
   // Pause and resume on YouTube's terms, reusing the countdown handling the
   // hidden-tab path already uses.
@@ -5753,11 +6026,18 @@ function wireInput() {
   $("playBtn").addEventListener("click", () => UI.playSelected());
   $("dailyBtn").addEventListener("click", () => UI.openDaily());
   $("dailyClose").addEventListener("click", () => UI.closeDaily());
-  $("dailyPlay").addEventListener("click", () => { UI.closeDaily(); Game.start(true); });
+  // A server-run daily keeps the dialog open while today's first question loads.
+  $("dailyPlay").addEventListener("click", () => { if (!Platform.daily) UI.closeDaily(); Game.start(true); });
+  $("bestChip").addEventListener("click", () => { if (typeof Platform.leaderboard === "function") UI.openBoard(); });
+  $("lbClose").addEventListener("click", () => UI.closeBoard());
+  $("lbModal").addEventListener("click", (e) => { if (e.target === $("lbModal")) UI.closeBoard(); });
+  document.querySelectorAll(".lb-tab").forEach((b) => b.addEventListener("click", () => { Sound.click(); UI.showBoard(b.dataset.board); }));
+  $("lbLogin").addEventListener("click", () => { if (typeof Platform.login === "function") Platform.login(); });
   // A tap on the dimmed backdrop, outside the card, closes the dialog.
   $("dailyModal").addEventListener("click", (e) => { if (e.target === $("dailyModal")) UI.closeDaily(); });
   $("langBtn").addEventListener("click", () => UI.openLang());
   $("langClose").addEventListener("click", () => UI.closeLang());
+  $("privacyBtn").addEventListener("click", () => { if (typeof Platform.privacyOptions === "function") Platform.privacyOptions(); });
   $("langModal").addEventListener("click", (e) => { if (e.target === $("langModal")) UI.closeLang(); });
   document.querySelectorAll(".mode-tab").forEach((t) => {
     t.addEventListener("click", () => UI.setMode(t.dataset.mode));
@@ -5774,15 +6054,16 @@ function wireInput() {
     });
   });
   $("nextBtn").addEventListener("click", () => Game.next());
-  $("againBtn").addEventListener("click", () => Game.start());
-  $("homeBtn").addEventListener("click", () => Game.quitToHome());
+  const finishedKind = () => (state.daily ? "daily" : "quiz");
+  $("againBtn").addEventListener("click", () => leaveFinished(finishedKind(), () => Game.start()));
+  $("homeBtn").addEventListener("click", () => leaveFinished(finishedKind(), () => Game.quitToHome()));
   $("quitBtn").addEventListener("click", () => Game.quitToHome());
   $("muteBtn").addEventListener("click", toggleMute);
   $("muteBtn2").addEventListener("click", toggleMute);
   $("musicBtn").addEventListener("click", toggleMusic);
   $("bkQuit").addEventListener("click", () => Blocks.quit());
-  $("bkHome").addEventListener("click", () => Blocks.quit());
-  $("bkAgain").addEventListener("click", () => Blocks.start());
+  $("bkHome").addEventListener("click", () => leaveFinished("blocks", () => Blocks.quit()));
+  $("bkAgain").addEventListener("click", () => leaveFinished("blocks", () => Blocks.start()));
   $("bkBomb").addEventListener("click", () => Blocks.toggleBomb());
   window.addEventListener("resize", () => { if (Blocks.isActive()) Blocks.layout(); else UI.fitTeasers(); });
 
@@ -5797,17 +6078,24 @@ function wireInput() {
       if (e.key === "Escape") { e.preventDefault(); UI.closeLang(); }
       return;
     }
+    if (UI.isBoardOpen()) {
+      if (e.key === "Escape") { e.preventDefault(); UI.closeBoard(); }
+      return;
+    }
     if (UI.isDailyOpen()) {
       // The dialog's own buttons handle Enter and Space; Escape closes it.
       if (e.key === "Escape") { e.preventDefault(); UI.closeDaily(); }
       return;
     }
     if (Blocks.isActive()) { Blocks.key(e); return; }
+    if ((e.key === "Enter" || e.key === " ") && document.activeElement === $("bestChip") && $("bestChip").classList.contains("lb")) {
+      e.preventDefault(); UI.openBoard(); return;
+    }
     if (!$("quiz").classList.contains("active")) {
       if ((e.key === "Enter" || e.key === " ") && $("home").classList.contains("active")) {
         e.preventDefault(); UI.playSelected();
       } else if (e.key === "Escape" && $("results").classList.contains("active")) {
-        e.preventDefault(); Game.quitToHome();
+        e.preventDefault(); leaveFinished(state.daily ? "daily" : "quiz", () => Game.quitToHome());
       }
       return;
     }

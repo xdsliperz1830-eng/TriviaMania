@@ -1,0 +1,28 @@
+{
+  "private": true,
+  "name": "brain-blast-android",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-web.mjs",
+    "build:web": "npm run sync && esbuild --bundle --minify --log-level=warning --target=es2020 --format=iife --outfile=www/platform.js src/platform.js && cap sync android",
+    "apk": "npm run build:web && cd app && ./gradlew assembleDebug",
+    "release": "node scripts/release.mjs",
+    "test": "npm run build:web && node --test test/*.test.mjs",
+    "screenshots": "node scripts/screenshots.mjs",
+    "icons": "node scripts/make-icons.mjs"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "8.3.0",
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3",
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

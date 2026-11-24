@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "name": "brain-blast-reddit",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-client.mjs",
+    "build:client": "esbuild --bundle --minify --log-level=warning --target=es2020 --format=iife --outdir=public --platform=browser src/client/platform.ts src/client/splash.ts",
+    "build:server": "esbuild --bundle --log-level=warning --target=node22 --format=cjs --outdir=dist/server --platform=node src/server/index.ts",
+    "build": "npm run sync && npm run build:client && npm run build:server",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.client.json",
+    "test": "npm run build && npm run typecheck && node --experimental-strip-types --no-warnings=ExperimentalWarning --test src/server/*.test.ts test/client.test.ts",
+    "playtest": "devvit playtest",
+    "publish-app": "npm run build && devvit publish"
+  },
+  "devDependencies": {
+    "@devvit/web": "0.15.4",
+    "@types/node": "24.19.2",
+    "devvit": "0.15.4",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.6.0"
+  }
+}

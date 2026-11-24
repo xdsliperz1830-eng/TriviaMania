@@ -1,0 +1,11 @@
+{
+  "appId": "app.brainblast.game",
+  "appName": "Brain Blast",
+  "webDir": "www",
+  "android": {
+    "path": "app"
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 0 }
+  }
+}

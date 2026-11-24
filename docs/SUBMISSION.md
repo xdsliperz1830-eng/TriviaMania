@@ -206,7 +206,7 @@ answers below; adjust the ones about you.
 | Accounts / sign-in | None |
 | Ads, payments, external links | None |
 | Audience | General audience, 13+ |
-| Languages | English |
+| Languages | English, Spanish, Portuguese, German (follows `ytgame.system.getLanguage`) |
 | Session length | 1–7 minutes for a quiz (5, 10, 20 or 30 questions), about 3 minutes for the daily challenge, and open-ended for Block Blitz |
 
 **One-paragraph pitch, if the form wants one**
@@ -233,6 +233,8 @@ answers below; adjust the ones about you.
 3. **Run the bundle in the portal's test harness.** This is the first contact
    with YouTube's real runtime rather than a mock, and is the true verification
    of the SDK integration.
-4. **Decide what `sendScore` should report for the new modes.** It currently
-   reports quiz and daily scores. Block Blitz scores are on a different scale,
-   so check how the portal uses the value before sending them too.
+4. **`sendScore` reports only the Daily Challenge.** It is the one round that
+   is the same for everyone and limited to one try a day, so YouTube's
+   "highest score" means the same thing for every player. Quiz rounds (5, 10
+   or 20 questions) and Block Blitz are on other scales and are not sent.
+   Confirm in the test harness that this is how the score is shown.

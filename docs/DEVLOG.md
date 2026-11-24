@@ -3,6 +3,66 @@
 Decisions, measurements and what is deliberately not done yet, so the next
 session starts from facts instead of memory. Newest first.
 
+## Android version with ads between rounds
+
+`android/` wraps the game in Capacitor 8 (target SDK 36) with
+`@capacitor-community/admob` 8.3. The game gained one hook,
+`Platform.adBreak(kind)`, called by `leaveFinished()` at every exit from a
+finished round (Play again, Home, Escape/back on results, the Block Blitz
+game-over buttons and keys); the game waits for it with the music paused.
+Platforms without it are unaffected.
+
+- **Pacing**, in `android/src/pacing.js`: first ad after round 3 ever, then
+  every second round, at least 150 s apart, persisted across restarts. A
+  zero timestamp was first read as "no ad yet" (caught by the tests); the
+  pacer now counts ads instead.
+- **Ad length** can't be set by the game: AdMob's ad unit settings decide the
+  skip delay (5 s default, up to 12 s with high-engagement ads, up to 30 s if
+  non-skippable video is allowed).
+- **Consent** through Google's UMP form before any ad request; a Privacy
+  options link appears in the language dialog where it is required
+  (`Platform.privacyOptions`).
+- **Test ids** everywhere until the owner's AdMob ids exist;
+  `scripts/release.mjs` refuses a release with test ids or without the
+  upload key, and was exercised with a throwaway key (8.2 MB signed bundle).
+- **Not verified on a device**: no phone or emulator in the build container.
+  The APK was inspected (manifest, target SDK, AdMob app id, bundled files)
+  and the game was driven in Chromium with a fake ad service.
+
+## Reddit version, server-scored daily, leaderboards
+
+The Reddit app lives in `reddit/` and is built from `index.html` by
+`reddit/scripts/sync-client.mjs`, so there is still one game. The game gained
+optional platform hooks (`window.BrainBlastPlatform`, documented above the
+`Platform` module); with none present nothing changes for the web or YouTube.
+
+- **Daily Challenge on the server.** The server picks the day's ten from a
+  secret (HMAC of a per-subreddit random key and the UTC date), hands out each
+  question only when it is shown, and scores each answer on its own clock with
+  the game's formula. The game shows its own points at once, then takes the
+  server's total. 600 ms of the elapsed time is forgiven for the round trip;
+  an answer more than 2 s past the 15 s limit is a time-out.
+- **Accepted risk.** The question bank, answers included, ships to the
+  browser (each player reads questions in their own language from it), so a
+  determined cheater can look answers up by id. Server timing limits that to
+  "fast lookups"; answers under 1.2 s and averages under 2 s are flagged in
+  the moderators' standings, along with accounts under 30 days old.
+- **One try a day, strictly.** A round that was started and then reloaded, or
+  opened on a second device, ends with what it scored. Resuming mid-round
+  would let a player re-roll the clock.
+- **Logged-out players** play everything, with the Daily Challenge run on the
+  device and unscored; the leaderboard asks them to log in.
+- **Board order** packs tie-breaks into the sorted-set score: month = points,
+  then days played, then less total answer time; day = points, then time.
+- **The Best chip opens the leaderboard** rather than a fifth top-bar button.
+  Measuring that showed a pre-existing bug: a five-digit best pushed the mute
+  button off phones 390 px wide and under. The chip now yields, and drops its
+  label below 400 px.
+- **Not verified yet** (needs `devvit playtest` on a real subreddit): whether
+  Reddit's content security policy allows the game's `data:` fonts, how the
+  scheduler's context names the subreddit, and the review-source settings
+  (`additionalSourceRoots`). Inline code was moved into files regardless.
+
 ## Laptops and monitors
 
 Reported from a monitor: category names broke inside words ("Knowledg-e",

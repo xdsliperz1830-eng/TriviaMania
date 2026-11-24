@@ -61,7 +61,17 @@
     "worth": "Estoure {n} · +{p}", "bombEarned": "Você ganhou uma bomba!", "itIs": "Era {a}.",
     "megaBlast": "Megaexplosão!", "hugeBlast": "Baita explosão!", "cleared": "Tabuleiro limpo! +{n}",
     "bkOver": "Os blocos chegaram ao topo!", "blocksLab": "Blocos",
-    "blockAria": "Bloco de {name}, coluna {c}, fileira {r}"
+    "blockAria": "Bloco de {name}, coluna {c}, fileira {r}",
+    "lbTitle": "Classificação",
+    "lbMonth": "Este mês",
+    "lbEmpty": "Ainda não há pontuações. Seja o primeiro!",
+    "lbFail": "Não foi possível carregar a classificação. Tente de novo.",
+    "lbMe": "Você: nº {r} · {s} pts",
+    "lbUnranked": "Você ainda não está nesta classificação.",
+    "lbLogin": "Entre no Reddit para salvar suas pontuações e aparecer na classificação.",
+    "lbLoginBtn": "ENTRAR",
+    "netFail": "Não foi possível conectar ao servidor. Verifique sua conexão e tente de novo.",
+    "privacyOpts": "Opções de privacidade"
   },
   "cats": {
     "general": "Cultura geral", "science": "Ciência", "history": "História", "geo": "Geografia",

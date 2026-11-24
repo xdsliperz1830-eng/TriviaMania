@@ -1,0 +1,8 @@
+/node_modules/
+# Generated from the shared game by scripts/sync-web.mjs and esbuild.
+/www/
+# Signing: the upload key and its passwords never go in git.
+*.jks
+*.keystore
+keystore.properties
+/release/

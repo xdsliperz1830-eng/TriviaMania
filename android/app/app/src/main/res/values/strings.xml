@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Brain Blast</string>
+    <string name="title_activity_main">Brain Blast</string>
+    <string name="package_name">app.brainblast.game</string>
+    <string name="custom_url_scheme">app.brainblast.game</string>
+    <!-- Google's public TEST app id. Replace with the app's own AdMob app id before release
+         (scripts/release.mjs refuses to build while this is still the test id). -->
+    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+</resources>
