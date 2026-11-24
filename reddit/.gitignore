@@ -1,0 +1,11 @@
+# Installed and built: `npm install`, then `npm run build`.
+/node_modules/
+/dist/
+/src/server/bank.gen.ts
+/assets/
+# Generated from the shared game by scripts/sync-client.mjs (splash.html and splash.css are hand-written).
+/public/*.js
+/public/game.html
+/public/game.css
+/public/assets/
+/public/lang/

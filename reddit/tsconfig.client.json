@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "customConditions": [
+      "browser"
+    ],
+    "types": []
+  },
+  "include": [
+    "src/client/**/*.ts"
+  ]
+}

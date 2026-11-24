@@ -1,0 +1,23 @@
+/* The launch card shown in the feed. It has to be up in under a second, so it
+   is plain HTML and CSS with one small script and the game's logo, no fonts. */
+:root{--navy:#0F172A;--slate:#1E293B;--purple:#8B5CF6;--yellow:#FACC15;--white:#F8FAFC;--muted:#CBD5E1;--ink:#040335}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{display:grid;place-items:center;padding:16px;overflow:hidden;color:var(--white);
+  font:600 16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(120% 90% at 50% 0%,#3B1D8F 0%,var(--navy) 62%)}
+.card{width:100%;max-width:420px;text-align:center;display:grid;gap:12px;justify-items:center}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{width:56px;height:56px}
+h1{margin:0;font-size:2.4rem;font-weight:900;letter-spacing:1px;line-height:1}
+h1 span{color:var(--yellow);margin-left:6px}
+.tag{margin:0;color:var(--muted)}
+.today{margin:4px 0 0;font-weight:800}
+.small{margin:0;font-size:.88rem;color:var(--muted)}
+.small:empty{display:none}
+button{appearance:none;border:3px solid var(--ink);border-radius:999px;cursor:pointer;
+  min-width:200px;min-height:56px;padding:10px 28px;font:900 1.35rem/1 system-ui,sans-serif;letter-spacing:1px;
+  color:var(--ink);background:var(--yellow);box-shadow:0 5px 0 var(--ink)}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+button:focus-visible{outline:3px solid var(--white);outline-offset:3px}
+@media (max-height:300px){.tag{display:none}.logo img{width:40px;height:40px}h1{font-size:1.8rem}}

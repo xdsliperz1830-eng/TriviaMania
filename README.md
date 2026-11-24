@@ -9,10 +9,18 @@ at runtime reads them.
 
 **Play:** open `index.html` in any modern browser.
 
-It runs in two places from the same file: as an ordinary web page, and inside
-YouTube as a Playable. The YouTube Playables SDK is loaded first and wrapped in a
-`Platform` adapter; outside YouTube that request simply fails and the game runs
-standalone, saving progress to `localStorage` instead of the cloud.
+It runs in three places from the same file: as an ordinary web page, inside
+YouTube as a Playable, and on Reddit as a Devvit app (`reddit/`). The YouTube
+Playables SDK is loaded first and wrapped in a `Platform` adapter; outside
+YouTube that request simply fails and the game runs standalone, saving progress
+to `localStorage` instead of the cloud. Another host can replace the adapter
+by defining `window.BrainBlastPlatform` before the game's script runs; the
+Reddit version does this to add a server-scored Daily Challenge and
+leaderboards (see [`reddit/README.md`](reddit/README.md)).
+
+On YouTube only the Daily Challenge score is sent (`sendScore`): it is the one
+round that is the same for everyone, once a day, so the "highest score" YouTube
+shows means the same thing for every player.
 
 ## Modes
 
@@ -167,14 +175,16 @@ npm test                 # all suites
 npm test -- rotation     # one suite by name prefix
 ```
 
-Fourteen suites in `tests/` drive the real page in a headless browser: gameplay,
+Fifteen suites in `tests/` drive the real page in a headless browser: gameplay,
 question rotation, round length, geography balance, picker layout, an
 18-viewport layout sweep, regressions for previously fixed defects, the launcher
 icons and manifest, the background music, Block Blitz, the daily challenge (on a
 fixed clock), the languages, the YouTube Playables integration (against a mock `ytgame`,
-since YouTube is not reachable from a test runner), and performance against the
-published Playables limits under CPU throttling. They run in CI on every push
-and pull request.
+since YouTube is not reachable from a test runner), the pluggable platform
+hooks (server-run daily, leaderboard, against a mock host), and performance
+against the published Playables limits under CPU throttling. They run in CI on
+every push and pull request, alongside the Reddit app's own tests
+(`npm test --prefix reddit`).
 
 ## Building for submission
 

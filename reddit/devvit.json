@@ -1,0 +1,68 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "brain-blast-game",
+  "post": {
+    "dir": "public",
+    "entrypoints": {
+      "default": { "entry": "splash.html", "height": "tall" },
+      "game": { "entry": "game.html" }
+    }
+  },
+  "server": { "dir": "dist/server", "entry": "index.js" },
+  "permissions": { "redis": true },
+  "menu": {
+    "items": [
+      {
+        "label": "Brain Blast: new game post",
+        "description": "Post a Brain Blast game in this subreddit.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/new-post"
+      },
+      {
+        "label": "Brain Blast: contest standings",
+        "description": "This month's and last month's Daily Challenge totals, with checks for picking a winner.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/results"
+      },
+      {
+        "label": "Brain Blast: delete my data",
+        "description": "Remove your saved progress and scores from this game.",
+        "location": "subreddit",
+        "forUserType": "user",
+        "endpoint": "/internal/menu/delete-data"
+      }
+    ]
+  },
+  "forms": {
+    "results": "/internal/form/results",
+    "deleteData": "/internal/form/delete-data"
+  },
+  "triggers": { "onAppInstall": "/internal/on/app/install" },
+  "scheduler": {
+    "tasks": {
+      "daily-post": { "endpoint": "/internal/cron/daily-post", "cron": "5 0 * * *" },
+      "month-close": { "endpoint": "/internal/cron/month-close", "cron": "15 0 1 * *" }
+    }
+  },
+  "settings": {
+    "subreddit": {
+      "dailyPost": {
+        "type": "boolean",
+        "label": "Post a new Daily Challenge every day",
+        "helpText": "Just after midnight UTC, when the new questions go live.",
+        "defaultValue": true
+      },
+      "monthlyPrize": {
+        "type": "paragraph",
+        "label": "Monthly prize line",
+        "helpText": "Shown above the This month leaderboard. Leave empty for no prize. Link the official rules in the text.",
+        "placeholder": "Top Daily Challenge player this month wins a $20 gift card. 18+, rules in the pinned post."
+      }
+    }
+  },
+  "marketingAssets": { "icon": "assets/icon.png" },
+  "additionalSourceRoots": [".."],
+  "sourceIgnores": ["../art/", "../docs/", "../tests/", "../dist/", "../icons/"]
+}
